@@ -24,6 +24,22 @@ const PERIODS = [
 
 const DEFAULT_TICKERS = ["^TNX", "CL=F", "^GSPC", "^KS11", "GC=F", "EURUSD=X"];
 
+function formatTimestamp(ts) {
+  if (!ts) return '--';
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return '--';
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
 export function macroRealtimeView(container) {
   container.innerHTML = `
     <div style="margin-bottom:24px;">
@@ -100,6 +116,10 @@ export function macroRealtimeView(container) {
       const data = await api.macroRealtime({ tickers, period: selectedPeriod });
 
       let html = '';
+      html += `
+        <div style="margin-bottom:12px; font-size:0.78rem; color:#94a3b8;">
+          조회 시각: <strong style="color:#e2e8f0;">${formatTimestamp(data.fetched_at)}</strong>
+        </div>`;
       if (data.is_simulated) {
         html += `<div style="margin-bottom:14px; padding:10px 14px; background:#422006; border:1px solid #92400e;
                              border-radius:8px; font-size:0.82rem; color:#fde68a; display:flex; gap:8px; align-items:center;">
@@ -125,6 +145,7 @@ export function macroRealtimeView(container) {
                   <div style="font-size:0.8rem; font-weight:600; color:${isPos ? '#22c55e' : '#ef4444'};">
                     ${isPos ? '▲' : '▼'} ${Math.abs(s.return_pct).toFixed(2)}%
                   </div>
+                  <div style="font-size:0.7rem; color:#64748b; margin-top:4px;">데이터 시각 ${formatTimestamp(s.latest_data_at)}</div>
                   <div style="font-size:0.7rem; color:#64748b; margin-top:4px;">연환산 변동성 ${s.annual_vol_pct.toFixed(1)}%</div>
                 </div>`;
             }).join('')}

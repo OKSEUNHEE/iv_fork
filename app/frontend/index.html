@@ -18,7 +18,15 @@
        TOPBAR
   ═══════════════════════════════════════════ -->
   <header class="topbar">
-    <button class="topbar-toggle" onclick="toggleSidebar()" aria-label="메뉴">
+    <button
+      id="sidebar-toggle"
+      class="topbar-toggle"
+      type="button"
+      onclick="toggleSidebar()"
+      aria-label="메뉴 열기"
+      aria-controls="sidebar"
+      aria-expanded="true"
+    >
       <i class="fa-solid fa-bars"></i>
     </button>
 
@@ -39,9 +47,16 @@
     </button>
 
     <div class="topbar-ticker" aria-label="시장 현황">
-      <span class="ticker-item"><span class="ticker-label">KOSPI</span><b>2,735</b><em class="up">+0.82%</em></span>
-      <span class="ticker-item"><span class="ticker-label">NASDAQ</span><b>18,112</b><em class="dn">-0.18%</em></span>
-      <span class="ticker-item"><span class="ticker-label">USD/KRW</span><b>1,362</b><em class="up">+0.21%</em></span>
+      <span class="ticker-item" data-market-label="KOSPI">
+        <span class="ticker-label">KOSPI</span><b>-</b><em>조회 중</em>
+      </span>
+      <span class="ticker-item" data-market-label="NASDAQ">
+        <span class="ticker-label">NASDAQ</span><b>-</b><em>조회 중</em>
+      </span>
+      <span class="ticker-item" data-market-label="USD/KRW">
+        <span class="ticker-label">USD/KRW</span><b>-</b><em>조회 중</em>
+      </span>
+      <span class="ticker-stamp" id="ticker-stamp">조회 시각 --</span>
     </div>
 
     <div id="health-indicator" class="health-badge">
@@ -200,20 +215,36 @@
 
   <script type="module" src="js/app.js?v=2"></script>
   <script>
-    let _sidebarOpen = false;
+    const DESKTOP_BREAKPOINT = 1024;
+    let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;
+
+    function syncSidebarToggle() {
+      const toggle = document.getElementById('sidebar-toggle');
+      if (!toggle) return;
+      toggle.setAttribute('aria-expanded', String(_sidebarOpen));
+      toggle.setAttribute('aria-label', _sidebarOpen ? '메뉴 닫기' : '메뉴 열기');
+    }
 
     function toggleSidebar() {
       _sidebarOpen ? closeSidebar() : openSidebar();
     }
     function openSidebar() {
       document.getElementById('sidebar').classList.add('open');
-      document.getElementById('overlay').classList.add('show');
+      document.body.classList.remove('sidebar-collapsed');
+      if (window.innerWidth <= DESKTOP_BREAKPOINT) {
+        document.getElementById('overlay').classList.add('show');
+      }
       _sidebarOpen = true;
+      syncSidebarToggle();
     }
     function closeSidebar() {
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('overlay').classList.remove('show');
+      if (window.innerWidth > DESKTOP_BREAKPOINT) {
+        document.body.classList.add('sidebar-collapsed');
+      }
       _sidebarOpen = false;
+      syncSidebarToggle();
     }
     function toggleNav(id) {
       const el = document.getElementById('nav-' + id);
@@ -230,6 +261,27 @@
         if (chev) chev.style.transform = 'rotate(180deg)';
       }
     };
+
+    window.addEventListener('resize', () => {
+      const isMobile = window.innerWidth <= DESKTOP_BREAKPOINT;
+      document.getElementById('overlay').classList.remove('show');
+
+      if (isMobile) {
+        document.body.classList.remove('sidebar-collapsed');
+        document.getElementById('sidebar').classList.remove('open');
+        _sidebarOpen = false;
+      } else {
+        document.getElementById('sidebar').classList.toggle('open', !document.body.classList.contains('sidebar-collapsed'));
+        _sidebarOpen = !document.body.classList.contains('sidebar-collapsed');
+      }
+
+      syncSidebarToggle();
+    });
+
+    if (window.innerWidth > DESKTOP_BREAKPOINT) {
+      document.getElementById('sidebar').classList.add('open');
+    }
+    syncSidebarToggle();
   </script>
 </body>
 </html>

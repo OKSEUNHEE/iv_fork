@@ -33,6 +33,8 @@ import { api }                 from './api.js';
 
 const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
+const TOPBAR_MARKETS = ['^KS11', '^IXIC', 'KRW=X'];
+const TOPBAR_REFRESH_MS = 60_000;
 
 const learnDocIds = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', 'voca'];
 const learnRoutes = Object.fromEntries(
@@ -85,6 +87,7 @@ const routes = {
 };
 
 let currentView = null;
+const MOBILE_BREAKPOINT = 1024;
 
 function updateQuizSidebarLock() {
   for (let d = 2; d <= 15; d++) {
@@ -116,7 +119,7 @@ function navigate(view) {
 
   route.render();
 
-  if (typeof closeSidebar === 'function') closeSidebar();
+  if (window.innerWidth <= MOBILE_BREAKPOINT && typeof closeSidebar === 'function') closeSidebar();
 }
 
 window.navigate = navigate;
@@ -147,8 +150,75 @@ async function checkHealth() {
   }
 }
 
+function formatMarketValue(label, value) {
+  const digits = label === 'USD/KRW' ? 2 : 0;
+  return Number(value).toLocaleString('ko-KR', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+}
+
+function formatTimestamp(ts) {
+  if (!ts) return '--';
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return '--';
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
+async function refreshTopbarMarkets() {
+  const stamp = document.getElementById('ticker-stamp');
+  const nodes = [...document.querySelectorAll('.ticker-item[data-market-label]')];
+  if (!nodes.length) return;
+
+  try {
+    const data = await api.marketSnapshot({ tickers: TOPBAR_MARKETS });
+    const byLabel = Object.fromEntries((data.items || []).map((item) => [item.label, item]));
+
+    nodes.forEach((node) => {
+      const label = node.dataset.marketLabel;
+      const valueEl = node.querySelector('b');
+      const changeEl = node.querySelector('em');
+      const item = byLabel[label];
+
+      if (!item || item.status !== 'ok') {
+        valueEl.textContent = '-';
+        changeEl.textContent = '조회 실패';
+        changeEl.className = '';
+        return;
+      }
+
+      valueEl.textContent = formatMarketValue(label, item.value);
+      const sign = item.change_pct >= 0 ? '+' : '';
+      changeEl.textContent = `${sign}${item.change_pct.toFixed(2)}%`;
+      changeEl.className = item.change_pct >= 0 ? 'up' : 'dn';
+      node.title = `데이터 시각 ${formatTimestamp(item.latest_data_at)}`;
+    });
+
+    if (stamp) stamp.textContent = `조회 시각 ${formatTimestamp(data.fetched_at)}`;
+  } catch {
+    nodes.forEach((node) => {
+      const valueEl = node.querySelector('b');
+      const changeEl = node.querySelector('em');
+      valueEl.textContent = '-';
+      changeEl.textContent = '조회 실패';
+      changeEl.className = '';
+    });
+    if (stamp) stamp.textContent = '조회 시각 확인 불가';
+  }
+}
+
 checkHealth();
 setInterval(checkHealth, 30000);
+refreshTopbarMarkets();
+setInterval(refreshTopbarMarkets, TOPBAR_REFRESH_MS);
 
 // Boot
 navigate('home');

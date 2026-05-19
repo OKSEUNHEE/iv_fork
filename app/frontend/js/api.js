@@ -54,6 +54,7 @@ export const api = {
   risk:             (body)  => apiFetch('/api/quant/risk',                 { method: 'POST', body: JSON.stringify(body) }),
   pipeline:         (body)  => apiFetch('/api/quant/pipeline',             { method: 'POST', body: JSON.stringify(body) }),
   financialKnowledge:(body) => apiFetch('/api/quant/financial-knowledge',   { method: 'POST', body: JSON.stringify(body) }),
+  marketSnapshot:   (body)  => apiFetch('/api/market/snapshot',             { method: 'POST', body: JSON.stringify(body) }),
   macroRealtime:    (body)  => apiFetch('/api/macro/realtime',              { method: 'POST', body: JSON.stringify(body) }),
   macroSimulation:  (body)  => apiFetch('/api/macro/simulation',            { method: 'POST', body: JSON.stringify(body) }),
   dartCompanySearch:(body)  => apiFetch('/api/dart/company-search',         { method: 'POST', body: JSON.stringify(body) }),

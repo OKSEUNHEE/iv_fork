@@ -2438,6 +2438,17 @@ class MacroRealtimeRequest(BaseModel):
     tickers: list[str] = ["^TNX", "CL=F", "^GSPC", "^KS11", "GC=F", "EURUSD=X"]
     period:  str       = "1y"   # 1mo 3mo 6mo 1y 2y 5y
 
+
+class MarketSnapshotRequest(BaseModel):
+    tickers: list[str] = ["^KS11", "^IXIC", "KRW=X"]
+
+
+MARKET_SNAPSHOT_LABELS = {
+    "^KS11": "KOSPI",
+    "^IXIC": "NASDAQ",
+    "KRW=X": "USD/KRW",
+}
+
 TICKER_LABELS = {
     "^TNX":     "미국 10년물 금리",
     "CL=F":     "WTI 유가",
@@ -2450,6 +2461,69 @@ TICKER_LABELS = {
     "^VIX":     "VIX 공포지수",
     "DX-Y.NYB": "달러 인덱스",
 }
+
+
+def _extract_close_series(frame):
+    close = frame["Close"]
+    if hasattr(close, "columns"):
+        close = close.iloc[:, 0]
+    return close.dropna()
+
+
+@app.post("/api/market/snapshot")
+def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
+    import pandas as pd
+    import yfinance as yf
+
+    if not req.tickers:
+        raise HTTPException(status_code=400, detail="최소 1개 종목을 선택하세요.")
+
+    fetched_at = pd.Timestamp.utcnow()
+    items: list[dict[str, object]] = []
+
+    for ticker in req.tickers:
+        label = MARKET_SNAPSHOT_LABELS.get(ticker, ticker)
+        try:
+            df = yf.download(
+                ticker,
+                period="5d",
+                interval="1d",
+                progress=False,
+                auto_adjust=False,
+                threads=False,
+            )
+            if df.empty:
+                raise ValueError("데이터가 비어 있습니다.")
+
+            close = _extract_close_series(df)
+            if close.empty:
+                raise ValueError("종가 데이터를 찾을 수 없습니다.")
+
+            current = float(close.iloc[-1])
+            previous = float(close.iloc[-2]) if len(close) > 1 else current
+            latest_index = pd.Timestamp(close.index[-1])
+            change_pct = ((current / previous) - 1) * 100 if previous else 0.0
+
+            items.append({
+                "ticker": ticker,
+                "label": label,
+                "value": round(current, 4),
+                "change_pct": round(change_pct, 2),
+                "latest_data_at": latest_index.isoformat(),
+                "status": "ok",
+            })
+        except Exception as exc:
+            items.append({
+                "ticker": ticker,
+                "label": label,
+                "status": "error",
+                "error": str(exc),
+            })
+
+    return {
+        "items": items,
+        "fetched_at": fetched_at.isoformat(),
+    }
 
 @app.post("/api/macro/realtime")
 def macro_realtime(req: MacroRealtimeRequest) -> dict[str, object]:
@@ -2476,15 +2550,14 @@ def macro_realtime(req: MacroRealtimeRequest) -> dict[str, object]:
     # ── 데이터 fetch ──────────────────────────────────────────────────────────
     raw: dict[str, pd.Series] = {}
     fetch_error: str | None = None
+    fetched_at = pd.Timestamp.utcnow()
+
     for t in req.tickers:
         try:
             df = yf.download(t, period=req.period, progress=False, auto_adjust=True)
             if df.empty:
                 continue
-            close = df["Close"]
-            if isinstance(close, pd.DataFrame):
-                close = close.iloc[:, 0]
-            close = close.dropna()
+            close = _extract_close_series(df)
             if len(close) > 0:
                 raw[t] = close
         except Exception as e:
@@ -2627,11 +2700,13 @@ def macro_realtime(req: MacroRealtimeRequest) -> dict[str, object]:
             "current": round(float(s.iloc[-1]), 4),
             "return_pct": round(ret, 2),
             "annual_vol_pct": round(vol, 2),
+            "latest_data_at": pd.Timestamp(s.index[-1]).isoformat(),
         }
 
     return {"image": img_b64, "summary": summary, "period": req.period,
             "n_tickers": len(raw),
             "is_simulated": is_simulated,
+            "fetched_at": fetched_at.isoformat(),
             "warning": "Yahoo Finance 요청 한도 초과로 시뮬레이션 데이터를 표시합니다. 잠시 후 다시 시도하세요." if is_simulated else None}
 
 

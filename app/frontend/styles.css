@@ -75,15 +75,21 @@ img { max-width: 100%; }
 }
 
 .topbar-toggle {
-  display: none;
+  display: inline-flex;
   width: 36px; height: 36px;
   align-items: center; justify-content: center;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-size: 1rem;
-  transition: background .15s;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: background .15s, color .15s, border-color .15s;
 }
-.topbar-toggle:hover { background: var(--surface-soft); }
+.topbar-toggle:hover {
+  background: var(--surface-soft);
+  color: var(--primary);
+  border-color: var(--border-strong);
+}
 
 .brand {
   display: inline-flex; align-items: center; gap: 9px;
@@ -115,6 +121,12 @@ img { max-width: 100%; }
 .ticker-label { color: var(--text-subtle); }
 .ticker-item b { color: var(--text); font-weight: 650; }
 .ticker-item em { font-style: normal; font-weight: 650; }
+.ticker-stamp {
+  color: var(--text-subtle);
+  font-size: .68rem;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
 .up { color: var(--green); }
 .dn { color: var(--red); }
 
@@ -251,9 +263,11 @@ img { max-width: 100%; }
 .content-wrap {
   flex: 1;
   margin-left: var(--sidebar-w);
+  width: calc(100% - var(--sidebar-w));
   min-width: 0;
   display: flex; flex-direction: column;
   min-height: calc(100vh - var(--topbar-h));
+  transition: margin-left .25s cubic-bezier(.4,0,.2,1), width .25s cubic-bezier(.4,0,.2,1);
 }
 .content-main {
   flex: 1;
@@ -377,7 +391,7 @@ img { max-width: 100%; }
 ═══════════════════════════════════════════════════════ */
 .learn-container {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
   gap: 24px;
   align-items: start;
 }
@@ -388,6 +402,7 @@ img { max-width: 100%; }
   padding: 32px 36px;
   box-shadow: var(--shadow-sm);
   min-height: 400px;
+  min-width: 0;
 }
 .learn-toc {
   position: sticky; top: calc(var(--topbar-h) + 16px);
@@ -414,7 +429,13 @@ img { max-width: 100%; }
 .toc-item.h3 { padding-left: 18px; font-size: .73rem; }
 
 /* MD body styling */
-.md-body { line-height: 1.75; color: var(--text); }
+.md-body {
+  line-height: 1.75;
+  color: var(--text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 .md-body h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 20px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
 .md-body h2 { font-size: 1.15rem; font-weight: 700; margin: 32px 0 12px; color: var(--primary-dark); border-left: 4px solid var(--primary); padding-left: 10px; }
 .md-body h3 { font-size: 1rem; font-weight: 700; margin: 22px 0 8px; }
@@ -923,7 +944,7 @@ img { max-width: 100%; }
   }
   .content-main { padding: 32px 48px 56px; }
   .home-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-  .learn-container { grid-template-columns: 1fr 300px; gap: 28px; }
+  .learn-container { grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 28px; }
   .learn-body { padding: 36px 42px; }
   .grid-2 { gap: 20px; }
   .grid-3 { gap: 20px; }
@@ -937,7 +958,7 @@ img { max-width: 100%; }
   }
   .content-main { padding: 36px 56px 64px; }
   .home-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-  .learn-container { grid-template-columns: 1fr 320px; gap: 32px; }
+  .learn-container { grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; }
   .analysis-group { padding: 28px 36px; }
   .grid-3 { grid-template-columns: repeat(3, 1fr); }
   .grid-4 { grid-template-columns: repeat(4, 1fr); }
@@ -951,14 +972,27 @@ img { max-width: 100%; }
     transform: translateX(0);
     box-shadow: var(--shadow-lg);
   }
-  .content-wrap { margin-left: 0; }
-  .topbar-toggle { display: flex; }
+  .content-wrap {
+    margin-left: 0;
+    width: 100%;
+  }
   .learn-container { grid-template-columns: 1fr; }
   .learn-toc { display: none; }
   .home-sections { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .grid-4 { grid-template-columns: 1fr 1fr; }
   .result-stats { gap: 16px; }
+}
+
+@media (min-width: 1025px) {
+  body.sidebar-collapsed .sidebar {
+    transform: translateX(calc(-1 * var(--sidebar-w)));
+  }
+
+  body.sidebar-collapsed .content-wrap {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 @media (max-width: 640px) {
   .content-main { padding: 16px 14px 32px; }
