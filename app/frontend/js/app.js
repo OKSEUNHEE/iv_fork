@@ -28,6 +28,7 @@ import { technicalChartView }  from './views/technicalChart.js';
 import { financialKnowledgeView } from './views/financialKnowledge.js';
 import { investmentTreeView }   from './views/investmentTree.js';
 import { quizHomeView, quizDayView } from './views/quiz.js';
+import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
 import { api }                 from './api.js';
 
@@ -73,6 +74,7 @@ const routes = {
   'macro-realtime':    { label: '거시경제현황 1 (실시간)',    render: () => macroRealtimeView(app) },
   'macro-simulation':  { label: '거시경제현황 2 (시뮬레이션)', render: () => macroSimulationView(app) },
   'industry-analysis': { label: '산업 경쟁력 분석',           render: () => industryAnalysisView(app) },
+  'company-financial':   { label: '기업 파이낸셜 분석',          render: () => companyFinancialView(app) },
   'financial-statement': { label: '재무제표분석',              render: () => financialStatementView(app) },
   'dart-company-search': { label: 'DART 상장기업 검색',        render: () => dartCompanySearchView(app) },
   'dart-region-search':  { label: 'DART 지역·종사자수 조회',    render: () => dartRegionSearchView(app) },

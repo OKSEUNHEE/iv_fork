@@ -413,7 +413,7 @@ pkill -f uvicorn
 
 - 확장팩에 docker compose 설치
 
-![alt text](image.png)
+![alt text](../docs/image-2.png)
 
 1. `Dockerfile`로 웹앱 이미지를 빌드해 ECR에 push
 2. `mongo:7` 이미지를 ECR로 복제 push

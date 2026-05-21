@@ -64,4 +64,5 @@ export const api = {
   industrySector:   (body)  => apiFetch('/api/industry/sector',             { method: 'POST', body: JSON.stringify(body) }),
   industryPeer:     (body)  => apiFetch('/api/industry/peer',               { method: 'POST', body: JSON.stringify(body) }),
   industryLifecycle:(body)  => apiFetch('/api/industry/lifecycle',          { method: 'POST', body: JSON.stringify(body) }),
+  companyFinancials:(body)  => apiFetch('/api/finance/company-financials',  { method: 'POST', body: JSON.stringify(body) }),
 };
