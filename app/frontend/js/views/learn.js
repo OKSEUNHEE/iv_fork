@@ -19,8 +19,6 @@ const DOC_MAP = {
   '13': { title: 'Day 13 · 금융상품의 구분',            file: '13' },
   '14': { title: 'Day 14 · 파생상품 이해',              file: '14' },
   '15': { title: 'Day 15 · 포트폴리오 이론 및 성과',    file: '15' },
-  '16': { title: 'Day 16 · 자산배분 모델',              file: '16' },
-  '17': { title: 'Day 17 · 금융 규제·자본시장법',       file: '17' },
   'voca': { title: '핵심 용어집',                       file: 'voca' },
 };
 
