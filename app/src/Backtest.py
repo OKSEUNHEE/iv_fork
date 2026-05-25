@@ -219,13 +219,13 @@ def plot_backtest(df: pd.DataFrame, metrics: dict, fast: int, slow: int) -> None
 
     # 합격 기준 강조
     if metrics["sharpe"] > 1.0:
-        fig.text(0.52, 0.05, "✅ Sharpe > 1.0 합격", color="#16a34a", fontsize=10, ha="center")
+        fig.text(0.52, 0.05, "[완료] Sharpe > 1.0 합격", color="#16a34a", fontsize=10, ha="center")
     if metrics["mdd"] > -0.15:
-        fig.text(0.52, 0.02, "✅ MDD < -15% 합격", color="#16a34a", fontsize=10, ha="center")
+        fig.text(0.52, 0.02, "[완료] MDD < -15% 합격", color="#16a34a", fontsize=10, ha="center")
 
     plt.suptitle("AI 퀀트 백테스트 결과 — Python Backtest Engine", fontsize=13, fontweight="bold", y=1.01)
     plt.savefig("backtest_result.png", dpi=130, bbox_inches="tight")
-    print("✅ 차트 저장: backtest_result.png")
+    print("[완료] 차트 저장: backtest_result.png")
     plt.close(fig)
 
 
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
     # 1. 주가 데이터 생성
     prices = generate_price_series(n_days=N_DAYS)
-    print(f"📈 주가 데이터: {len(prices)}일 ({prices.index[0].date()} ~ {prices.index[-1].date()})")
+    print(f"[성과] 주가 데이터: {len(prices)}일 ({prices.index[0].date()} ~ {prices.index[-1].date()})")
 
     # 2. 전략 실행
     df = ma_crossover_strategy(prices, fast=FAST, slow=SLOW)
@@ -254,13 +254,13 @@ if __name__ == "__main__":
     metrics = calc_metrics(df)
 
     # 4. 결과 출력
-    print("\n📊 백테스트 성과 지표")
+    print("\n[통계] 백테스트 성과 지표")
     print("-" * 35)
     print(f"  전략 총 수익률  : {metrics['total_return']:+.1%}")
     print(f"  B&H 총 수익률   : {metrics['bh_return']:+.1%}")
     print(f"  연간 수익률(CAGR): {metrics['cagr']:+.2%}")
-    print(f"  Sharpe Ratio    : {metrics['sharpe']:.2f}  {'✅' if metrics['sharpe'] > 1.0 else '⚠️'} (기준 > 1.0)")
-    print(f"  MDD             : {metrics['mdd']:.1%}  {'✅' if metrics['mdd'] > -0.15 else '⚠️'} (기준 < -15%)")
+    print(f"  Sharpe Ratio    : {metrics['sharpe']:.2f}  {'[완료]' if metrics['sharpe'] > 1.0 else '[경고]'} (기준 > 1.0)")
+    print(f"  MDD             : {metrics['mdd']:.1%}  {'[완료]' if metrics['mdd'] > -0.15 else '[경고]'} (기준 < -15%)")
     print(f"  승률            : {metrics['win_rate']:.1%}")
     print(f"  손익비          : {metrics['profit_factor']:.2f}")
     print(f"  총 거래 횟수    : {metrics['n_trades']}회")
@@ -269,9 +269,9 @@ if __name__ == "__main__":
     # 합격 판정
     pass_sharpe = metrics["sharpe"] > 1.0
     pass_mdd    = metrics["mdd"] > -0.15
-    print(f"\n🎯 취업 포트폴리오 합격 기준 체크")
-    print(f"  Sharpe > 1.0 : {'합격 ✅' if pass_sharpe else '미달 ⚠️'}")
-    print(f"  MDD < -15%   : {'합격 ✅' if pass_mdd else '미달 ⚠️'}")
+    print(f"\n[목표] 취업 포트폴리오 합격 기준 체크")
+    print(f"  Sharpe > 1.0 : {'합격 [완료]' if pass_sharpe else '미달 [경고]'}")
+    print(f"  MDD < -15%   : {'합격 [완료]' if pass_mdd else '미달 [경고]'}")
 
     # 5. 시각화
     plot_backtest(df, metrics, fast=FAST, slow=SLOW)

@@ -56,10 +56,10 @@ def load_data(ticker: str, start: str) -> pd.DataFrame:
         # yfinance 멀티인덱스 정리
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
-        print(f"  ✅ yfinance: {ticker} ({len(df)}일)")
+        print(f"  [완료] yfinance: {ticker} ({len(df)}일)")
         return df
     except Exception as e:
-        print(f"  ⚠️  yfinance 실패 ({e}) → GBM 시뮬레이션 사용")
+        print(f"  [경고]  yfinance 실패 ({e}) → GBM 시뮬레이션 사용")
         return _simulate_ohlcv(n=2520, start=start)   # 약 10년
 
 
@@ -220,9 +220,9 @@ def print_metrics(m: dict) -> None:
     for label, vs, vb in rows:
         print(f"  {label:20s} {vs} {vb}")
     print("-" * 50)
-    print(f"\n🎯 합격 기준 체크")
-    print(f"   Sharpe > 1.0: {'✅ 합격' if m['sharpe_s'] > 1.0 else '⚠️ 미달'}  ({m['sharpe_s']:.2f})")
-    print(f"   MDD > -15%:   {'✅ 합격' if m['mdd_s'] > -0.15 else '⚠️ 미달'}  ({m['mdd_s']:.2%})")
+    print(f"\n[목표] 합격 기준 체크")
+    print(f"   Sharpe > 1.0: {'[완료] 합격' if m['sharpe_s'] > 1.0 else '[경고] 미달'}  ({m['sharpe_s']:.2f})")
+    print(f"   MDD > -15%:   {'[완료] 합격' if m['mdd_s'] > -0.15 else '[경고] 미달'}  ({m['mdd_s']:.2%})")
 
 
 # ──────────────────────────────────────────────────────────────
@@ -400,7 +400,7 @@ def plot_dashboard(df: pd.DataFrame, metrics: dict, ml: dict) -> None:
     ax6.grid(True, alpha=0.3, axis="x")
 
     plt.savefig("quant_pipeline_result.png", dpi=130, bbox_inches="tight")
-    print("✅ 차트 저장: quant_pipeline_result.png")
+    print("[완료] 차트 저장: quant_pipeline_result.png")
     plt.close(fig)
 
 
@@ -416,22 +416,22 @@ if __name__ == "__main__":
     print(DIVIDER)
 
     # ─── 1단계: 데이터 ────────────────────────────────────────
-    print("\n🟦 1단계: 데이터 수집 & 정리")
+    print("\n[1단계] 1단계: 데이터 수집 & 정리")
     df = load_data(TICKER, START_DATE)
     df = clean_data(df)
 
     # ─── 2단계: 지표 ──────────────────────────────────────────
-    print("\n🟩 2단계: 기술적 지표 계산")
+    print("\n[2단계] 2단계: 기술적 지표 계산")
     df = add_indicators(df)
 
     # ─── 3단계: 백테스트 ──────────────────────────────────────
-    print("\n🟨 3단계: 백테스트")
+    print("\n[3단계] 3단계: 백테스트")
     df = run_backtest(df)
     metrics = calc_metrics(df)
     print_metrics(metrics)
 
     # ─── 4단계: ML ────────────────────────────────────────────
-    print("\n🟥 4단계: ML 방향 예측 (RandomForest)")
+    print("\n[4단계] 4단계: ML 방향 예측 (RandomForest)")
     try:
         feat = build_features(df)
         print(f"  피처: {feat.shape[1]-1}개  |  샘플: {feat.shape[0]}개")
@@ -442,19 +442,19 @@ if __name__ == "__main__":
             bar = "█" * int(fval * 50)
             print(f"    {fname:22s}: {fval:.3f}  {bar}")
     except ImportError:
-        print("  ⚠️  scikit-learn 미설치 → pip install scikit-learn")
+        print("  [경고]  scikit-learn 미설치 → pip install scikit-learn")
         ml = {
             "mean_acc": 0.0, "std_acc": 0.0,
             "importance": pd.Series(dtype=float),
         }
 
     # ─── 시각화 ───────────────────────────────────────────────
-    print("\n📊 대시보드 생성 중...")
+    print("\n[통계] 대시보드 생성 중...")
     plot_dashboard(df, metrics, ml)
 
     # ─── 자동매매 골격 안내 ───────────────────────────────────
     print(f"\n{DIVIDER}")
-    print("  💰 실전 자동매매 연결 방법 (DOC/Chapter16.md 참고)")
+    print("  [수익] 실전 자동매매 연결 방법 (DOC/Chapter16.md 참고)")
     print(DIVIDER)
     print("""
   국내:  pip install mojito2       → 한국투자증권 KIS API
@@ -469,4 +469,4 @@ if __name__ == "__main__":
     account = broker.get_account()
     print(f"포트폴리오: ${account.portfolio_value}")
 """)
-    print("✅ 파이프라인 완료! quant_pipeline_result.png 를 확인하세요.")
+    print("[완료] 파이프라인 완료! quant_pipeline_result.png 를 확인하세요.")

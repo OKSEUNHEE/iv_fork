@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
 ## 금융자산 knowledge 를 취업 목적으로 serving 시스템 만드는 과정
 
 ### 본 저장소의 `docs/` 폴더에 Vector DB 구축을 위한 RAG 용 자산운용 관련 내용이 있습니다.
@@ -9,7 +11,7 @@
 #### 본인의 경력, 실력과 상관없이 수업중 자신의 스케쥴대로 독립적인 연구를 할 수 있으며, 단, 수업에 방해되지 않게 해야합니다.
 #### md 파일별로 각종 youtube 등의 링크가 있으므로, 헤드셋을 준비하여 개인 실습 시간에 이용 합니다.
 
-### 🧭 시작 전 개인 준비 가이드 (필수)
+### <i class="fa-solid fa-compass"></i> 시작 전 개인 준비 가이드 (필수)
 
 이 저장소를 실제로 진행하려면, 각자 역할과 목표에 맞춰 아래 항목을 먼저 준비해야 합니다.
 
@@ -80,7 +82,7 @@
 
 ---
 
-### 🔗 웹앱 API — 전체 엔드포인트 맵
+### <i class="fa-solid fa-link"></i> 웹앱 API — 전체 엔드포인트 맵
 
 | 분류 | 엔드포인트 | 설명 | 연계 프론트 |
 |------|-----------|------|------------|
@@ -112,7 +114,7 @@
 
 ---
 
-## 🐍 Python 라이브러리 구성 (`requirements.txt`)
+## <i class="fa-brands fa-python"></i> Python 라이브러리 구성 (`requirements.txt`)
 
 | 카테고리 | 패키지 | 용도 |
 |----------|--------|------|
@@ -129,7 +131,7 @@
 
 ---
 
-## 💡 투자 분석 관련 핵심 영어 표현
+## <i class="fa-solid fa-lightbulb"></i> 투자 분석 관련 핵심 영어 표현
 
 | 표현 | 의미 |
 |------|------|
@@ -146,61 +148,61 @@
 | **Price Target** | 목표 주가 |
 | **Bullish / Bearish** | 강세 / 약세 전망 |
 
-> 📖 용어 사전: [docs/voca.md](docs/voca.md)
+> <i class="fa-solid fa-book"></i> 용어 사전: [docs/voca.md](docs/voca.md)
 
 ---
 
-## 🌐 참고 사이트 & API 목록
+## <i class="fa-solid fa-globe"></i> 참고 사이트 & API 목록
 
 > 이 레포를 실행하고 데이터를 수집하기 위해 방문해야 할 사이트 전체 목록입니다.  
-> ⚿ = API 키 발급 필요 / ✅ = 무료 공개 / 📋 = 가입·승인 필요
+> <i class="fa-solid fa-key"></i> = API 키 발급 필요 / <i class="fa-solid fa-circle-check"></i> = 무료 공개 / <i class="fa-solid fa-clipboard-list"></i> = 가입·승인 필요
 
 ---
 
-### 🇰🇷 국내 금융 당국 & 규제 기관
+### <i class="fa-solid fa-flag"></i> KR 국내 금융 당국 & 규제 기관
 
 | 기관 | URL | 비고 | 주요 활용 |
 |------|-----|------|-----------|
-| **금융감독원 (FSS)** | <https://www.fss.or.kr> | ✅ | 금융 감독·규제 동향, 제재 현황 |
-| **금융위원회** | <https://www.fsc.go.kr> | ✅ | 금융 정책·법령, 자본시장법 정보 |
-| **한국은행 (BOK)** | <https://www.bok.or.kr> | ✅ | 통화정책, 기준금리 결정 발표 |
-| **통계청** | <https://www.kostat.go.kr> | ✅ | CPI, 고용, GDP 공식 통계 |
-| **기획재정부** | <https://www.moef.go.kr> | ✅ | 재정·경기 동향, 예산안 |
+| **금융감독원 (FSS)** | <https://www.fss.or.kr> | <i class="fa-solid fa-circle-check"></i> | 금융 감독·규제 동향, 제재 현황 |
+| **금융위원회** | <https://www.fsc.go.kr> | <i class="fa-solid fa-circle-check"></i> | 금융 정책·법령, 자본시장법 정보 |
+| **한국은행 (BOK)** | <https://www.bok.or.kr> | <i class="fa-solid fa-circle-check"></i> | 통화정책, 기준금리 결정 발표 |
+| **통계청** | <https://www.kostat.go.kr> | <i class="fa-solid fa-circle-check"></i> | CPI, 고용, GDP 공식 통계 |
+| **기획재정부** | <https://www.moef.go.kr> | <i class="fa-solid fa-circle-check"></i> | 재정·경기 동향, 예산안 |
 
 ---
 
-### 📊 국내 금융 데이터 API (API 키 발급 필요)
+### <i class="fa-solid fa-chart-bar"></i> 국내 금융 데이터 API (API 키 발급 필요)
 
 | 서비스 | URL | API 키 | `.env` 변수명 | 제공 데이터 |
 |--------|-----|--------|--------------|-------------|
-| **DART 전자공시시스템** | <https://opendart.fss.or.kr> | ⚿ 필요 | `DART_API_KEY` | 사업보고서, 재무제표, 공시 전체 |
-| **한국은행 ECOS** | <https://ecos.bok.or.kr> | ⚿ 필요 | `BOK_API_KEY` | 기준금리, 국고채, 환율, M1/M2, CPI |
-| **KRX Data Marketplace** | <https://openapi.krx.co.kr> | ⚿ 필요 | `KRX_API_KEY` | 주가·채권·지수·업종 공식 시계열 |
-| **KOFIA OpenAPI** | <https://openapi.kofia.or.kr> | 📋 승인 필요 | — | 채권 시장금리, 자본시장 통계 |
-| **금융감독원 금융상품한눈에** | <https://finlife.fss.or.kr> | ⚿ 필요 | — | 예·적금, 주담대, 신용대출 금리 |
-| **공공데이터포털** | <https://www.data.go.kr> | ⚿ 필요 | — | 다양한 금융·경제 공공 데이터 |
-| **통계청 KOSIS** | <https://kosis.kr> | ⚿ 권장 | — | CPI, PPI, 고용, GDP 시계열 |
+| **DART 전자공시시스템** | <https://opendart.fss.or.kr> | <i class="fa-solid fa-key"></i> 필요 | `DART_API_KEY` | 사업보고서, 재무제표, 공시 전체 |
+| **한국은행 ECOS** | <https://ecos.bok.or.kr> | <i class="fa-solid fa-key"></i> 필요 | `BOK_API_KEY` | 기준금리, 국고채, 환율, M1/M2, CPI |
+| **KRX Data Marketplace** | <https://openapi.krx.co.kr> | <i class="fa-solid fa-key"></i> 필요 | `KRX_API_KEY` | 주가·채권·지수·업종 공식 시계열 |
+| **KOFIA OpenAPI** | <https://openapi.kofia.or.kr> | <i class="fa-solid fa-clipboard-list"></i> 승인 필요 | — | 채권 시장금리, 자본시장 통계 |
+| **금융감독원 금융상품한눈에** | <https://finlife.fss.or.kr> | <i class="fa-solid fa-key"></i> 필요 | — | 예·적금, 주담대, 신용대출 금리 |
+| **공공데이터포털** | <https://www.data.go.kr> | <i class="fa-solid fa-key"></i> 필요 | — | 다양한 금융·경제 공공 데이터 |
+| **통계청 KOSIS** | <https://kosis.kr> | <i class="fa-solid fa-key"></i> 권장 | — | CPI, PPI, 고용, GDP 시계열 |
 
 ---
 
-### 🇺🇸 해외 금융 데이터 API
+### <i class="fa-solid fa-flag"></i> US 해외 금융 데이터 API
 
 | 서비스 | URL | API 키 | `.env` 변수명 | 제공 데이터 |
 |--------|-----|--------|--------------|-------------|
-| **FRED (St. Louis Fed)** | <https://fred.stlouisfed.org> | ⚿ 권장 | `FRED_API_KEY` | 금리, CPI, GDP, 실업률, M2 |
-| **U.S. Treasury Fiscal Data** | <https://fiscaldata.treasury.gov> | ✅ 불필요 | — | 미국 국채 금리, 재정 데이터 |
-| **BLS (미국 노동통계국)** | <https://www.bls.gov/developers> | ⚿ 권장 | `BLS_API_KEY` | CPI, PPI, 실업률, 고용 원시 데이터 |
-| **BEA (미국 경제분석국)** | <https://apps.bea.gov/api> | ⚿ 필요 | `BEA_API_KEY` | GDP, PCE, 국민소득 데이터 |
-| **EIA (미국 에너지정보청)** | <https://www.eia.gov/opendata> | ⚿ 필요 | `EIA_API_KEY` | WTI·브렌트 유가, 천연가스, 재고 |
-| **SEC EDGAR** | <https://www.sec.gov/developer> | ✅ 불필요 | — | 미국 기업 10-K/10-Q 재무제표 |
-| **Alpha Vantage** | <https://www.alphavantage.co> | ⚿ 필요 | `ALPHA_VANTAGE_KEY` | 주가, 기술 지표, 펀더멘털 |
-| **OECD Data** | <https://data.oecd.org> | ✅ 불필요 | — | 국가별 금리·GDP·물가 비교 |
-| **World Bank Open Data** | <https://data.worldbank.org> | ✅ 불필요 | — | 글로벌 거시 지표 장기 시계열 |
-| **IMF Data** | <https://www.imf.org/en/Data> | ✅ 불필요 | — | 세계경제전망(WEO), IFS 국제금융통계 |
+| **FRED (St. Louis Fed)** | <https://fred.stlouisfed.org> | <i class="fa-solid fa-key"></i> 권장 | `FRED_API_KEY` | 금리, CPI, GDP, 실업률, M2 |
+| **U.S. Treasury Fiscal Data** | <https://fiscaldata.treasury.gov> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 미국 국채 금리, 재정 데이터 |
+| **BLS (미국 노동통계국)** | <https://www.bls.gov/developers> | <i class="fa-solid fa-key"></i> 권장 | `BLS_API_KEY` | CPI, PPI, 실업률, 고용 원시 데이터 |
+| **BEA (미국 경제분석국)** | <https://apps.bea.gov/api> | <i class="fa-solid fa-key"></i> 필요 | `BEA_API_KEY` | GDP, PCE, 국민소득 데이터 |
+| **EIA (미국 에너지정보청)** | <https://www.eia.gov/opendata> | <i class="fa-solid fa-key"></i> 필요 | `EIA_API_KEY` | WTI·브렌트 유가, 천연가스, 재고 |
+| **SEC EDGAR** | <https://www.sec.gov/developer> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 미국 기업 10-K/10-Q 재무제표 |
+| **Alpha Vantage** | <https://www.alphavantage.co> | <i class="fa-solid fa-key"></i> 필요 | `ALPHA_VANTAGE_KEY` | 주가, 기술 지표, 펀더멘털 |
+| **OECD Data** | <https://data.oecd.org> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 국가별 금리·GDP·물가 비교 |
+| **World Bank Open Data** | <https://data.worldbank.org> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 글로벌 거시 지표 장기 시계열 |
+| **IMF Data** | <https://www.imf.org/en/Data> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 세계경제전망(WEO), IFS 국제금융통계 |
 
 ---
 
-### 🏦 국내 자본시장 인프라
+### <i class="fa-solid fa-building-columns"></i> 국내 자본시장 인프라
 
 | 기관 | URL | 활용 용도 |
 |------|-----|-----------|
@@ -212,7 +214,7 @@
 
 ---
 
-### 📈 차트 & 트레이딩 플랫폼
+### <i class="fa-solid fa-chart-line"></i> 차트 & 트레이딩 플랫폼
 
 | 서비스 | URL | 활용 용도 |
 |--------|-----|-----------|
@@ -222,7 +224,7 @@
 
 ---
 
-### 📰 국내 금융 미디어 & 정보 포탈
+### <i class="fa-solid fa-newspaper"></i> 국내 금융 미디어 & 정보 포탈
 
 | 서비스 | URL | 활용 용도 |
 |--------|-----|-----------|
@@ -238,7 +240,7 @@
 
 ---
 
-### 🏦 국내 주요 증권사 리서치센터
+### <i class="fa-solid fa-building-columns"></i> 국내 주요 증권사 리서치센터
 
 | 증권사 | URL | 활용 용도 |
 |--------|-----|-----------|
@@ -253,7 +255,7 @@
 
 ---
 
-### 🐍 Python 라이브러리 & 개발 도구
+### <i class="fa-brands fa-python"></i> Python 라이브러리 & 개발 도구
 
 | 라이브러리 | URL | 용도 |
 |-----------|-----|------|
@@ -266,7 +268,7 @@
 
 ---
 
-### 🔑 API 키 발급 우선순위 안내
+### <i class="fa-solid fa-key"></i> API 키 발급 우선순위 안내
 
 | 우선순위 | 서비스 | 이유 |
 |---------|--------|------|
@@ -279,7 +281,7 @@
 
 ---
 
-# 📌 DART API Key 발급 방법
+# <i class="fa-solid fa-thumbtack"></i> DART API Key 발급 방법
 
 DART(전자공시시스템) API는 상장 기업의 재무제표·공시 데이터를 무료로 수집할 수 있는 공공 API입니다.
 
@@ -293,12 +295,12 @@ DART(전자공시시스템) API는 상장 기업의 재무제표·공시 데이�
 | 4. 이메일 인증 | 신청 이메일로 발송된 인증 링크 클릭 |
 | 5. 키 확인 | **인증키 신청/관리 → 오픈 API 이용현황** 에서 발급된 키 복사 |
 
-> ⚠️ **유의사항**: 무료 제공 / 개인·기업 모두 발급 가능 / 하루 호출 횟수 제한 있음  
+> <i class="fa-solid fa-triangle-exclamation"></i>️ **유의사항**: 무료 제공 / 개인·기업 모두 발급 가능 / 하루 호출 횟수 제한 있음  
 > 발급 후 프로젝트 루트의 `app/backend/.env` 파일에 `DART_API_KEY=발급받은키` 형식으로 입력
 
 ---
 
-## 🗂️ Repository Structure
+## <i class="fa-solid fa-folder-open"></i>️ Repository Structure
 
 ```text
 .
@@ -375,7 +377,7 @@ DART(전자공시시스템) API는 상장 기업의 재무제표·공시 데이�
 
 ---
 
-## 🚀 Quick Start
+## <i class="fa-solid fa-rocket"></i> Quick Start
 
 ### 1) Python 앱 실행
 
@@ -407,7 +409,7 @@ pkill -f uvicorn
 
 ---
 
-## 🚢 GitHub Actions → ECR → EC2 배포
+## <i class="fa-solid fa-ship"></i> GitHub Actions → ECR → EC2 배포
 
 새로 추가된 `/home/runner/work/investment-analysis/investment-analysis/.github/workflows/deploy-ecr-ec2.yml` 워크플로우는 아래 순서로 동작합니다.
 
@@ -448,7 +450,7 @@ pkill -f uvicorn
 
 ---
 
-## 🧠 Vector DB(RAG) 업로드 스크립트
+## <i class="fa-solid fa-brain"></i> Vector DB(RAG) 업로드 스크립트
 
 `docker compose up -d` 후 아래 스크립트로 `docs/*.md`를 청크/벡터화(해시 임베딩)하여 Qdrant에 업로드할 수 있습니다.
 
@@ -473,7 +475,7 @@ QDRANT_URL=http://localhost:6333 QDRANT_COLLECTION=finance_docs ./scripts/upload
 
 ---
 
-## 🦙 Ollama 모델 설치/운영 가이드 (Windows + WSL2)
+## <i class="fa-solid fa-paw"></i> Ollama 모델 설치/운영 가이드 (Windows + WSL2)
 
 아래는 현재 실습 환경에서 사용 중인 Ollama 모델 예시입니다.
 
@@ -624,7 +626,7 @@ curl $OLLAMA_HOST/api/tags
 
 ---
 
-## ⚠️ 주의사항
+## <i class="fa-solid fa-triangle-exclamation"></i>️ 주의사항
 - **보안 리스크**: API 키(App Key, Secret)는 계좌 접근 권한이므로 반드시 안전하게 관리해야 함  
 - **호출 제한**: 초당 호출 횟수 제한 존재 → 대량 주문 시 설계 필요  
 - **모의투자 환경**: 대부분 증권사에서 제공 → 실전 적용 전 백테스트 및 모의투자 권장  
@@ -632,7 +634,7 @@ curl $OLLAMA_HOST/api/tags
 
 ---
 
-👉 정리하면, **퀀트 시스템을 붙이려면 [한국투자증권 REST API](ca://s?q=한국투자증권_Open_API_자동매매)**가 가장 범용적이고 현대적인 선택지이며, Windows 환경이라면 [키움증권](ca://s?q=키움증권_Open_API_자동매매)이나 [대신증권](ca://s?q=대신증권_CYBOS_API)도 활용 가능합니다.
+<i class="fa-solid fa-hand-point-right"></i> 정리하면, **퀀트 시스템을 붙이려면 [한국투자증권 REST API](ca://s?q=한국투자증권_Open_API_자동매매)**가 가장 범용적이고 현대적인 선택지이며, Windows 환경이라면 [키움증권](ca://s?q=키움증권_Open_API_자동매매)이나 [대신증권](ca://s?q=대신증권_CYBOS_API)도 활용 가능합니다.
 
 
 ---

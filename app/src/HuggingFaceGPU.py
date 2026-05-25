@@ -19,4 +19,4 @@ image = pipe(prompt, guidance_scale=9).images[0]
 
 # 저장
 image.save("test.png")
-print("✅ Diffusers GPU 이미지 생성 완료")
+print("[완료] Diffusers GPU 이미지 생성 완료")

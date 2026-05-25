@@ -217,7 +217,7 @@ function renderSummary(preset, money, years, expected, risk, futureMoney) {
       <div style="font-size:0.85rem; color:#131722; font-weight:700; margin-bottom:6px;">${preset.description}</div>
       <div style="display:grid; gap:4px;">
         ${preset.checks.map((text) => `
-          <div style="font-size:0.8rem; color:#475569;">☑ ${text}</div>
+          <div style="font-size:0.8rem; color:#475569;"><i class="fa-regular fa-square-check"></i> ${text}</div>
         `).join('')}
       </div>
     </div>

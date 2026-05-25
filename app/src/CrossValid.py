@@ -3,7 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 import numpy as np
 
-# ✅ 1. 가상 이진 분류 데이터 생성
+# [완료] 1. 가상 이진 분류 데이터 생성
 X, y = make_classification(
     n_samples=1000,      # 샘플 수
     n_features=10,       # 특성 수
@@ -13,12 +13,12 @@ X, y = make_classification(
     random_state=42
 )
 
-# ✅ 2. 모델 정의
+# [완료] 2. 모델 정의
 model = LogisticRegression(max_iter=1000)
 
-# ✅ 3. 5-Fold 교차검증
+# [완료] 3. 5-Fold 교차검증
 scores = cross_val_score(model, X, y, cv=5)
 
-# ✅ 4. 결과 출력
+# [완료] 4. 결과 출력
 print("각 Fold의 정확도:", scores)
 print("평균 정확도:", np.mean(scores))

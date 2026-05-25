@@ -253,7 +253,7 @@ def plot_risk(df_ohlcv: pd.DataFrame, returns_df: pd.DataFrame) -> None:
 
     plt.suptitle("퀀트 리스크 관리 분석 결과", fontsize=13, fontweight="bold")
     plt.savefig("risk_result.png", dpi=130, bbox_inches="tight")
-    print("✅ 차트 저장: risk_result.png")
+    print("[완료] 차트 저장: risk_result.png")
     plt.close(fig)
 
 
@@ -283,7 +283,7 @@ if __name__ == "__main__":
         atr_multiplier=2.0,
     )
 
-    print("\n📐 ATR 기반 포지션 사이징 (1% 리스크 룰)")
+    print("\n[분석] ATR 기반 포지션 사이징 (1% 리스크 룰)")
     print(f"  자본금          : {ps['capital']:,.0f}원")
     print(f"  현재가          : {ps['price']:.2f}")
     print(f"  ATR (14일)     : {ps['atr']:.2f}")
@@ -296,14 +296,14 @@ if __name__ == "__main__":
     daily_rets = df_ohlcv["Close"].pct_change().dropna()
     vc = var_cvar(daily_rets, confidence=0.95)
 
-    print("\n⚠️  VaR / CVaR 리스크 지표 (95% 신뢰 수준)")
+    print("\n[경고]  VaR / CVaR 리스크 지표 (95% 신뢰 수준)")
     print(f"  일별 VaR  : {vc['var_daily']:.2%}")
     print(f"  일별 CVaR : {vc['cvar_daily']:.2%}")
     print(f"  연환산 VaR: {vc['var_annual']:.2%}")
 
     # 4. 포트폴리오 리스크
     pr = portfolio_risk_report(rets_df)
-    print("\n🗂️  포트폴리오 리스크 보고서")
+    print("\n[보고서]  포트폴리오 리스크 보고서")
     print(f"  포트폴리오 연환산 변동성: {pr['portfolio_vol']:.2%}")
     print(f"  HHI 집중도 지수         : {pr['hhi']:.3f}  (0=완전분산, 1=완전집중)")
     print("  개별 자산 변동성:")

@@ -50,7 +50,7 @@ const NODES = {
 
 const STRATEGIES = {
   s1: {
-    emoji: '🛡️', name: '안전우선형',
+    emoji: '<i class="fa-solid fa-shield-halved"></i>', name: '안전우선형',
     desc: '원금 보호를 가장 중요하게 생각해요. 수익보다 손실 최소화가 우선입니다. 예금·채권 위주로 구성해 큰 변동 없이 조금씩 자산을 지킵니다.',
     alloc: [
       { label: '예금·CMA', pct: 55, color: '#3b82f6' },
@@ -58,14 +58,14 @@ const STRATEGIES = {
       { label: '주식ETF', pct: 10, color: '#f59e0b' },
       { label: '현금', pct: 5,  color: '#94a3b8' },
     ],
-    expected: '연 2~3%', risk: '낮음 🟢',
+    expected: '연 2~3%', risk: '낮음 <i class="fa-solid fa-circle" style="color:#22c55e;"></i>',
     horizon: '단기 (1년 미만)',
     products: ['KB국민은행 정기예금', 'KODEX 단기채권PLUS', '예금보험 적금'],
     tags: ['원금보호', '저위험', '예금·채권 중심'],
-    tip: '💡 예금자보호법으로 1인당 5,000만원까지 보호됩니다.',
+    tip: '<i class="fa-solid fa-lightbulb"></i> 예금자보호법으로 1인당 5,000만원까지 보호됩니다.',
   },
   s2: {
-    emoji: '⚡', name: '단기수익형',
+    emoji: '<i class="fa-solid fa-bolt"></i>', name: '단기수익형',
     desc: '단기간에 예금보다 높은 수익을 노립니다. 어느 정도 변동을 감수하고, 주식 ETF와 채권을 반반 섞어 유연하게 운용합니다.',
     alloc: [
       { label: '주식ETF', pct: 40, color: '#f59e0b' },
@@ -73,14 +73,14 @@ const STRATEGIES = {
       { label: '원자재ETF', pct: 15, color: '#8b5cf6' },
       { label: '현금', pct: 10, color: '#94a3b8' },
     ],
-    expected: '연 4~6%', risk: '중하 🟡',
+    expected: '연 4~6%', risk: '중하 <i class="fa-solid fa-circle" style="color:#eab308;"></i>',
     horizon: '단기 (1년 미만)',
     products: ['KODEX 200', 'TIGER 국채3년', 'KODEX 골드선물(H)'],
     tags: ['단기수익', '혼합형', '변동 감수'],
-    tip: '💡 단기 매매는 거래세·수수료가 수익을 줄일 수 있습니다. 비용 확인 필수!',
+    tip: '<i class="fa-solid fa-lightbulb"></i> 단기 매매는 거래세·수수료가 수익을 줄일 수 있습니다. 비용 확인 필수!',
   },
   s3: {
-    emoji: '⚖️', name: '균형안정형',
+    emoji: '<i class="fa-solid fa-scale-balanced"></i>', name: '균형안정형',
     desc: '주식과 채권을 반반 섞어 중기적으로 안정적인 성장을 추구합니다. 시장 하락 시 채권이 충격을 완화해줍니다.',
     alloc: [
       { label: '주식ETF', pct: 40, color: '#3b82f6' },
@@ -88,14 +88,14 @@ const STRATEGIES = {
       { label: '원자재', pct: 10, color: '#f59e0b' },
       { label: '현금', pct: 10, color: '#94a3b8' },
     ],
-    expected: '연 4~6%', risk: '중간 🟡',
+    expected: '연 4~6%', risk: '중간 <i class="fa-solid fa-circle" style="color:#eab308;"></i>',
     horizon: '중기 (1~5년)',
     products: ['TIGER 미국S&P500', 'KODEX 국고채10년', 'KODEX 골드선물(H)'],
     tags: ['균형분산', '중기', '정기 리밸런싱'],
-    tip: '💡 6개월마다 비중을 원래대로 되돌리는 "리밸런싱"이 핵심입니다.',
+    tip: '<i class="fa-solid fa-lightbulb"></i> 6개월마다 비중을 원래대로 되돌리는 "리밸런싱"이 핵심입니다.',
   },
   s4: {
-    emoji: '📈', name: '중기성장형',
+    emoji: '<i class="fa-solid fa-chart-line"></i>', name: '중기성장형',
     desc: '주가 하락도 매수 기회로 보는 적극적 투자자입니다. 주식 ETF 비중을 높여 중장기 복리 성장을 기대합니다.',
     alloc: [
       { label: '주식ETF', pct: 65, color: '#f59e0b' },
@@ -103,28 +103,28 @@ const STRATEGIES = {
       { label: '원자재ETF', pct: 10, color: '#8b5cf6' },
       { label: '현금', pct: 5,  color: '#94a3b8' },
     ],
-    expected: '연 6~9%', risk: '중상 🟠',
+    expected: '연 6~9%', risk: '중상 <i class="fa-solid fa-circle" style="color:#f97316;"></i>',
     horizon: '중기 (1~5년)',
     products: ['TIGER 미국S&P500', 'KODEX 나스닥100', 'TIGER 국채3년'],
     tags: ['성장추구', '주식중심', '변동 감수'],
-    tip: '💡 하락장에서 추가 매수(물타기)보다 정해진 비중을 유지하는 게 더 안전합니다.',
+    tip: '<i class="fa-solid fa-lightbulb"></i> 하락장에서 추가 매수(물타기)보다 정해진 비중을 유지하는 게 더 안전합니다.',
   },
   s5: {
-    emoji: '🌱', name: '장기패시브형',
+    emoji: '<i class="fa-solid fa-seedling"></i>', name: '장기패시브형',
     desc: '오래 두면 복리가 알아서 일을 한다는 믿음입니다. 글로벌 지수추종 ETF 한두 개로 단순하게 장기 보유합니다.',
     alloc: [
       { label: '글로벌ETF', pct: 70, color: '#10b981' },
       { label: '채권ETF', pct: 20, color: '#3b82f6' },
       { label: '현금', pct: 10, color: '#94a3b8' },
     ],
-    expected: '연 7~10%', risk: '중상 🟠',
+    expected: '연 7~10%', risk: '중상 <i class="fa-solid fa-circle" style="color:#f97316;"></i>',
     horizon: '장기 (5년 이상)',
     products: ['TIGER 미국S&P500', 'KODEX 미국나스닥100', 'ACE 미국채10년'],
     tags: ['인덱스투자', '장기복리', '패시브'],
-    tip: '💡 매달 일정액을 자동 매수(적립식)하면 평균 단가를 낮출 수 있습니다.',
+    tip: '<i class="fa-solid fa-lightbulb"></i> 매달 일정액을 자동 매수(적립식)하면 평균 단가를 낮출 수 있습니다.',
   },
   s6: {
-    emoji: '🎯', name: '장기액티브형',
+    emoji: '<i class="fa-solid fa-bullseye"></i>', name: '장기액티브형',
     desc: '섹터, 테마, 팩터 전략으로 시장 평균보다 높은 수익(알파)을 추구합니다. 경험을 활용해 능동적으로 포트폴리오를 관리합니다.',
     alloc: [
       { label: '국내외주식', pct: 55, color: '#f59e0b' },
@@ -132,11 +132,11 @@ const STRATEGIES = {
       { label: '채권ETF', pct: 15, color: '#3b82f6' },
       { label: '현금', pct: 5,  color: '#94a3b8' },
     ],
-    expected: '연 8~12%', risk: '높음 🔴',
+    expected: '연 8~12%', risk: '높음 <i class="fa-solid fa-circle" style="color:#ef4444;"></i>',
     horizon: '장기 (5년 이상)',
     products: ['TIGER 글로벌AI&로보틱스', 'KODEX 반도체', 'TIGER 인도니프티50'],
     tags: ['알파추구', '섹터·테마', '적극운용'],
-    tip: '💡 과도한 집중투자는 포트폴리오 전체를 위험에 빠뜨릴 수 있습니다. 분산은 필수입니다.',
+    tip: '<i class="fa-solid fa-lightbulb"></i> 과도한 집중투자는 포트폴리오 전체를 위험에 빠뜨릴 수 있습니다. 분산은 필수입니다.',
   },
 };
 
@@ -362,7 +362,7 @@ function renderResult(resultEl, stratId) {
       </div>
 
       <p style="font-size:0.75rem;color:#9ca3af;margin:14px 0 0;line-height:1.5;">
-        ⚠️ 이 결과는 학습 목적의 참고용이며 실제 투자 권유가 아닙니다. 투자 전 전문가와 상담하세요.
+        <i class="fa-solid fa-triangle-exclamation"></i> 이 결과는 학습 목적의 참고용이며 실제 투자 권유가 아닙니다. 투자 전 전문가와 상담하세요.
       </p>
     </div>`;
 
@@ -377,7 +377,7 @@ function updateBreadcrumb(el, st) {
     return;
   }
   const parts = st.path.map(s => `<b>${s.edgeLabel}</b>`).join(' → ');
-  el.innerHTML = `선택 경로: ${parts}${st.done ? ` → <b style="color:#059669;">${NODES[st.current].text[0]}</b> ✓` : ''}`;
+  el.innerHTML = `선택 경로: ${parts}${st.done ? ` → <b style="color:#059669;">${NODES[st.current].text[0]}</b> <i class="fa-solid fa-check"></i>` : ''}`;
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────

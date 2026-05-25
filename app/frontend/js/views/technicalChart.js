@@ -326,7 +326,7 @@ function renderStockSelect(content, state) {
                 c.scenario==='wave'?'〜 파동형':'─ 횡보'}
             </span>
           </div>
-          ${state.selected===i?`<div style="margin-top:8px;padding:4px 8px;background:#eff6ff;border-radius:6px;font-size:0.75rem;color:#2563eb;font-weight:600;">✓ 선택됨 — 나머지 탭에서 분석 가능</div>`:''}
+          ${state.selected===i?`<div style="margin-top:8px;padding:4px 8px;background:#eff6ff;border-radius:6px;font-size:0.75rem;color:#2563eb;font-weight:600;"><i class="fa-solid fa-check"></i> 선택됨 — 나머지 탭에서 분석 가능</div>`:''}
         </div>`).join('')}
     </div>
     <div id="stock-preview" style="${state.selected==null?'display:none':''}">
@@ -501,7 +501,7 @@ function renderCandle(content, state) {
         </button>`).join('')}
     </div>
     ${card(p.name, 'fa-solid fa-chart-candlestick', `
-      ${info(`<strong>신호:</strong> ${p.signal==='반등'?'📈 매수 신호':'📉 매도 신호'} &nbsp;|&nbsp; ${p.desc}`
+      ${info(`<strong>신호:</strong> ${p.signal==='반등'?'<i class="fa-solid fa-arrow-trend-up"></i> 매수 신호':'<i class="fa-solid fa-arrow-trend-down"></i> 매도 신호'} &nbsp;|&nbsp; ${p.desc}`
         , p.signal==='반등'?'#22c55e':'#ef4444')}
       <canvas id="cv-candle" style="width:100%;height:280px;display:block;border-radius:8px;border:1px solid #e2e8f0;"></canvas>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
@@ -577,7 +577,7 @@ function renderIndicators(content, state) {
     const lastUp=upper.filter(v=>v!=null).slice(-1)[0];
     const lastLo=lower.filter(v=>v!=null).slice(-1)[0];
     const bbPct=((lastC-lastLo)/(lastUp-lastLo)*100).toFixed(0);
-    const rsiSig=lastRsi>70?'과매수 ⚠️':lastRsi<30?'과매도 ✅':'중립';
+    const rsiSig=lastRsi>70?'과매수 <i class="fa-solid fa-triangle-exclamation"></i>':lastRsi<30?'과매도 <i class="fa-solid fa-circle-check"></i>':'중립';
     const macdSig=lastMacd>lastSig?'골든크로스 ↑':'데드크로스 ↓';
 
     content.querySelector('#ind-signal').innerHTML=[
@@ -696,7 +696,7 @@ function renderSummary(content, state) {
       </div>
     </div>
     <div style="margin-top:14px;padding:12px;background:#f8fafc;border-radius:8px;font-size:0.78rem;color:#475569;line-height:1.65;border:1px solid #e2e8f0;">
-      ⚠️ 본 분석은 시뮬레이션 데이터 기반 교육용 리포트입니다. 실제 투자 결정은 추가적인 기본적 분석과 리스크 관리를 병행하세요.
+      <i class="fa-solid fa-triangle-exclamation"></i> 본 분석은 시뮬레이션 데이터 기반 교육용 리포트입니다. 실제 투자 결정은 추가적인 기본적 분석과 리스크 관리를 병행하세요.
     </div>`, '#0f172a');
 
   requestAnimationFrame(()=>{

@@ -81,12 +81,12 @@ function renderCompanySelect(content) {
   ];
 
   const sampleCompanies = [
-    { name: '삼성전자', sector: '반도체·IT', ticker: '005930', why: '안정적 FCF, 글로벌 1위 파운드리·메모리, DART 데이터 풍부', difficulty: '★★★' },
-    { name: 'NAVER', sector: '인터넷 플랫폼', ticker: '035420', why: '광고·커머스·클라우드 수익 구조 이해 용이, 네트워크 해자', difficulty: '★★☆' },
-    { name: '셀트리온', sector: '바이오·제약', ticker: '068270', why: '바이오시밀러 글로벌 판매, 성장성 높지만 가정 난이도 높음', difficulty: '★★★★' },
-    { name: '현대차', sector: '자동차·EV', ticker: '005380', why: '전통 자동차 + EV 전환기, 실물 자산 기반 FCF 분석에 적합', difficulty: '★★★' },
-    { name: 'LG에너지솔루션', sector: '2차전지', ticker: '373220', why: '글로벌 EV 배터리 수요 성장, 장기 계약 기반 예측 가능성', difficulty: '★★★★' },
-    { name: '카카오', sector: '플랫폼·핀테크', ticker: '035720', why: '다양한 수익 모델이지만 구조 복잡, 중급 수준 실습에 적합', difficulty: '★★★' },
+    { name: '삼성전자', sector: '반도체·IT', ticker: '005930', why: '안정적 FCF, 글로벌 1위 파운드리·메모리, DART 데이터 풍부', difficulty: '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>' },
+    { name: 'NAVER', sector: '인터넷 플랫폼', ticker: '035420', why: '광고·커머스·클라우드 수익 구조 이해 용이, 네트워크 해자', difficulty: '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>' },
+    { name: '셀트리온', sector: '바이오·제약', ticker: '068270', why: '바이오시밀러 글로벌 판매, 성장성 높지만 가정 난이도 높음', difficulty: '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>' },
+    { name: '현대차', sector: '자동차·EV', ticker: '005380', why: '전통 자동차 + EV 전환기, 실물 자산 기반 FCF 분석에 적합', difficulty: '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>' },
+    { name: 'LG에너지솔루션', sector: '2차전지', ticker: '373220', why: '글로벌 EV 배터리 수요 성장, 장기 계약 기반 예측 가능성', difficulty: '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>' },
+    { name: '카카오', sector: '플랫폼·핀테크', ticker: '035720', why: '다양한 수익 모델이지만 구조 복잡, 중급 수준 실습에 적합', difficulty: '<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>' },
   ];
 
   const checklist = [
@@ -108,8 +108,8 @@ function renderCompanySelect(content) {
           </div>
           <p style="font-size:0.8rem;color:#475569;line-height:1.55;margin:0 0 10px;">${c.desc}</p>
           <div style="font-size:0.75rem;">
-            <div style="color:#16a34a;margin-bottom:3px;">✅ 적합: ${c.good}</div>
-            <div style="color:#dc2626;">❌ 주의: ${c.bad}</div>
+            <div style="color:#16a34a;margin-bottom:3px;"><i class="fa-solid fa-circle-check"></i> 적합: ${c.good}</div>
+            <div style="color:#dc2626;"><i class="fa-solid fa-circle-xmark"></i> 주의: ${c.bad}</div>
           </div>
         </div>`).join('')}
     </div>
@@ -481,7 +481,7 @@ function renderDcf(content) {
       </div>
       ${infoBox(`
         <strong>영구가치(TV) 비중이 ${fmtPct(pvTv/ev*100)}입니다.</strong><br>
-        ${pvTv/ev > 0.65 ? '⚠️ TV 비중이 65%를 초과합니다. 5년 이후 성장 가정이 결과를 크게 좌우합니다. 영구성장률과 할인율 가정을 보수적으로 재검토하세요.' : '✅ TV 비중이 적정 수준입니다. 5년 예측 FCF가 가치의 상당 부분을 설명합니다.'}<br>
+        ${pvTv/ev > 0.65 ? '<i class="fa-solid fa-triangle-exclamation"></i> TV 비중이 65%를 초과합니다. 5년 이후 성장 가정이 결과를 크게 좌우합니다. 영구성장률과 할인율 가정을 보수적으로 재검토하세요.' : '<i class="fa-solid fa-circle-check"></i> TV 비중이 적정 수준입니다. 5년 예측 FCF가 가치의 상당 부분을 설명합니다.'}<br>
         <strong>주의</strong>: DCF는 "정답"이 아닙니다. 민감도 표를 보며 가치 범위(보수~낙관)를 확인하고 현재 주가와 비교해보세요.`)}`, '#22c55e');
 
     content.querySelector('#dcf-detail').style.display = 'block';
@@ -536,9 +536,9 @@ function renderEva(content) {
     ${card('EVA 이해하기 — 비유로 설명', 'fa-solid fa-lightbulb', `
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
         ${[
-          ['📦 A 회사', '영업이익 500억, 투하자본 4,000억, WACC 10%', '자본비용 400억 → EVA = +100억', '진짜 가치를 만들고 있는 기업', '#22c55e'],
-          ['📦 B 회사', '영업이익 300억, 투하자본 4,000억, WACC 10%', '자본비용 400억 → EVA = -100억', '회계이익은 있지만 실질 가치 파괴', '#ef4444'],
-          ['📦 C 회사', '영업이익 400억, 투하자본 4,000억, WACC 10%', '자본비용 400억 → EVA = 0', '본전치기. 투자자 기대를 딱 충족', '#f59e0b'],
+          ['<i class="fa-solid fa-box"></i> A 회사', '영업이익 500억, 투하자본 4,000억, WACC 10%', '자본비용 400억 → EVA = +100억', '진짜 가치를 만들고 있는 기업', '#22c55e'],
+          ['<i class="fa-solid fa-box"></i> B 회사', '영업이익 300억, 투하자본 4,000억, WACC 10%', '자본비용 400억 → EVA = -100억', '회계이익은 있지만 실질 가치 파괴', '#ef4444'],
+          ['<i class="fa-solid fa-box"></i> C 회사', '영업이익 400억, 투하자본 4,000억, WACC 10%', '자본비용 400억 → EVA = 0', '본전치기. 투자자 기대를 딱 충족', '#f59e0b'],
         ].map(([name, cond, res, comment, col]) => `
           <div style="background:#f8fafc;border-radius:8px;padding:14px;border-top:3px solid ${col};">
             <div style="font-size:0.88rem;font-weight:700;color:#0f172a;margin-bottom:6px;">${name}</div>
@@ -575,7 +575,7 @@ function renderEva(content) {
       ${resultRow('WACC 대비 스프레드 (ROIC-WACC)', fmtPct(spread * 100))}
       ${resultRow('EVA', `${fmt(eva)}억`, true)}
       <div style="margin-top:12px;padding:12px;border-radius:8px;background:${evaCol}18;border:1px solid ${evaCol}44;font-size:0.82rem;color:${evaCol};font-weight:600;text-align:center;">
-        ${eva >= 0 ? `✅ EVA 양수: 자본 비용을 넘어 ${fmt(eva)}억원의 가치를 창출하고 있습니다.` : `⚠️ EVA 음수: 자본 비용을 충당하지 못해 ${fmt(Math.abs(eva))}억원의 가치를 훼손하고 있습니다.`}
+        ${eva >= 0 ? `<i class="fa-solid fa-circle-check"></i> EVA 양수: 자본 비용을 넘어 ${fmt(eva)}억원의 가치를 창출하고 있습니다.` : `<i class="fa-solid fa-triangle-exclamation"></i> EVA 음수: 자본 비용을 충당하지 못해 ${fmt(Math.abs(eva))}억원의 가치를 훼손하고 있습니다.`}
       </div>`;
 
     const nopats = [nopat * 0.6, nopat * 0.8, nopat, nopat * 1.2, nopat * 1.4];
@@ -726,7 +726,7 @@ function renderReport(content) {
           <div style="font-size:0.8rem;font-weight:700;color:#475569;margin-bottom:8px;">주요 리스크</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             ${[g('rpt-risk1'), g('rpt-risk2'), g('rpt-risk3')].filter(Boolean).map(r =>
-              `<span style="background:#ef444418;color:#ef4444;border:1px solid #ef444444;border-radius:20px;padding:3px 12px;font-size:0.78rem;">⚠️ ${r}</span>`
+              `<span style="background:#ef444418;color:#ef4444;border:1px solid #ef444444;border-radius:20px;padding:3px 12px;font-size:0.78rem;"><i class="fa-solid fa-triangle-exclamation"></i> ${r}</span>`
             ).join('')}
           </div>
         </div>

@@ -26,5 +26,5 @@ clf.fit(X_train, y_train)
 # 4. 예측 및 평가
 y_pred = clf.predict(X_test)
 
-print("✅ 정확도:", accuracy_score(y_test, y_pred))
-print("📊 리포트:\n", classification_report(y_test, y_pred))
+print("[완료] 정확도:", accuracy_score(y_test, y_pred))
+print("[통계] 리포트:\n", classification_report(y_test, y_pred))

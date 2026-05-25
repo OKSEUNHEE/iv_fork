@@ -257,7 +257,7 @@ def plot_portfolio(
 
     plt.tight_layout()
     plt.savefig("portfolio_result.png", dpi=130, bbox_inches="tight")
-    print("✅ 차트 저장: portfolio_result.png")
+    print("[완료] 차트 저장: portfolio_result.png")
     plt.close(fig)
 
 
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     cov = build_cov_matrix(ANNUAL_VOLS, CORR_MATRIX)
 
     # 1. 몬테카를로 시뮬레이션
-    print("\n⚙️  몬테카를로 시뮬레이션 (5,000 포트폴리오)...")
+    print("\n[실행]  몬테카를로 시뮬레이션 (5,000 포트폴리오)...")
     frontier = monte_carlo_frontier(mu, cov, n_portfolios=5000)
 
     # 2. 최적 포트폴리오 탐색
@@ -283,13 +283,13 @@ if __name__ == "__main__":
     min_v = min_vol_portfolio(frontier)
 
     # 3. Risk Parity 계산
-    print("⚙️  Risk Parity 최적화...")
+    print("[실행]  Risk Parity 최적화...")
     rp_w = risk_parity_weights(cov)
     rp_r, rp_v, rp_s = portfolio_performance(rp_w, mu, cov)
     rc = risk_contributions(rp_w, cov)
 
     # 4. 결과 출력
-    print("\n🏆 포트폴리오 비교 결과")
+    print("\n[결과] 포트폴리오 비교 결과")
     print("-" * 60)
     header = f"{'지표':18s} {'Sharpe 최대':>14s} {'최소 변동성':>14s} {'Risk Parity':>14s}"
     print(header)
@@ -302,19 +302,19 @@ if __name__ == "__main__":
     pf("Sharpe Ratio", max_s["sharpe"], min_v["sharpe"], rp_s, fmt="{:.2f}")
     print("-" * 60)
 
-    print("\n📊 Sharpe 최대 포트폴리오 자산 배분")
+    print("\n[통계] Sharpe 최대 포트폴리오 자산 배분")
     for t in TICKERS:
         bar = "█" * int(max_s[t] * 30)
         print(f"  {t:18s}: {max_s[t]:.1%}  {bar}")
 
-    print("\n📊 Risk Parity 리스크 기여도")
+    print("\n[통계] Risk Parity 리스크 기여도")
     for t, pct in rc["pct_rc"].items():
         bar = "█" * int(pct * 30)
         print(f"  {t:18s}: {pct:.1%}  {bar}")
 
     # 취업 합격 기준 체크
-    print("\n🎯 NCS 취업 포트폴리오 합격 기준")
-    print(f"  Sharpe > 1.0 : {'합격 ✅' if max_s['sharpe'] > 1.0 else '미달 ⚠️'}  ({max_s['sharpe']:.2f})")
+    print("\n[목표] NCS 취업 포트폴리오 합격 기준")
+    print(f"  Sharpe > 1.0 : {'합격 [완료]' if max_s['sharpe'] > 1.0 else '미달 [경고]'}  ({max_s['sharpe']:.2f})")
 
     # 5. 시뮬레이션 수익률 생성 후 시각화
     returns_df = simulate_returns(mu, cov)

@@ -14,7 +14,7 @@ for r in list(np.linspace(20, 100, 30)) + list(np.linspace(100, 20, 30)):
     writer.write(img)
 
 writer.release()
-print("🎞️ 동영상 저장 완료:", output_path)
+print("[동영상] 동영상 저장 완료:", output_path)
 
 # 자동 재생 (Windows 전용)
 os.startfile(output_path)
