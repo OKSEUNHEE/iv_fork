@@ -54,7 +54,7 @@ function card(title, icon, body, accent = '#2563eb') {
 }
 
 function infoBox(text, color = '#3b82f6') {
-  return `<div style="background:${color}12;border:1px solid ${color}44;border-radius:8px;padding:12px 14px;font-size:0.83rem;color:#e2e8f0;line-height:1.65;margin-bottom:14px;">${text}</div>`;
+  return `<div style="background:${color}12;border:1px solid ${color}44;border-radius:8px;padding:12px 14px;font-size:0.83rem;color:#1e293b;line-height:1.65;margin-bottom:14px;">${text}</div>`;
 }
 
 function badge(label, color = '#2563eb') {

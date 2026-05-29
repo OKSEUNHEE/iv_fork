@@ -3367,4 +3367,62 @@ def company_financials(req: CompanyFinancialsRequest) -> dict[str, object]:
     }
 
 
+PERIOD_DAYS = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365}
+
+
+@app.get("/api/home/kospi-candle")
+def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
+    if period not in PERIOD_DAYS:
+        period = "3mo"
+    import pandas as pd
+    try:
+        import yfinance as yf
+        df = yf.download("^KS11", period=period, interval="1d", progress=False,
+                         auto_adjust=True, threads=False)
+        if df.empty:
+            raise ValueError("empty")
+        ohlcv = []
+        for idx, row in df.iterrows():
+            def _f(col):
+                v = row.get(col)
+                if v is None:
+                    return None
+                if hasattr(v, '__iter__') and not isinstance(v, (str, float, int)):
+                    v = list(v)[0]
+                return round(float(v), 2)
+            ohlcv.append({
+                "date": str(idx)[:10],
+                "o": _f("Open"), "h": _f("High"),
+                "l": _f("Low"),  "c": _f("Close"),
+                "v": int(_f("Volume") or 0),
+            })
+        return {"ohlcv": ohlcv, "is_simulated": False}
+    except Exception:
+        import numpy as np, math
+        rng_state = 42
+        def _rand():
+            nonlocal rng_state
+            rng_state = (rng_state * 1664525 + 1013904223) % 2**32
+            return rng_state / 2**32
+        def _randn():
+            u, v = max(_rand(), 1e-10), _rand()
+            return math.sqrt(-2 * math.log(u)) * math.cos(2 * math.pi * v)
+        price = 2650.0
+        ohlcv = []
+        days = PERIOD_DAYS[period]
+        n_bars = int(days * 0.72)
+        base = pd.Timestamp("today") - pd.Timedelta(days=days)
+        for i in range(n_bars):
+            date = (base + pd.Timedelta(days=i + 1)).strftime("%Y-%m-%d")
+            chg = _randn() * price * 0.012
+            o = price
+            c = max(o * 0.9, o + chg)
+            h = max(o, c) * (1 + _rand() * 0.008)
+            l = min(o, c) * (1 - _rand() * 0.008)
+            ohlcv.append({"date": date, "o": round(o, 2), "h": round(h, 2),
+                          "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e8)})
+            price = c
+        return {"ohlcv": ohlcv, "is_simulated": True}
+
+
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
