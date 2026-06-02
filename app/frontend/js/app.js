@@ -35,7 +35,7 @@ import { api }                 from './api.js';
 const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
 const TOPBAR_MARKETS = ['^KS11', '^IXIC', 'KRW=X'];
-const TOPBAR_REFRESH_MS = 60_000;
+const TOPBAR_REFRESH_MS = 30_000;
 
 const learnDocIds = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', 'voca'];
 const learnRoutes = Object.fromEntries(
@@ -204,7 +204,7 @@ async function refreshTopbarMarkets() {
       node.title = `데이터 시각 ${formatTimestamp(item.latest_data_at)}`;
     });
 
-    if (stamp) stamp.textContent = `조회 시각 ${formatTimestamp(data.fetched_at)}`;
+    if (stamp) stamp.textContent = `조회 시각 ${formatTimestamp(data.fetched_at)} (15분 지연)`;
   } catch {
     nodes.forEach((node) => {
       const valueEl = node.querySelector('b');

@@ -2484,24 +2484,12 @@ def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
     for ticker in req.tickers:
         label = MARKET_SNAPSHOT_LABELS.get(ticker, ticker)
         try:
-            df = yf.download(
-                ticker,
-                period="5d",
-                interval="1d",
-                progress=False,
-                auto_adjust=False,
-                threads=False,
-            )
-            if df.empty:
-                raise ValueError("데이터가 비어 있습니다.")
+            tk = yf.Ticker(ticker)
+            fi = tk.fast_info
 
-            close = _extract_close_series(df)
-            if close.empty:
-                raise ValueError("종가 데이터를 찾을 수 없습니다.")
-
-            current = float(close.iloc[-1])
-            previous = float(close.iloc[-2]) if len(close) > 1 else current
-            latest_index = pd.Timestamp(close.index[-1])
+            # fast_info provides near-realtime last_price (15-min delayed for most exchanges)
+            current  = float(fi.last_price)
+            previous = float(fi.previous_close) if fi.previous_close else current
             change_pct = ((current / previous) - 1) * 100 if previous else 0.0
 
             items.append({
@@ -2509,16 +2497,28 @@ def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
                 "label": label,
                 "value": round(current, 4),
                 "change_pct": round(change_pct, 2),
-                "latest_data_at": latest_index.isoformat(),
+                "latest_data_at": fetched_at.isoformat(),
                 "status": "ok",
             })
         except Exception as exc:
-            items.append({
-                "ticker": ticker,
-                "label": label,
-                "status": "error",
-                "error": str(exc),
-            })
+            # fallback: last daily close
+            try:
+                df = yf.download(ticker, period="5d", interval="1d",
+                                 progress=False, auto_adjust=False, threads=False)
+                close = _extract_close_series(df)
+                current  = float(close.iloc[-1])
+                previous = float(close.iloc[-2]) if len(close) > 1 else current
+                change_pct = ((current / previous) - 1) * 100 if previous else 0.0
+                items.append({
+                    "ticker": ticker, "label": label,
+                    "value": round(current, 4),
+                    "change_pct": round(change_pct, 2),
+                    "latest_data_at": pd.Timestamp(close.index[-1]).isoformat(),
+                    "status": "ok",
+                })
+            except Exception as exc2:
+                items.append({"ticker": ticker, "label": label,
+                              "status": "error", "error": str(exc2)})
 
     return {
         "items": items,
