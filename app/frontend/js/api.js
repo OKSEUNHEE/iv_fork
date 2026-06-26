@@ -67,4 +67,10 @@ export const api = {
   companyFinancials:(body)  => apiFetch('/api/finance/company-financials',  { method: 'POST', body: JSON.stringify(body) }),
   kospiExMeta:      ()      => apiFetch('/api/macro/kospi-ex/meta'),
   kospiEx:          (body)  => apiFetch('/api/macro/kospi-ex',              { method: 'POST', body: JSON.stringify(body) }),
+  dartFinancialAnalysis: (body) => apiFetch('/api/dart/financial-analysis', { method: 'POST', body: JSON.stringify(body) }),
+  taxSample:        ()      => apiFetch('/api/tax/sample'),
+  taxSimulate:      (body)  => apiFetch('/api/tax/simulate',               { method: 'POST', body: JSON.stringify(body) }),
+  ollamaStatus:     ()      => apiFetch('/api/ollama/status'),
+  ollamaChat:       (body)  => apiFetch('/api/ollama/chat',                { method: 'POST', body: JSON.stringify(body) }),
+  ollamaPull:       (body)  => apiFetch('/api/ollama/pull',                { method: 'POST', body: JSON.stringify(body) }),
 };

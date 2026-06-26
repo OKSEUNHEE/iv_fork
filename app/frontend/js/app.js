@@ -31,6 +31,9 @@ import { investmentTreeView }   from './views/investmentTree.js';
 import { quizHomeView, quizDayView } from './views/quiz.js';
 import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
+import { taxAccountingView }         from './views/taxAccounting.js';
+import { dartFinancialAnalysisView } from './views/dartFinancialAnalysis.js';
+import { ollamaView }               from './views/ollama.js';
 import { api }                 from './api.js';
 
 const app        = document.getElementById('app');
@@ -85,6 +88,9 @@ const routes = {
   'technical-chart':     { label: '기술적 분석 실습',            render: () => technicalChartView(app) },
   'financial-knowledge': { label: '금융상품·자산배분',           render: () => financialKnowledgeView(app) },
   'investment-tree':     { label: '투자 성향 분석',              render: () => investmentTreeView(app) },
+  'tax-accounting':              { label: '세무·회계 시뮬레이션',         render: () => taxAccountingView(app) },
+  'dart-financial-analysis':    { label: 'DART 재무 AI 분석',             render: () => dartFinancialAnalysisView(app) },
+  'ollama':                     { label: 'Ollama AI 엔진 관리',           render: () => ollamaView(app) },
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
   ...quizDayRoutes,
   ...learnRoutes,
@@ -118,6 +124,13 @@ function navigate(view) {
 
   if (view?.startsWith('learn-') && typeof window._openNavSection === 'function') window._openNavSection('learn');
   if (view?.startsWith('quiz-') && typeof window._openNavSection === 'function') window._openNavSection('quiz');
+  const _practiceViews = ['macro-realtime','macro-simulation','kospi-excluded','industry-analysis',
+    'dart-region-search','group-network','company-financial','financial-statement','valuation',
+    'portfolio','risk','technical-chart','backtest','pipeline','cross-validation','random-forest',
+    'kmeans','svm','mlp','linear-regression','lstm','transformer','market-snapshot','financial-knowledge'];
+  if (_practiceViews.includes(view) && typeof window._openNavSection === 'function') window._openNavSection('practice');
+  const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting','ollama'];
+  if (_aiViews.includes(view) && typeof window._openNavSection === 'function') window._openNavSection('aitools');
 
   if (view?.startsWith('quiz-')) updateQuizSidebarLock();
 

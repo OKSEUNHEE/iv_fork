@@ -5,6 +5,7 @@ import io
 import json
 import os
 import sqlite3
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -12,8 +13,126 @@ import zipfile
 from functools import lru_cache
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).parent / ".env")
+
+# ─── Ollama Configuration ─────────────────────────────────────────────────────
+OLLAMA_HOST  = os.getenv("OLLAMA_HOST",  "http://172.29.32.1:11435")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3:latest")
+_OLLAMA_TIMEOUT = 120  # seconds
+
+
+def _ollama_request(endpoint: str, payload: dict, timeout: int = _OLLAMA_TIMEOUT) -> dict:
+    """Send a JSON request to the Ollama API and return parsed response."""
+    url  = OLLAMA_HOST.rstrip("/") + endpoint
+    data = json.dumps(payload).encode()
+    req  = urllib.request.Request(url, data=data,
+                                  headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read())
+    except urllib.error.URLError as exc:
+        raise HTTPException(status_code=503,
+                            detail=f"Ollama 연결 실패 ({OLLAMA_HOST}): {exc.reason}") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503,
+                            detail=f"Ollama 오류: {exc}") from exc
+
+
+def _ollama_available() -> bool:
+    """Quick connectivity check — returns False instead of raising."""
+    try:
+        url = OLLAMA_HOST.rstrip("/") + "/api/tags"
+        with urllib.request.urlopen(url, timeout=3) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
+def _ollama_models() -> list[dict]:
+    """Return list of locally installed Ollama models."""
+    try:
+        url = OLLAMA_HOST.rstrip("/") + "/api/tags"
+        with urllib.request.urlopen(url, timeout=5) as r:
+            return json.loads(r.read()).get("models", [])
+    except Exception:
+        return []
+
+
+def _ollama_chat(
+    model: str,
+    system_prompt: str,
+    user_prompt: str,
+    temperature: float = 0.3,
+    num_predict: int = 800,
+) -> str:
+    """Call Ollama /api/chat and return assistant text content."""
+    result = _ollama_request(
+        "/api/chat",
+        {
+            "model":  model,
+            "stream": False,
+            "options": {"temperature": temperature, "num_predict": num_predict},
+            "messages": [
+                {"role": "system",  "content": system_prompt},
+                {"role": "user",    "content": user_prompt},
+            ],
+        },
+    )
+    return (result.get("message") or {}).get("content", "").strip()
+
+
+def _build_financial_analysis_prompt(
+    corp_name: str, market: str, bsns_year: str,
+    financials: dict, ratios: dict, score: float, grade: str,
+) -> tuple[str, str]:
+    """Return (system_prompt, user_prompt) for Ollama financial analysis."""
+    system_prompt = (
+        "당신은 한국 상장기업 재무분석 전문가입니다. "
+        "DART 전자공시 데이터를 기반으로 투자자가 이해하기 쉬운 한국어로 "
+        "재무 건전성 분석과 투자 의견을 제시합니다. "
+        "답변은 반드시 한국어로, 명확하고 구체적으로 작성하세요."
+    )
+
+    def fmt(v: object, unit: str = "억원") -> str:
+        if v is None:
+            return "N/A"
+        return f"{float(v):,.1f}{unit}"
+
+    def fpct(v: object) -> str:
+        if v is None:
+            return "N/A"
+        return f"{float(v):.1f}%"
+
+    user_prompt = f"""다음 기업의 재무 데이터를 분석해주세요.
+
+【기업 정보】
+- 기업명: {corp_name}
+- 상장시장: {market}
+- 분석 연도: {bsns_year}년
+
+【재무 현황】 (단위: 억원)
+- 매출액: {fmt(financials.get('revenue'))} (전기: {fmt(financials.get('prev_revenue'))}, YoY {fpct(ratios.get('revenue_growth'))})
+- 영업이익: {fmt(financials.get('op_income'))} (영업이익률 {fpct(ratios.get('op_margin'))})
+- 당기순이익: {fmt(financials.get('net_income'))} (순이익률 {fpct(ratios.get('net_margin'))})
+- 자산총계: {fmt(financials.get('total_assets'))}
+- 부채총계: {fmt(financials.get('total_liabilities'))} (부채비율 {fpct(ratios.get('debt_equity_ratio'))})
+- 자본총계: {fmt(financials.get('total_equity'))}
+- 유동비율: {fpct(ratios.get('current_ratio'))}
+- ROE: {fpct(ratios.get('roe'))} / ROA: {fpct(ratios.get('roa'))}
+- 재무 건전성 점수: {score:.0f}/100점 (등급: {grade})
+
+다음 5개 항목으로 나누어 분석해주세요:
+① 재무 건전성 종합 평가 (2~3문장)
+② 수익성 분석 (1~2문장)
+③ 안정성 분석 (1~2문장)
+④ 성장성 분석 (1~2문장)
+⑤ 투자 의견: 반드시 "매수", "중립", "매도" 중 하나를 명시하고 근거를 1~2문장으로 작성"""
+
+    return system_prompt, user_prompt
+
 from bson import ObjectId
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
@@ -3703,5 +3822,869 @@ def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
             price = c
         return {"ohlcv": ohlcv, "is_simulated": True}
 
+
+# ─── DART Financial Analysis ─────────────────────────────────────────────────
+
+class DartFinancialAnalysisRequest(BaseModel):
+    corp_code:    str       = Field(min_length=8, max_length=8, description="DART 고유번호 (8자리)")
+    bsns_year:    str       = Field(default="2023", pattern=r"^\d{4}$")
+    reprt_code:   str       = Field(default="11011", pattern=r"^1101[1-4]$",
+                                    description="11011=사업보고서 11012=반기 11013=1분기 11014=3분기")
+    ollama_model: str | None = Field(default=None, description="Ollama 모델명 (미지정 시 환경변수 기본값 사용)")
+
+
+def _parse_dart_amounts(items: list[dict]) -> dict[str, dict[str, float]]:
+    """Extract key financial line items from DART fnlttSinglAcnt response.
+
+    Returns a dict mapping account_nm → {current, prior}.
+    """
+    ACCT_MAP: dict[str, list[str]] = {
+        "current_assets":       ["유동자산"],
+        "noncurrent_assets":    ["비유동자산"],
+        "total_assets":         ["자산총계"],
+        "current_liabilities":  ["유동부채"],
+        "noncurrent_liabilities": ["비유동부채"],
+        "total_liabilities":    ["부채총계"],
+        "paid_in_capital":      ["자본금"],
+        "retained_earnings":    ["이익잉여금"],
+        "total_equity":         ["자본총계"],
+        "revenue":              ["매출액", "영업수익", "수익(매출액)"],
+        "op_income":            ["영업이익", "영업손익"],
+        "pretax_income":        ["법인세차감전", "법인세비용차감전"],
+        "net_income":           ["당기순이익(손실)", "당기순이익"],
+        "comprehensive_income": ["총포괄손익"],
+    }
+
+    def _num(val: object) -> float:
+        try:
+            s = str(val or "").replace(",", "").strip()
+            return float(s) if s and s not in ("-", "") else 0.0
+        except (ValueError, TypeError):
+            return 0.0
+
+    result: dict[str, dict[str, float]] = {}
+    for key, kws in ACCT_MAP.items():
+        for item in items:
+            nm = (item.get("account_nm") or "").strip()
+            if any(kw in nm for kw in kws):
+                result[key] = {
+                    "current": _num(item.get("thstrm_amount")),
+                    "prior":   _num(item.get("frmtrm_amount")),
+                }
+                break
+        if key not in result:
+            result[key] = {"current": 0.0, "prior": 0.0}
+    return result
+
+
+def _calc_dart_ratios(fin: dict[str, dict[str, float]]) -> dict[str, float | None]:
+    """Compute financial ratios from parsed DART data."""
+
+    def g(k: str, period: str = "current") -> float:
+        return fin.get(k, {}).get(period, 0.0)
+
+    def safe_r(a: float, b: float, mult: float = 100.0) -> float | None:
+        return (a / b * mult) if b != 0 else None
+
+    rev     = g("revenue")
+    prev_rev = g("revenue", "prior")
+    op_inc  = g("op_income")
+    net_inc = g("net_income")
+    assets  = g("total_assets")
+    liab    = g("total_liabilities")
+    equity  = g("total_equity")
+    cur_a   = g("current_assets")
+    cur_l   = g("current_liabilities")
+    ret_e   = g("retained_earnings")
+    prev_eq = g("total_equity", "prior")
+
+    return {
+        "debt_equity_ratio": safe_r(liab, equity),
+        "op_margin":         safe_r(op_inc, rev),
+        "net_margin":        safe_r(net_inc, rev),
+        "roe":               safe_r(net_inc, equity),
+        "roa":               safe_r(net_inc, assets),
+        "current_ratio":     safe_r(cur_a, cur_l),
+        "revenue_growth":    safe_r(rev - prev_rev, prev_rev) if prev_rev else None,
+        "equity_growth":     safe_r(equity - prev_eq, prev_eq) if prev_eq else None,
+        "retained_ratio":    safe_r(ret_e, equity),
+        "debt_ratio":        safe_r(liab, assets),
+    }
+
+
+def _score_financial_health(ratios: dict) -> tuple[float, dict]:
+    """Score financial health on 0-100 scale with breakdown."""
+    breakdown: dict[str, dict] = {}
+    total = 0.0
+
+    def score_item(key: str, label: str, max_score: float,
+                   thresholds: list[tuple[float, float]], value: float | None) -> float:
+        if value is None:
+            s = max_score * 0.5
+        else:
+            s = 0.0
+            for limit, pts in thresholds:
+                if value >= limit:
+                    s = pts
+                    break
+        breakdown[label] = {"score": round(s, 1), "max": max_score, "value": value}
+        return s
+
+    # 부채비율 (20점) — 낮을수록 좋음 (역방향)
+    dr = ratios.get("debt_equity_ratio")
+    dr_inv = -dr if dr is not None else None  # invert so higher=better
+    total += score_item("debt_equity_ratio", "부채비율", 20,
+                        [(-50, 20), (-100, 16), (-200, 10), (-300, 5), (-1e9, 0)], dr_inv)
+
+    # 영업이익률 (20점)
+    total += score_item("op_margin", "영업이익률", 20,
+                        [(20, 20), (10, 16), (5, 10), (0, 5), (-1e9, 0)],
+                        ratios.get("op_margin"))
+
+    # ROE (15점)
+    total += score_item("roe", "자기자본이익률(ROE)", 15,
+                        [(20, 15), (10, 12), (5, 8), (0, 4), (-1e9, 0)],
+                        ratios.get("roe"))
+
+    # 유동비율 (15점)
+    total += score_item("current_ratio", "유동비율", 15,
+                        [(200, 15), (150, 12), (100, 8), (50, 4), (-1e9, 0)],
+                        ratios.get("current_ratio"))
+
+    # 매출 성장률 (15점)
+    total += score_item("revenue_growth", "매출 성장률", 15,
+                        [(15, 15), (5, 12), (0, 7), (-10, 3), (-1e9, 0)],
+                        ratios.get("revenue_growth"))
+
+    # 이익잉여금 비율 (15점)
+    total += score_item("retained_ratio", "이익잉여금 비율", 15,
+                        [(70, 15), (50, 12), (30, 8), (10, 4), (-1e9, 0)],
+                        ratios.get("retained_ratio"))
+
+    return round(total, 1), breakdown
+
+
+def _generate_dart_analysis(
+    company: dict, market: str, ratios: dict,
+    score: float, grade: str, bsns_year: str,
+) -> dict:
+    """Generate rule-based AI financial analysis narrative."""
+    corp_name = company.get("corp_name", "동 기업")
+
+    market_ctx = {
+        "KOSPI":  "유가증권시장(KOSPI)에 상장된",
+        "KOSDAQ": "코스닥(KOSDAQ)에 상장된",
+        "KONEX":  "코넥스(KONEX)에 상장된",
+    }.get(market, "상장된")
+
+    paragraphs: list[str] = []
+
+    # Overall verdict
+    if score >= 85:
+        paragraphs.append(
+            f"{corp_name}의 {bsns_year}년 재무제표는 전반적으로 매우 우수한 건전성을 보입니다. "
+            f"{market_ctx} 기업으로, 재무 안정성과 수익성 모두 업계 상위 수준입니다."
+        )
+    elif score >= 70:
+        paragraphs.append(
+            f"{corp_name}의 {bsns_year}년 재무 상태는 양호한 수준입니다. "
+            f"{market_ctx} 기업으로, 핵심 재무지표들이 안정적으로 관리되고 있습니다."
+        )
+    elif score >= 55:
+        paragraphs.append(
+            f"{corp_name}의 {bsns_year}년 재무 상태는 보통 수준이며, 일부 지표에서 개선이 필요합니다. "
+            f"{market_ctx} 기업으로, 선별적 모니터링이 권고됩니다."
+        )
+    else:
+        paragraphs.append(
+            f"{corp_name}의 {bsns_year}년 재무 상태는 취약한 것으로 분석됩니다. "
+            f"{market_ctx} 기업이나, 재무 리스크가 높아 투자에 각별한 주의가 필요합니다."
+        )
+
+    # Debt structure
+    dr = ratios.get("debt_equity_ratio")
+    if dr is not None:
+        if dr < 50:
+            paragraphs.append(
+                f"부채비율 {dr:.1f}%는 매우 낮은 수준으로, 무차입 또는 보수적 재무 구조를 유지하고 있습니다. "
+                "금리 상승기에도 재무적 부담이 경미합니다."
+            )
+        elif dr < 100:
+            paragraphs.append(
+                f"부채비율 {dr:.1f}%는 안정적 수준으로, 재무 레버리지가 건전하게 관리되고 있습니다."
+            )
+        elif dr < 200:
+            paragraphs.append(
+                f"부채비율 {dr:.1f}%는 업계 평균 수준(100~200%)에 해당하며, 레버리지 관리가 중요합니다."
+            )
+        else:
+            paragraphs.append(
+                f"부채비율 {dr:.1f}%는 높은 편입니다. 이자 부담 및 유동성 리스크를 면밀히 점검해야 합니다."
+            )
+
+    # Profitability
+    om = ratios.get("op_margin")
+    nm = ratios.get("net_margin")
+    if om is not None:
+        if om > 20:
+            paragraphs.append(
+                f"영업이익률 {om:.1f}%는 매우 높은 수익성을 입증합니다. "
+                "강력한 가격 결정력 또는 원가 경쟁력을 보유한 것으로 판단됩니다."
+            )
+        elif om > 10:
+            paragraphs.append(
+                f"영업이익률 {om:.1f}%는 안정적 수익성을 나타냅니다."
+                + (f" 순이익률 {nm:.1f}%까지 고려할 때 전반적 수익 구조가 건전합니다." if nm and nm > 5 else "")
+            )
+        elif om > 0:
+            paragraphs.append(
+                f"영업이익률 {om:.1f}%는 낮은 편으로, 수익성 개선이 향후 핵심 과제입니다."
+            )
+        else:
+            paragraphs.append(
+                f"영업이익 적자(영업이익률 {om:.1f}%)는 핵심 영업 활동에서의 손실을 의미합니다. "
+                "사업 구조 재편 또는 비용 절감이 시급합니다."
+            )
+
+    # Capital efficiency
+    roe = ratios.get("roe")
+    roa = ratios.get("roa")
+    if roe is not None:
+        if roe > 15:
+            paragraphs.append(
+                f"ROE {roe:.1f}%는 자본 효율성이 탁월함을 보여줍니다."
+                + (f" ROA {roa:.1f}%도 양호해 자산 운용 효율이 높습니다." if roa and roa > 5 else "")
+            )
+        elif roe > 5:
+            paragraphs.append(f"ROE {roe:.1f}%는 적정 수준의 자본 수익성을 나타냅니다.")
+        else:
+            paragraphs.append(
+                f"ROE {roe:.1f}%는 낮은 자본 효율성을 시사합니다. "
+                "수익 모델 개선 또는 자본 재구조화 여지를 검토할 필요가 있습니다."
+            )
+
+    # Growth
+    rg = ratios.get("revenue_growth")
+    if rg is not None:
+        if rg > 20:
+            paragraphs.append(f"전년 대비 매출이 {rg:.1f}% 급성장하며 강한 성장 모멘텀을 보여줍니다.")
+        elif rg > 5:
+            paragraphs.append(f"매출 성장률 {rg:.1f}%는 안정적 성장세를 나타냅니다.")
+        elif rg >= 0:
+            paragraphs.append(f"매출 성장률 {rg:.1f}%로 소폭 성장에 그쳤습니다. 성장 동력 강화가 필요합니다.")
+        else:
+            paragraphs.append(
+                f"매출이 전년 대비 {abs(rg):.1f}% 감소했습니다. "
+                "수요 약화 또는 경쟁 심화 여부를 면밀히 파악해야 합니다."
+            )
+
+    # Liquidity
+    cr = ratios.get("current_ratio")
+    if cr is not None:
+        if cr > 200:
+            paragraphs.append(f"유동비율 {cr:.0f}%는 단기 채무 상환 능력이 매우 충분함을 나타냅니다.")
+        elif cr > 100:
+            paragraphs.append(f"유동비율 {cr:.0f}%는 단기 유동성이 적정 수준입니다.")
+        else:
+            paragraphs.append(
+                f"유동비율 {cr:.0f}%는 단기 유동성이 다소 취약합니다. "
+                "단기 차입 의존도를 낮추는 전략이 필요합니다."
+            )
+
+    # Outlook
+    if score >= 75:
+        outlook       = "매수(Buy)"
+        outlook_eng   = "BUY"
+        outlook_color = "green"
+        outlook_reason = (
+            f"재무 건전성 종합점수 {score:.0f}점(등급: {grade}) — "
+            "견실한 재무구조·수익성을 바탕으로 중장기 투자 매력이 높습니다."
+        )
+    elif score >= 55:
+        outlook       = "중립(Hold)"
+        outlook_eng   = "HOLD"
+        outlook_color = "yellow"
+        outlook_reason = (
+            f"재무 건전성 종합점수 {score:.0f}점(등급: {grade}) — "
+            "일부 지표의 개선 여부를 모니터링하면서 보유 또는 소규모 분할 접근이 권고됩니다."
+        )
+    else:
+        outlook       = "관망(Sell/Wait)"
+        outlook_eng   = "SELL"
+        outlook_color = "red"
+        outlook_reason = (
+            f"재무 건전성 종합점수 {score:.0f}점(등급: {grade}) — "
+            "재무 리스크가 높아 투자에 신중을 기하고 실적 개선 확인 후 재검토를 권고합니다."
+        )
+
+    return {
+        "paragraphs":     paragraphs,
+        "outlook":        outlook,
+        "outlook_eng":    outlook_eng,
+        "outlook_color":  outlook_color,
+        "outlook_reason": outlook_reason,
+        "disclaimer":     (
+            "본 분석은 DART 공시 재무제표를 기반으로 한 자동화 AI 분석이며, "
+            "투자 권유가 아닙니다. 실제 투자 판단은 전문가와 상담하시기 바랍니다."
+        ),
+    }
+
+
+@app.post("/api/dart/financial-analysis")
+def dart_financial_analysis(req: DartFinancialAnalysisRequest) -> dict:
+    """Fetch DART financial statements and run AI-powered financial health analysis."""
+    key = _dart_api_key()
+
+    # ── 1. Company meta-data ─────────────────────────────────────────────────
+    company = _fetch_company_detail(req.corp_code)
+    if not company:
+        raise HTTPException(status_code=404, detail="DART 기업 정보를 조회할 수 없습니다.")
+
+    corp_cls = company.get("corp_cls", "")
+    market   = {"Y": "KOSPI", "K": "KOSDAQ", "N": "KONEX"}.get(corp_cls, "비상장/기타")
+
+    # ── 2. Financial statements ──────────────────────────────────────────────
+    def _fetch_fin(fs_div: str) -> dict:
+        url = ("https://opendart.fss.or.kr/api/fnlttSinglAcnt.json?"
+               + urllib.parse.urlencode({
+                   "crtfc_key":  key,
+                   "corp_code":  req.corp_code,
+                   "bsns_year":  req.bsns_year,
+                   "reprt_code": req.reprt_code,
+                   "fs_div":     fs_div,
+               }))
+        try:
+            with urllib.request.urlopen(url, timeout=15) as resp:
+                return json.loads(resp.read())
+        except Exception:
+            return {}
+
+    fin_data = _fetch_fin("CFS")  # 연결재무제표 우선
+    is_consolidated = True
+    if fin_data.get("status") != "000" or not fin_data.get("list"):
+        fin_data = _fetch_fin("OFS")  # 별도재무제표 fallback
+        is_consolidated = False
+
+    if fin_data.get("status") != "000" or not fin_data.get("list"):
+        raise HTTPException(
+            status_code=404,
+            detail=f"{req.bsns_year}년 재무제표 데이터가 없습니다: {fin_data.get('message', '알 수 없음')}"
+        )
+
+    items = fin_data.get("list", [])
+    fin   = _parse_dart_amounts(items)
+
+    # ── 3. Ratios & scoring ──────────────────────────────────────────────────
+    ratios       = _calc_dart_ratios(fin)
+    score, breakdown = _score_financial_health(ratios)
+    grade        = (
+        "A+" if score >= 90 else "A" if score >= 80 else "B+" if score >= 75
+        else "B" if score >= 70 else "C" if score >= 60 else "D" if score >= 50 else "F"
+    )
+    verdict      = "매우 견실" if score >= 85 else "견실" if score >= 70 else "보통" if score >= 55 else "취약"
+
+    # ── 4. Friendly financial snapshot (unit: 억원) ──────────────────────────
+    B = 100_000_000  # 1억
+
+    def to_eok(v: float) -> float | None:
+        return round(v / B, 1) if v else None
+
+    snap = {
+        "revenue":              to_eok(fin["revenue"]["current"]),
+        "prev_revenue":         to_eok(fin["revenue"]["prior"]),
+        "op_income":            to_eok(fin["op_income"]["current"]),
+        "prev_op_income":       to_eok(fin["op_income"]["prior"]),
+        "net_income":           to_eok(fin["net_income"]["current"]),
+        "prev_net_income":      to_eok(fin["net_income"]["prior"]),
+        "total_assets":         to_eok(fin["total_assets"]["current"]),
+        "total_liabilities":    to_eok(fin["total_liabilities"]["current"]),
+        "total_equity":         to_eok(fin["total_equity"]["current"]),
+        "current_assets":       to_eok(fin["current_assets"]["current"]),
+        "current_liabilities":  to_eok(fin["current_liabilities"]["current"]),
+        "retained_earnings":    to_eok(fin["retained_earnings"]["current"]),
+        "is_consolidated":      is_consolidated,
+        "unit":                 "억원",
+    }
+
+    # ── 5. AI narrative (Ollama → rule-based fallback) ────────────────────────
+    ollama_text: str | None = None
+    ollama_model_used: str | None = None
+    ollama_ok = _ollama_available()
+
+    if ollama_ok:
+        try:
+            model_to_use = req.ollama_model or OLLAMA_MODEL
+            sys_p, usr_p = _build_financial_analysis_prompt(
+                company.get("corp_name", ""),
+                market, req.bsns_year, snap, ratios, score, grade,
+            )
+            ollama_text       = _ollama_chat(model_to_use, sys_p, usr_p)
+            ollama_model_used = model_to_use
+        except Exception:
+            ollama_ok = False
+
+    analysis = _generate_dart_analysis(company, market, ratios, score, grade, req.bsns_year)
+
+    return {
+        "company":  {
+            "corp_code":  req.corp_code,
+            "corp_name":  company.get("corp_name", ""),
+            "ceo_nm":     company.get("ceo_nm", ""),
+            "adres":      company.get("adres", ""),
+            "est_dt":     company.get("est_dt", ""),
+            "stock_code": company.get("stock_code", ""),
+            "corp_cls":   corp_cls,
+            "market":     market,
+        },
+        "financials": snap,
+        "ratios":     ratios,
+        "health":     {
+            "score":     score,
+            "grade":     grade,
+            "verdict":   verdict,
+            "breakdown": breakdown,
+        },
+        "analysis":       analysis,
+        "ollama": {
+            "available":    ollama_ok,
+            "host":         OLLAMA_HOST,
+            "model_used":   ollama_model_used,
+            "text":         ollama_text,
+        },
+        "bsns_year":  req.bsns_year,
+    }
+
+
+# ─── Ollama Endpoints ────────────────────────────────────────────────────────
+
+class OllamaChatRequest(BaseModel):
+    model:   str        = Field(default="")
+    prompt:  str        = Field(min_length=1, max_length=8000)
+    system:  str        = Field(default="당신은 한국 금융·투자 전문가입니다. 한국어로 답변하세요.")
+    temperature: float  = Field(default=0.4, ge=0.0, le=2.0)
+    num_predict: int    = Field(default=600, ge=50, le=2000)
+
+
+class OllamaPullRequest(BaseModel):
+    model: str = Field(min_length=1, max_length=100)
+
+
+@app.get("/api/ollama/status")
+def ollama_status() -> dict:
+    """Return Ollama connection status and available models."""
+    available = _ollama_available()
+    models: list[dict] = []
+    if available:
+        raw = _ollama_models()
+        for m in raw:
+            details = m.get("details", {})
+            models.append({
+                "name":       m.get("name", ""),
+                "size_gb":    round(m.get("size", 0) / 1e9, 2),
+                "param_size": details.get("parameter_size", ""),
+                "quantize":   details.get("quantization_level", ""),
+                "modified":   (m.get("modified_at") or "")[:10],
+                "is_default": m.get("name", "") == OLLAMA_MODEL,
+            })
+    return {
+        "available":     available,
+        "host":          OLLAMA_HOST,
+        "default_model": OLLAMA_MODEL,
+        "models":        models,
+        "model_count":   len(models),
+        "recommended": {
+            "financial_analysis": "llama3:latest",
+            "korean_text":        "ko-llama:latest",
+            "embedding":          "nomic-embed-text:latest",
+            "fast_coding":        "qwen2.5-coder:1.5b-base",
+        },
+        "suggested_pull": [
+            {"name": "llama3.1:8b",    "desc": "한국어 지원 강화 버전 (추천)", "size": "~4.7GB"},
+            {"name": "qwen2.5:7b",     "desc": "한국어·영어 다국어 최적화",   "size": "~4.4GB"},
+            {"name": "exaone3.5:7.8b", "desc": "LG AI Research 한국어 전용", "size": "~4.9GB"},
+        ],
+    }
+
+
+@app.post("/api/ollama/chat")
+def ollama_chat(req: OllamaChatRequest) -> dict:
+    """Send a prompt to Ollama and return the generated text."""
+    model = req.model or OLLAMA_MODEL
+    text  = _ollama_chat(model, req.system, req.prompt, req.temperature, req.num_predict)
+    return {"model": model, "response": text, "host": OLLAMA_HOST}
+
+
+@app.post("/api/ollama/pull")
+def ollama_pull(req: OllamaPullRequest) -> dict:
+    """Start pulling an Ollama model (non-streaming, may take several minutes)."""
+    result = _ollama_request(
+        "/api/pull",
+        {"name": req.model, "stream": False},
+        timeout=600,  # 10-min max for large models
+    )
+    status = result.get("status", "unknown")
+    return {"model": req.model, "status": status, "detail": result}
+
+
+# ─── Tax / Accounting Simulation ─────────────────────────────────────────────
+
+class TaxSimulationRequest(BaseModel):
+    transactions: list[dict]
+    entity_type: str = Field(default="individual", pattern="^(individual|corporate)$")
+    tax_year: int = Field(default=2024, ge=2020, le=2030)
+    business_name: str = Field(default="")
+    taxpayer_id: str = Field(default="")
+    vat_registered: bool = Field(default=True)
+    standard_deduction: float = Field(default=0.0, ge=0.0)
+
+
+_INCOME_KEYWORDS: dict[str, list[str]] = {
+    "상품매출":   ["매출", "판매대금", "카드매출", "판매입금", "상품판매"],
+    "서비스매출": ["서비스", "용역", "컨설팅", "자문료", "강의료"],
+    "임대수입":   ["임대", "월세", "부동산"],
+    "이자수입":   ["이자수입", "예금이자", "이자"],
+    "기타수입":   ["환급", "지원금", "보조금", "보상금", "배당"],
+}
+
+_EXPENSE_KEYWORDS: dict[str, list[str]] = {
+    "급여":       ["급여", "월급", "임금", "상여", "인건비", "퇴직금"],
+    "임차료":     ["임대료", "임차료", "월세", "관리비"],
+    "접대비":     ["접대", "회식", "식대", "거래처식사"],
+    "광고선전비": ["광고", "마케팅", "홍보"],
+    "복리후생비": ["복리", "후생", "식권", "직원식대"],
+    "통신비":     ["통신", "인터넷", "전화요금", "KT", "SKT", "LGU"],
+    "수도광열비": ["전기요금", "가스요금", "수도요금", "한전", "한국전력", "가스공사"],
+    "교통비":     ["교통비", "주유", "택시", "버스", "주차비", "고속도로"],
+    "사무용품비": ["사무용품", "문구", "비품", "소모품", "사무기기"],
+    "보험료":     ["보험료", "화재보험", "자동차보험", "단체보험"],
+    "수수료비용": ["수수료", "카드수수료", "결제수수료", "플랫폼수수료"],
+}
+
+
+def _categorize_tx(desc: str, deposit: float, withdrawal: float) -> tuple[str, str]:
+    if deposit > 0:
+        for cat, kws in _INCOME_KEYWORDS.items():
+            if any(k in desc for k in kws):
+                return "income", cat
+        return "income", "기타수입"
+    for cat, kws in _EXPENSE_KEYWORDS.items():
+        if any(k in desc for k in kws):
+            return "expense", cat
+    return "expense", "기타비용"
+
+
+def _calc_income_tax(income: float) -> float:
+    """Korean individual income tax brackets (2024)."""
+    if income <= 0:
+        return 0.0
+    brackets = [
+        (14_000_000,         0.06, 0),
+        (50_000_000,         0.15, 1_260_000),
+        (88_000_000,         0.24, 5_220_000),
+        (150_000_000,        0.35, 14_900_000),
+        (300_000_000,        0.38, 19_400_000),
+        (500_000_000,        0.40, 25_400_000),
+        (1_000_000_000,      0.42, 35_400_000),
+        (float("inf"),       0.45, 65_400_000),
+    ]
+    for limit, rate, deduction in brackets:
+        if income <= limit:
+            return max(0.0, income * rate - deduction)
+    return max(0.0, income * 0.45 - 65_400_000)
+
+
+def _calc_corporate_tax(income: float) -> float:
+    """Korean corporate tax brackets (2024)."""
+    if income <= 0:
+        return 0.0
+    brackets = [
+        (200_000_000,         0.09, 0),
+        (20_000_000_000,      0.19, 20_000_000),
+        (300_000_000_000,     0.21, 420_000_000),
+        (float("inf"),        0.24, 9_420_000_000),
+    ]
+    for limit, rate, deduction in brackets:
+        if income <= limit:
+            return max(0.0, income * rate - deduction)
+    return max(0.0, income * 0.24 - 9_420_000_000)
+
+
+def _parse_df_to_transactions(df: "import pandas; pandas.DataFrame") -> list[dict]:
+    import pandas as pd
+
+    raw_cols = list(df.columns)
+    col_map: dict[str, str | None] = {
+        "date": None, "description": None,
+        "withdrawal": None, "deposit": None, "balance": None,
+    }
+
+    DATE_KW   = ["날짜", "일자", "거래일", "일시", "거래시간", "date"]
+    DESC_KW   = ["내용", "적요", "거래내용", "거래명", "메모", "description"]
+    OUT_KW    = ["출금", "출금액", "지출", "출금금액", "debit", "withdrawal"]
+    IN_KW     = ["입금", "입금액", "수입", "입금금액", "credit", "deposit"]
+    BAL_KW    = ["잔액", "잔금", "balance"]
+
+    for c in raw_cols:
+        cs = str(c).strip()
+        if col_map["date"]        is None and any(k in cs for k in DATE_KW):   col_map["date"]        = c
+        if col_map["description"] is None and any(k in cs for k in DESC_KW):   col_map["description"] = c
+        if col_map["withdrawal"]  is None and any(k in cs for k in OUT_KW):    col_map["withdrawal"]  = c
+        if col_map["deposit"]     is None and any(k in cs for k in IN_KW):     col_map["deposit"]     = c
+        if col_map["balance"]     is None and any(k in cs for k in BAL_KW):    col_map["balance"]     = c
+
+    def _num(val: object) -> float:
+        try:
+            s = str(val).replace(",", "").strip()
+            return float(s) if s and s.lower() not in ("nan", "") else 0.0
+        except (ValueError, TypeError):
+            return 0.0
+
+    txs: list[dict] = []
+    for _, row in df.iterrows():
+        date_val = str(row[col_map["date"]]).strip()   if col_map["date"]        else ""
+        desc_val = str(row[col_map["description"]]).strip() if col_map["description"] else ""
+        out_val  = _num(row[col_map["withdrawal"]])    if col_map["withdrawal"]   else 0.0
+        in_val   = _num(row[col_map["deposit"]])       if col_map["deposit"]      else 0.0
+        bal_val  = _num(row[col_map["balance"]])       if col_map["balance"]      else 0.0
+
+        if not date_val or date_val.lower() == "nan":
+            continue
+
+        txs.append({
+            "date":        date_val,
+            "description": desc_val,
+            "withdrawal":  out_val,
+            "deposit":     in_val,
+            "balance":     bal_val,
+        })
+    return txs
+
+
+@app.post("/api/tax/upload")
+async def tax_upload(file: UploadFile = File(...)) -> dict:
+    """Parse a bank-statement CSV or Excel file and return structured transactions."""
+    import pandas as pd
+
+    filename = (file.filename or "").lower()
+    content  = await file.read()
+
+    try:
+        if filename.endswith((".xlsx", ".xls")):
+            df = pd.read_excel(io.BytesIO(content), dtype=str)
+        else:
+            df = None
+            for enc in ("utf-8-sig", "utf-8", "euc-kr", "cp949"):
+                try:
+                    text = content.decode(enc)
+                    df   = pd.read_csv(io.StringIO(text), dtype=str)
+                    break
+                except (UnicodeDecodeError, Exception):
+                    continue
+            if df is None:
+                raise HTTPException(status_code=400, detail="파일 인코딩을 감지할 수 없습니다.")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"파일 파싱 오류: {exc}") from exc
+
+    df.dropna(how="all", inplace=True)
+    txs = _parse_df_to_transactions(df)
+
+    if not txs:
+        raise HTTPException(status_code=400, detail="유효한 거래 데이터를 찾을 수 없습니다. 컬럼명을 확인하세요.")
+
+    return {
+        "status":   "ok",
+        "rows":     len(txs),
+        "columns":  list(df.columns),
+        "transactions": txs[:500],  # max 500 rows for safety
+    }
+
+
+@app.get("/api/tax/sample")
+def tax_sample() -> dict:
+    """Return synthetic sample transaction data for demo purposes."""
+    import datetime, math, random
+
+    rng = random.Random(42)
+    base_date = datetime.date(2024, 1, 2)
+    balance   = 50_000_000.0
+    txs: list[dict] = []
+
+    INCOME_TEMPLATES = [
+        ("상품 판매 대금 입금 (거래처A)",   3_000_000, 8_000_000, "상품매출"),
+        ("컨설팅 용역료 입금",               2_000_000, 5_000_000, "서비스매출"),
+        ("카드매출 정산",                    1_000_000, 4_000_000, "상품매출"),
+        ("임대료 수입",                      1_500_000, 1_500_000, "임대수입"),
+        ("이자수입",                          50_000,   200_000, "이자수입"),
+    ]
+    EXPENSE_TEMPLATES = [
+        ("급여 지급",                        3_500_000, 6_000_000, "급여"),
+        ("사무실 임대료 납부",               1_200_000, 1_200_000, "임차료"),
+        ("광고비 지출",                       300_000,  800_000, "광고선전비"),
+        ("사무용품 구매",                      50_000,  200_000, "사무용품비"),
+        ("KT 통신비",                          80_000,  150_000, "통신비"),
+        ("전기요금 납부 (한전)",              120_000,  300_000, "수도광열비"),
+        ("교통비 (주유·택시)",               100_000,  400_000, "교통비"),
+        ("거래처 회식 (접대비)",             300_000,  500_000, "접대비"),
+        ("카드수수료",                         30_000,  100_000, "수수료비용"),
+        ("복리후생비",                        200_000,  500_000, "복리후생비"),
+        ("단체보험료",                        150_000,  250_000, "보험료"),
+    ]
+
+    for day_offset in range(0, 365, rng.randint(1, 4)):
+        date = base_date + datetime.timedelta(days=day_offset)
+        if date >= datetime.date(2025, 1, 1):
+            break
+
+        # 50% income, 50% expense
+        if rng.random() < 0.45:
+            tmpl = rng.choice(INCOME_TEMPLATES)
+            amt  = rng.randint(int(tmpl[1] / 1000), int(tmpl[2] / 1000)) * 1000
+            balance += amt
+            txs.append({
+                "date":        date.strftime("%Y-%m-%d"),
+                "description": tmpl[0],
+                "deposit":     float(amt),
+                "withdrawal":  0.0,
+                "balance":     balance,
+            })
+        else:
+            tmpl = rng.choice(EXPENSE_TEMPLATES)
+            amt  = rng.randint(int(tmpl[1] / 1000), int(tmpl[2] / 1000)) * 1000
+            balance -= amt
+            txs.append({
+                "date":        date.strftime("%Y-%m-%d"),
+                "description": tmpl[0],
+                "deposit":     0.0,
+                "withdrawal":  float(amt),
+                "balance":     balance,
+            })
+
+    return {"status": "ok", "rows": len(txs), "transactions": txs}
+
+
+@app.post("/api/tax/simulate")
+def tax_simulate(req: TaxSimulationRequest) -> dict:
+    """Run full Korean tax simulation on the provided transaction list."""
+    import datetime
+
+    categorized: list[dict] = []
+    income_by_cat: dict[str, float] = {}
+    expense_by_cat: dict[str, float] = {}
+    monthly: dict[str, dict[str, float]] = {}
+
+    for tx in req.transactions:
+        deposit    = float(tx.get("deposit", 0) or 0)
+        withdrawal = float(tx.get("withdrawal", 0) or 0)
+        desc       = str(tx.get("description", ""))
+        date_str   = str(tx.get("date", ""))
+        balance    = float(tx.get("balance", 0) or 0)
+
+        tx_type, category = _categorize_tx(desc, deposit, withdrawal)
+        amount = deposit if tx_type == "income" else withdrawal
+
+        categorized.append({
+            "date":        date_str,
+            "description": desc,
+            "deposit":     deposit,
+            "withdrawal":  withdrawal,
+            "balance":     balance,
+            "type":        tx_type,
+            "category":    category,
+            "amount":      amount,
+        })
+
+        month = date_str[:7]
+        if month not in monthly:
+            monthly[month] = {"income": 0.0, "expense": 0.0}
+        monthly[month][tx_type] += amount
+
+        if tx_type == "income":
+            income_by_cat[category]  = income_by_cat.get(category, 0.0)  + amount
+        else:
+            expense_by_cat[category] = expense_by_cat.get(category, 0.0) + amount
+
+    total_income  = sum(income_by_cat.values())
+    total_expense = sum(expense_by_cat.values())
+    net_income    = total_income - total_expense
+    taxable_income = max(0.0, net_income - req.standard_deduction)
+
+    # VAT (부가가치세) — 일반과세자 기준 10%
+    vat_output  = total_income  * 0.10 if req.vat_registered else 0.0
+    vat_input   = total_expense * 0.10 if req.vat_registered else 0.0
+    vat_payable = max(0.0, vat_output - vat_input)
+
+    # 소득세 또는 법인세
+    if req.entity_type == "individual":
+        base_tax = _calc_income_tax(taxable_income)
+    else:
+        base_tax = _calc_corporate_tax(taxable_income)
+
+    local_tax  = base_tax * 0.10   # 지방소득세
+    total_tax  = base_tax + local_tax
+    effective_rate = (base_tax / taxable_income * 100) if taxable_income > 0 else 0.0
+
+    # Income tax bracket breakdown (for audit report)
+    bracket_info: list[dict] = []
+    if req.entity_type == "individual":
+        BRACKETS = [
+            (14_000_000,   "6%",  14_000_000),
+            (50_000_000,   "15%", 36_000_000),
+            (88_000_000,   "24%", 38_000_000),
+            (150_000_000,  "35%", 62_000_000),
+            (300_000_000,  "38%", 150_000_000),
+            (500_000_000,  "40%", 200_000_000),
+            (1_000_000_000,"42%", 500_000_000),
+            (float("inf"), "45%", 0),
+        ]
+        prev = 0.0
+        for limit, rate_label, width in BRACKETS:
+            if taxable_income > prev:
+                in_bracket = min(taxable_income, limit if limit != float("inf") else taxable_income) - prev
+                bracket_info.append({
+                    "range": f"{int(prev):,}원 초과 ~ {int(limit):,}원 이하" if limit != float("inf") else f"{int(prev):,}원 초과",
+                    "rate":  rate_label,
+                    "amount": in_bracket,
+                })
+                prev = limit
+            else:
+                break
+
+    monthly_sorted = dict(sorted(monthly.items()))
+
+    return {
+        "entity_type":    req.entity_type,
+        "tax_year":       req.tax_year,
+        "business_name":  req.business_name,
+        "taxpayer_id":    req.taxpayer_id,
+        "summary": {
+            "total_income":    total_income,
+            "total_expense":   total_expense,
+            "net_income":      net_income,
+            "taxable_income":  taxable_income,
+            "standard_deduction": req.standard_deduction,
+        },
+        "income_by_category":  income_by_cat,
+        "expense_by_category": expense_by_cat,
+        "monthly":             monthly_sorted,
+        "vat": {
+            "output_tax":  vat_output,
+            "input_tax":   vat_input,
+            "payable":     vat_payable,
+            "registered":  req.vat_registered,
+        },
+        "income_tax": {
+            "amount":         base_tax,
+            "local_tax":      local_tax,
+            "total":          total_tax,
+            "effective_rate": effective_rate,
+            "brackets":       bracket_info,
+        },
+        "transactions": categorized,
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

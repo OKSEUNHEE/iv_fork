@@ -80,6 +80,23 @@
           <i class="fa-solid fa-house"></i><span>홈</span>
         </a>
 
+        <!-- ─────── AI 분석 ─────── -->
+        <div class="nav-section">
+          <button class="nav-section-hdr" onclick="toggleNav('aitools')">
+            <span><i class="fa-solid fa-robot"></i>AI 분석</span>
+            <i class="fa-solid fa-chevron-down nav-chev" id="chev-aitools" style="transform:rotate(180deg);"></i>
+          </button>
+          <div class="nav-children open" id="nav-aitools">
+            <div class="nav-group-label">DART 재무 분석</div>
+            <a class="nav-item" data-view="dart-financial-analysis"><i class="fa-solid fa-magnifying-glass-dollar"></i>DART 재무 AI 분석</a>
+            <a class="nav-item" data-view="dart-company-search"><i class="fa-solid fa-magnifying-glass-chart"></i>DART 기업 검색</a>
+            <div class="nav-group-label">세무·회계</div>
+            <a class="nav-item" data-view="tax-accounting"><i class="fa-solid fa-file-invoice-dollar"></i>세무·회계 시뮬레이션</a>
+            <div class="nav-group-label">로컬 AI 엔진</div>
+            <a class="nav-item" data-view="ollama"><i class="fa-solid fa-microchip"></i>Ollama AI 엔진 관리</a>
+          </div>
+        </div>
+
         <!-- ─────── 학습 ─────── -->
         <div class="nav-section">
           <button class="nav-section-hdr" onclick="toggleNav('learn')">
@@ -110,9 +127,9 @@
         <div class="nav-section">
           <button class="nav-section-hdr" onclick="toggleNav('practice')">
             <span><i class="fa-solid fa-laptop-code"></i>실습</span>
-            <i class="fa-solid fa-chevron-down nav-chev" id="chev-practice"></i>
+            <i class="fa-solid fa-chevron-down nav-chev" id="chev-practice" style="transform:rotate(180deg);"></i>
           </button>
-          <div class="nav-children" id="nav-practice">
+          <div class="nav-children open" id="nav-practice">
             <div class="nav-group-label">매크로 분석</div>
             <a class="nav-item" data-view="macro-realtime"><i class="fa-solid fa-satellite-dish"></i>거시경제현황 (실시간)</a>
             <a class="nav-item" data-view="macro-simulation"><i class="fa-solid fa-chart-area"></i>거시경제 시뮬레이션</a>
@@ -122,6 +139,7 @@
             <a class="nav-item" data-view="industry-analysis"><i class="fa-solid fa-industry"></i>산업 경쟁력 분석</a>
 
             <div class="nav-group-label">기본적 분석</div>
+            <a class="nav-item" data-view="dart-financial-analysis"><i class="fa-solid fa-magnifying-glass-dollar"></i>DART 재무 AI 분석</a>
             <a class="nav-item" data-view="dart-company-search"><i class="fa-solid fa-magnifying-glass-chart"></i>DART 기업 검색</a>
             <a class="nav-item" data-view="dart-region-search"><i class="fa-solid fa-location-dot"></i>DART 지역·종사자수 조회</a>
             <a class="nav-item" data-view="group-network"><i class="fa-solid fa-sitemap"></i>그룹사 네트워크</a>
@@ -211,7 +229,7 @@
   </div><!-- /.layout -->
 
   <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
-  <script type="module" src="js/app.js?v=3"></script>
+  <script type="module" src="js/app.js?v=5"></script>
   <script>
     const DESKTOP_BREAKPOINT = 1024;
     let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;

@@ -2,6 +2,8 @@
 
 ## 금융자산 knowledge 를 취업 목적으로 serving 시스템 만드는 과정
 
+![alt text](image.png)
+
 ### 본 저장소의 `docs/` 폴더에 Vector DB 구축을 위한 RAG 용 자산운용 관련 내용이 있습니다.
 
 - 이 내용은 전공여부, 본인의 지식, 경험여부와 무관하게, 자산운용 시스템을 만들기 위한 자료 입니다.
@@ -599,6 +601,57 @@ curl $OLLAMA_HOST/api/tags
 - 모델 다운로드 중 중단되면 동일 `ollama pull <모델>` 재실행(이어받기)
 - 대용량 모델(`qwen3.5:latest`)은 RAM/디스크 여유 확인 후 설치
 - RAG 임베딩은 `nomic-embed-text:latest`를 우선 사용 권장
+
+### 6) 백엔드 Ollama 연동 (FastAPI → Windows Ollama Bridge)
+
+이 프로젝트 백엔드(`app/backend/main.py`)는 Ollama를 DART 재무 AI 분석에 활용합니다.
+
+**연결 구조:**
+
+```
+[사용자 브라우저]
+       │ HTTP
+       ▼
+[WSL2 FastAPI 백엔드 :8000]
+       │ HTTP (http://172.29.32.1:11435)
+       ▼
+[Windows Ollama 서버 :11435]
+       │
+       ▼
+[llama3:latest 모델]
+```
+
+**환경변수 설정** (`app/backend/.env`):
+
+```env
+OLLAMA_HOST=http://172.29.32.1:11435   # WSL2 → Windows 게이트웨이
+OLLAMA_MODEL=llama3:latest             # 기본 분석 모델
+```
+
+**재무 분석 모델 추천 (성능순):**
+
+| 모델 | 용량 | 한국어 | 추천 용도 |
+|------|------|--------|-----------|
+| `llama3:latest` | 4.7GB | ★★★★ | DART 재무 분석 (기본값) |
+| `exaone3.5:7.8b` | 4.9GB | ★★★★★ | LG AI 한국어 전용 모델 |
+| `qwen2.5:7b` | 4.4GB | ★★★★ | 다국어 최적화 |
+| `llama3.1:8b` | 4.7GB | ★★★★ | 한국어 강화 버전 |
+| `nomic-embed-text:latest` | 274MB | - | 문서 임베딩(RAG) 전용 |
+
+**신규 API 엔드포인트:**
+
+| 엔드포인트 | 메서드 | 설명 |
+|---|---|---|
+| `/api/ollama/status` | GET | 연결 상태 + 설치 모델 목록 |
+| `/api/ollama/chat` | POST | 프롬프트 → 모델 응답 |
+| `/api/ollama/pull` | POST | 모델 다운로드 (서버측 pull) |
+| `/api/dart/financial-analysis` | POST | DART 재무 분석 (Ollama AI + 룰 기반) |
+
+**Ollama 분석 동작 방식:**
+- `dart_financial_analysis` 엔드포인트 호출 시 Ollama 연결 여부를 자동 확인
+- Ollama 연결 성공 → `_ollama_chat()` 호출로 AI 서술형 분석 생성
+- Ollama 미연결 → 기존 룰 기반 `_generate_dart_analysis()` 분석만 반환
+- 응답에 `ollama.available`, `ollama.text`, `ollama.model_used` 포함
 
 ---
 
