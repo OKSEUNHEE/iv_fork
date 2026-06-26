@@ -17,6 +17,7 @@ import { pipelineView }        from './views/pipeline.js';
 import { riskView }            from './views/risk.js';
 import { huggingfaceView }     from './views/huggingface.js';
 import { macroRealtimeView }    from './views/macroRealtime.js';
+import { kospiExcludedView }   from './views/kospiExcluded.js';
 import { macroSimulationView }  from './views/macroSimulation.js';
 import { industryAnalysisView } from './views/industryAnalysis.js';
 import { financialStatementView } from './views/financialStatement.js';
@@ -73,6 +74,7 @@ const routes = {
   'huggingface':       { label: 'HuggingFace 이미지 생성', render: () => huggingfaceView(app) },
   'macro-realtime':    { label: '거시경제현황 1 (실시간)',    render: () => macroRealtimeView(app) },
   'macro-simulation':  { label: '거시경제현황 2 (시뮬레이션)', render: () => macroSimulationView(app) },
+  'kospi-excluded':    { label: 'KOSPI 제외 지수 분석',       render: () => kospiExcludedView(app) },
   'industry-analysis': { label: '산업 경쟁력 분석',           render: () => industryAnalysisView(app) },
   'company-financial':   { label: '기업 파이낸셜 분석',          render: () => companyFinancialView(app) },
   'financial-statement': { label: '재무제표분석',              render: () => financialStatementView(app) },

@@ -2710,6 +2710,285 @@ def macro_realtime(req: MacroRealtimeRequest) -> dict[str, object]:
             "warning": "Yahoo Finance 요청 한도 초과로 시뮬레이션 데이터를 표시합니다. 잠시 후 다시 시도하세요." if is_simulated else None}
 
 
+# ── KOSPI 섹터/종목 제외 지수 ──────────────────────────────────────────────────
+
+KOSPI_COMPONENTS = [
+    {"ticker": "005930.KS", "name": "삼성전자",        "sector": "반도체",    "weight": 0.210},
+    {"ticker": "000660.KS", "name": "SK하이닉스",      "sector": "반도체",    "weight": 0.075},
+    {"ticker": "373220.KS", "name": "LG에너지솔루션",  "sector": "배터리",    "weight": 0.035},
+    {"ticker": "207940.KS", "name": "삼성바이오로직스", "sector": "바이오",    "weight": 0.028},
+    {"ticker": "005380.KS", "name": "현대차",          "sector": "자동차",    "weight": 0.025},
+    {"ticker": "000270.KS", "name": "기아",            "sector": "자동차",    "weight": 0.022},
+    {"ticker": "105560.KS", "name": "KB금융",          "sector": "금융",      "weight": 0.018},
+    {"ticker": "035420.KS", "name": "NAVER",           "sector": "IT/플랫폼", "weight": 0.013},
+    {"ticker": "055550.KS", "name": "신한지주",        "sector": "금융",      "weight": 0.015},
+    {"ticker": "006400.KS", "name": "삼성SDI",         "sector": "배터리",    "weight": 0.012},
+    {"ticker": "086790.KS", "name": "하나금융지주",    "sector": "금융",      "weight": 0.012},
+    {"ticker": "012330.KS", "name": "현대모비스",      "sector": "자동차",    "weight": 0.009},
+    {"ticker": "051910.KS", "name": "LG화학",          "sector": "화학",      "weight": 0.010},
+    {"ticker": "032830.KS", "name": "삼성생명",        "sector": "금융",      "weight": 0.008},
+    {"ticker": "035720.KS", "name": "카카오",          "sector": "IT/플랫폼", "weight": 0.008},
+    {"ticker": "316140.KS", "name": "우리금융지주",    "sector": "금융",      "weight": 0.007},
+    {"ticker": "068270.KS", "name": "셀트리온",        "sector": "바이오",    "weight": 0.010},
+    {"ticker": "005490.KS", "name": "POSCO홀딩스",     "sector": "철강",      "weight": 0.015},
+    {"ticker": "017670.KS", "name": "SK텔레콤",        "sector": "통신",      "weight": 0.010},
+    {"ticker": "030200.KS", "name": "KT",              "sector": "통신",      "weight": 0.008},
+    {"ticker": "018260.KS", "name": "삼성SDS",         "sector": "IT/플랫폼", "weight": 0.005},
+    {"ticker": "096770.KS", "name": "SK이노베이션",    "sector": "에너지",    "weight": 0.006},
+    {"ticker": "034730.KS", "name": "SK",              "sector": "에너지",    "weight": 0.006},
+    {"ticker": "003550.KS", "name": "LG",              "sector": "지주회사",  "weight": 0.005},
+    {"ticker": "090430.KS", "name": "아모레퍼시픽",    "sector": "소비재",    "weight": 0.004},
+    {"ticker": "034220.KS", "name": "LG디스플레이",    "sector": "디스플레이","weight": 0.004},
+    {"ticker": "011170.KS", "name": "롯데케미칼",      "sector": "화학",      "weight": 0.003},
+    {"ticker": "000120.KS", "name": "CJ대한통운",      "sector": "물류",      "weight": 0.003},
+]
+
+KOSPI_SECTORS = sorted({c["sector"] for c in KOSPI_COMPONENTS})
+
+
+class MacroKospiExRequest(BaseModel):
+    exclude_tickers: list[str] = []
+    exclude_sectors: list[str] = []
+    period: str = "1y"
+
+
+@app.post("/api/macro/kospi-ex")
+def macro_kospi_ex(req: MacroKospiExRequest) -> dict[str, object]:
+    import yfinance as yf
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    import numpy as np
+    import pandas as pd
+    import io, base64
+    from datetime import datetime, timezone
+    configure_matplotlib_korean_font(plt)
+
+    # 제외 대상 결정
+    excl_ticker_codes = {t.replace(".KS", "").replace(".KQ", "") for t in req.exclude_tickers}
+    excl_sectors      = set(req.exclude_sectors)
+
+    excluded: list[dict] = []
+    included: list[dict] = []
+    for comp in KOSPI_COMPONENTS:
+        code = comp["ticker"].replace(".KS", "").replace(".KQ", "")
+        if code in excl_ticker_codes or comp["sector"] in excl_sectors:
+            excluded.append(comp)
+        else:
+            included.append(comp)
+
+    total_excl_weight = sum(c["weight"] for c in excluded)
+    if total_excl_weight >= 0.95:
+        raise HTTPException(status_code=400, detail="제외 비중이 너무 커서 지수를 계산할 수 없습니다.")
+
+    # 다운로드
+    tickers_needed = ["^KS11"] + [c["ticker"] for c in excluded]
+    raw: dict[str, pd.Series] = {}
+    is_simulated = False
+    fetched_at = datetime.now(timezone.utc)
+
+    for t in tickers_needed:
+        try:
+            df = yf.download(t, period=req.period, progress=False, auto_adjust=True)
+            if df.empty:
+                raise ValueError("empty")
+            s = df["Close"]
+            if isinstance(s, pd.DataFrame):
+                s = s.iloc[:, 0]
+            s = s.dropna()
+            if len(s) > 5:
+                raw[t] = s
+        except Exception:
+            is_simulated = True
+
+    if "^KS11" not in raw or is_simulated:
+        # 시뮬레이션 대체 데이터
+        import math
+        rng = 12345
+        def _rnd():
+            nonlocal rng
+            rng = (rng * 1664525 + 1013904223) % 2**32
+            return rng / 2**32
+        def _randn():
+            u, v = max(_rnd(), 1e-10), _rnd()
+            return math.sqrt(-2*math.log(u)) * math.cos(2*math.pi*v)
+        period_days = {"1mo":30,"3mo":90,"6mo":180,"1y":365,"2y":730,"3y":1095}
+        days = period_days.get(req.period, 365)
+        n_bars = int(days * 0.72)
+        base_date = pd.Timestamp("today") - pd.Timedelta(days=days)
+        dates = [base_date + pd.Timedelta(days=i+1) for i in range(n_bars)]
+        price = 2650.0
+        prices = []
+        for _ in range(n_bars):
+            price = max(price * (1 + _randn() * 0.012), 100)
+            prices.append(price)
+        raw["^KS11"] = pd.Series(prices, index=dates)
+        # 시뮬레이션된 종목 데이터
+        for comp in excluded:
+            price2 = 50000.0
+            p2 = []
+            for _ in range(n_bars):
+                price2 = max(price2 * (1 + _randn() * 0.015), 100)
+                p2.append(price2)
+            raw[comp["ticker"]] = pd.Series(p2, index=dates)
+        is_simulated = True
+
+    kospi_s = raw["^KS11"]
+    # 공통 날짜 인덱스 정렬
+    common_idx = kospi_s.index
+    for comp in excluded:
+        if comp["ticker"] in raw:
+            common_idx = common_idx.intersection(raw[comp["ticker"]].index)
+    kospi_s = kospi_s.loc[common_idx]
+
+    # 일별 수익률
+    kospi_ret = kospi_s.pct_change().fillna(0)
+
+    # 제외 종목 기여도 계산
+    contrib = pd.Series(0.0, index=common_idx)
+    for comp in excluded:
+        if comp["ticker"] in raw:
+            s = raw[comp["ticker"]].reindex(common_idx).ffill()
+            ret = s.pct_change().fillna(0)
+            contrib += comp["weight"] * ret
+
+    # 조정 수익률: r_adj = (r_KOSPI - contrib_excl) / (1 - total_excl_weight)
+    adj_ret = (kospi_ret - contrib) / (1 - total_excl_weight)
+
+    # 누적 가격 지수 (100 기준)
+    kospi_norm  = (1 + kospi_ret).cumprod() * 100
+    adj_norm    = (1 + adj_ret).cumprod() * 100
+    kospi_norm.iloc[0] = 100.0
+    adj_norm.iloc[0]   = 100.0
+
+    # 통계
+    def _stats(s: pd.Series) -> dict:
+        ret_pct = float((s.iloc[-1] / s.iloc[0] - 1) * 100)
+        vol_pct = float(s.pct_change().std() * (252**0.5) * 100)
+        return {"return_pct": round(ret_pct, 2), "annual_vol_pct": round(vol_pct, 2)}
+
+    stats = {
+        "kospi":    _stats(kospi_s),
+        "adjusted": _stats(adj_norm),
+        "total_excl_weight": round(total_excl_weight * 100, 1),
+    }
+
+    # 차트 그리기 (화이트 테마)
+    BG    = "#ffffff"
+    SURF  = "#f8f9fa"
+    GRID  = "#e8e8e8"
+    TEXT  = "#1a1a1a"
+    MUTED = "#666666"
+    C1    = "#0078d4"   # KOSPI
+    C2    = "#e63946"   # 제외 후
+
+    fig = plt.figure(figsize=(13, 8), facecolor=BG)
+    gs  = gridspec.GridSpec(2, 2, figure=fig, hspace=0.44, wspace=0.30,
+                            left=0.07, right=0.97, top=0.90, bottom=0.08)
+
+    # Panel 1: 누적 수익률 비교 (상단 전체)
+    ax1 = fig.add_subplot(gs[0, :], facecolor=SURF)
+    excl_label = _build_excl_label(excluded, excl_sectors, total_excl_weight)
+    ax1.plot(kospi_norm.index, kospi_norm.values, color=C1, lw=2.0,
+             label="KOSPI (실제)", zorder=3)
+    ax1.plot(adj_norm.index, adj_norm.values, color=C2, lw=2.0, ls="--",
+             label=f"KOSPI 제외 후 ({excl_label})", zorder=3)
+    ax1.axhline(100, color=MUTED, lw=0.8, ls=":")
+    ax1.fill_between(adj_norm.index, kospi_norm.values, adj_norm.values,
+                     where=(adj_norm.values > kospi_norm.values),
+                     alpha=0.12, color=C2, label="제외 후 > KOSPI")
+    ax1.fill_between(adj_norm.index, kospi_norm.values, adj_norm.values,
+                     where=(adj_norm.values <= kospi_norm.values),
+                     alpha=0.12, color=C1, label="KOSPI > 제외 후")
+    ax1.set_title(f"KOSPI vs KOSPI 제외 후 비교  |  {req.period}", color=TEXT, fontsize=11, pad=8, fontweight="bold")
+    ax1.tick_params(colors=MUTED, labelsize=7)
+    for sp in ax1.spines.values(): sp.set_color(GRID)
+    ax1.grid(color=GRID, lw=0.6, alpha=0.8)
+    ax1.tick_params(axis="x", rotation=20)
+    ax1.legend(fontsize=8, facecolor=BG, labelcolor=TEXT, framealpha=0.9, loc="upper left")
+    ax1.set_facecolor(BG)
+
+    # Panel 2: 수익률 차이 (하단 좌)
+    ax2 = fig.add_subplot(gs[1, 0], facecolor=BG)
+    diff = adj_norm.values - kospi_norm.values
+    colors_diff = [C2 if d > 0 else C1 for d in diff]
+    ax2.bar(range(len(diff)), diff, color=colors_diff, alpha=0.7, width=1.0)
+    ax2.axhline(0, color=MUTED, lw=0.8)
+    ax2.set_title("KOSPI 대비 초과 성과 (제외 후 - 실제)", color=TEXT, fontsize=9, pad=6)
+    ax2.tick_params(colors=MUTED, labelsize=7)
+    for sp in ax2.spines.values(): sp.set_color(GRID)
+    ax2.grid(color=GRID, lw=0.6, axis="y", alpha=0.8)
+    ax2.set_xticks([])
+    ax2.set_facecolor(BG)
+
+    # Panel 3: 제외 종목 기여 비중 파이 (하단 우)
+    ax3 = fig.add_subplot(gs[1, 1], facecolor=BG)
+    if excluded:
+        pie_labels = [c["name"] for c in excluded]
+        pie_sizes  = [c["weight"] for c in excluded]
+        SECTOR_COLORS = ["#0078d4","#e63946","#2dc653","#f59e0b","#a855f7",
+                         "#06b6d4","#f97316","#ec4899","#14b8a6","#8b5cf6"]
+        wedge_colors = [SECTOR_COLORS[i % len(SECTOR_COLORS)] for i in range(len(pie_sizes))]
+        wedges, texts, autotexts = ax3.pie(
+            pie_sizes, labels=pie_labels, colors=wedge_colors,
+            autopct=lambda p: f"{p:.1f}%" if p > 3 else "",
+            pctdistance=0.78, startangle=90,
+            wedgeprops={"edgecolor": BG, "linewidth": 1.5},
+            textprops={"fontsize": 7, "color": TEXT},
+        )
+        for at in autotexts: at.set_fontsize(6.5)
+        ax3.set_title(f"제외 종목 구성  (총 비중 {total_excl_weight*100:.1f}%)", color=TEXT, fontsize=9, pad=6)
+    else:
+        ax3.text(0.5, 0.5, "제외 종목 없음", ha="center", va="center", color=MUTED, fontsize=10)
+        ax3.set_title("제외 종목 구성", color=TEXT, fontsize=9, pad=6)
+    ax3.set_facecolor(BG)
+
+    title_excl = excl_label if excl_label else "없음"
+    fig.suptitle(f"KOSPI 제외 지수 분석  |  제외: {title_excl}",
+                 color=TEXT, fontsize=12, fontweight="bold", y=0.96)
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, facecolor=BG, bbox_inches="tight")
+    plt.close(fig)
+    img_b64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+
+    return {
+        "image": img_b64,
+        "stats": stats,
+        "excluded": [{"name": c["name"], "ticker": c["ticker"].replace(".KS","").replace(".KQ",""),
+                      "sector": c["sector"], "weight_pct": round(c["weight"]*100,1)} for c in excluded],
+        "period": req.period,
+        "is_simulated": is_simulated,
+        "fetched_at": fetched_at.isoformat(),
+        "warning": "Yahoo Finance 데이터 수신 실패로 시뮬레이션 데이터를 표시합니다." if is_simulated else None,
+    }
+
+
+def _build_excl_label(excluded: list, excl_sectors: set, total_weight: float) -> str:
+    if not excluded:
+        return "없음"
+    sector_names = sorted(excl_sectors) if excl_sectors else []
+    stock_names  = [c["name"] for c in excluded if c["sector"] not in excl_sectors]
+    parts = sector_names + stock_names
+    label = ", ".join(parts[:3])
+    if len(parts) > 3:
+        label += f" 외 {len(parts)-3}개"
+    return label
+
+
+@app.get("/api/macro/kospi-ex/meta")
+def macro_kospi_ex_meta() -> dict[str, object]:
+    sectors = sorted({c["sector"] for c in KOSPI_COMPONENTS})
+    components = [
+        {"ticker": c["ticker"].replace(".KS","").replace(".KQ",""),
+         "name": c["name"], "sector": c["sector"],
+         "weight_pct": round(c["weight"]*100, 1)}
+        for c in KOSPI_COMPONENTS
+    ]
+    return {"sectors": sectors, "components": components}
+
+
 # ── 거시경제현황 2: GBM 시뮬레이션 대시보드 ──────────────────────────────────
 
 class MacroSimRequest(BaseModel):
