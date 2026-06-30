@@ -926,6 +926,7 @@ OLLAMA_MODEL=llama3:latest             # 기본 분석 모델
 ### 기타 개인적인 발표자료 작성
 
 #### https://notebooklm.google.com/notebook 를 이용하여, 각종 머티리얼 제작
+#### https://aistudio.google.com/ 유사하면서 상급 레벨
 
 ```text
 local_lake/
