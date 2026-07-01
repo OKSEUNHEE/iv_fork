@@ -921,6 +921,13 @@ OLLAMA_MODEL=llama3:latest             # 기본 분석 모델
 ### 📂 디렉터리 구조 설계
 로컬 폴더를 데이터 레이크의 계층 구조(Raw -> Processed)로 나누어 관리하면 추후 클라우드로 이관하기 쉽습니다.
 
+--- 
+
+### 기타 개인적인 발표자료 작성
+
+#### https://notebooklm.google.com/notebook 를 이용하여, 각종 머티리얼 제작
+#### https://aistudio.google.com/ 유사하면서 상급 레벨
+
 ```text
 local_lake/
 ├── raw/            # 크롤링하거나 다운로드한 원본 파일 (CSV, JSON 등)
