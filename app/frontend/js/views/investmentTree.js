@@ -1,55 +1,51 @@
 // Virtual canvas coordinate space
 const VW = 900, VH = 490;
 
-// ── Tree data ─────────────────────────────────────────────────────────────────
-const NODES = {
-  q1: {
-    id: 'q1', type: 'question',
-    text: ['투자 기간은?'],
-    cx: 450, cy: 68, w: 172, h: 52,
-    edges: [
-      { to: 'q2a', label: '1년 미만' },
-      { to: 'q2b', label: '1~5년' },
-      { to: 'q2c', label: '5년 이상' },
-    ],
+// ── Branching condition ──────────────────────────────────────────────────────
+// Single source of truth for how the tree forks: picking an investment period
+// (1년 미만 / 1~5년 / 5년 이상) selects the follow-up question, and each answer
+// to that follow-up question maps to one of the six strategy results below.
+// NODES/edges used for canvas rendering are generated from this definition,
+// so adding/changing a period bucket or its follow-up only requires editing
+// this array.
+const PERIOD_BRANCHES = [
+  {
+    period: '1년 미만',
+    cx: 150,
+    followUp: {
+      text: ['손실을 얼마까지', '허용할 수 있나요?'],
+      answers: [
+        { label: '5% 이하',  result: 'safe_first' },
+        { label: '10% 이상', result: 'short_term' },
+      ],
+    },
   },
-  q2a: {
-    id: 'q2a', type: 'question',
-    text: ['손실을 얼마까지', '허용할 수 있나요?'],
-    cx: 150, cy: 218, w: 158, h: 52,
-    edges: [
-      { to: 's1', label: '5% 이하' },
-      { to: 's2', label: '10% 이상' },
-    ],
+  {
+    period: '1~5년',
+    cx: 450,
+    followUp: {
+      text: ['시장 급락 시', '어떻게 하나요?'],
+      answers: [
+        { label: '팔고 싶다',    result: 'balanced' },
+        { label: '더 사고 싶다', result: 'mid_growth' },
+      ],
+    },
   },
-  q2b: {
-    id: 'q2b', type: 'question',
-    text: ['시장 급락 시', '어떻게 하나요?'],
-    cx: 450, cy: 218, w: 158, h: 52,
-    edges: [
-      { to: 's3', label: '팔고 싶다' },
-      { to: 's4', label: '더 사고 싶다' },
-    ],
+  {
+    period: '5년 이상',
+    cx: 750,
+    followUp: {
+      text: ['주식 투자', '경험이 있나요?'],
+      answers: [
+        { label: '없거나 적다', result: 'long_passive' },
+        { label: '경험 있다',   result: 'long_active' },
+      ],
+    },
   },
-  q2c: {
-    id: 'q2c', type: 'question',
-    text: ['주식 투자', '경험이 있나요?'],
-    cx: 750, cy: 218, w: 158, h: 52,
-    edges: [
-      { to: 's5', label: '없거나 적다' },
-      { to: 's6', label: '경험 있다' },
-    ],
-  },
-  s1: { id: 's1', type: 'result', text: ['안전우선형'],  cx: 75,  cy: 395, w: 126, h: 46 },
-  s2: { id: 's2', type: 'result', text: ['단기수익형'],  cx: 225, cy: 395, w: 126, h: 46 },
-  s3: { id: 's3', type: 'result', text: ['균형안정형'],  cx: 375, cy: 395, w: 126, h: 46 },
-  s4: { id: 's4', type: 'result', text: ['중기성장형'],  cx: 525, cy: 395, w: 126, h: 46 },
-  s5: { id: 's5', type: 'result', text: ['장기패시브형'], cx: 675, cy: 395, w: 126, h: 46 },
-  s6: { id: 's6', type: 'result', text: ['장기액티브형'], cx: 825, cy: 395, w: 126, h: 46 },
-};
+];
 
 const STRATEGIES = {
-  s1: {
+  safe_first: {
     emoji: '<i class="fa-solid fa-shield-halved"></i>', name: '안전우선형',
     desc: '원금 보호를 가장 중요하게 생각해요. 수익보다 손실 최소화가 우선입니다. 예금·채권 위주로 구성해 큰 변동 없이 조금씩 자산을 지킵니다.',
     alloc: [
@@ -64,7 +60,7 @@ const STRATEGIES = {
     tags: ['원금보호', '저위험', '예금·채권 중심'],
     tip: '<i class="fa-solid fa-lightbulb"></i> 예금자보호법으로 1인당 5,000만원까지 보호됩니다.',
   },
-  s2: {
+  short_term: {
     emoji: '<i class="fa-solid fa-bolt"></i>', name: '단기수익형',
     desc: '단기간에 예금보다 높은 수익을 노립니다. 어느 정도 변동을 감수하고, 주식 ETF와 채권을 반반 섞어 유연하게 운용합니다.',
     alloc: [
@@ -79,7 +75,7 @@ const STRATEGIES = {
     tags: ['단기수익', '혼합형', '변동 감수'],
     tip: '<i class="fa-solid fa-lightbulb"></i> 단기 매매는 거래세·수수료가 수익을 줄일 수 있습니다. 비용 확인 필수!',
   },
-  s3: {
+  balanced: {
     emoji: '<i class="fa-solid fa-scale-balanced"></i>', name: '균형안정형',
     desc: '주식과 채권을 반반 섞어 중기적으로 안정적인 성장을 추구합니다. 시장 하락 시 채권이 충격을 완화해줍니다.',
     alloc: [
@@ -94,7 +90,7 @@ const STRATEGIES = {
     tags: ['균형분산', '중기', '정기 리밸런싱'],
     tip: '<i class="fa-solid fa-lightbulb"></i> 6개월마다 비중을 원래대로 되돌리는 "리밸런싱"이 핵심입니다.',
   },
-  s4: {
+  mid_growth: {
     emoji: '<i class="fa-solid fa-chart-line"></i>', name: '중기성장형',
     desc: '주가 하락도 매수 기회로 보는 적극적 투자자입니다. 주식 ETF 비중을 높여 중장기 복리 성장을 기대합니다.',
     alloc: [
@@ -109,7 +105,7 @@ const STRATEGIES = {
     tags: ['성장추구', '주식중심', '변동 감수'],
     tip: '<i class="fa-solid fa-lightbulb"></i> 하락장에서 추가 매수(물타기)보다 정해진 비중을 유지하는 게 더 안전합니다.',
   },
-  s5: {
+  long_passive: {
     emoji: '<i class="fa-solid fa-seedling"></i>', name: '장기패시브형',
     desc: '오래 두면 복리가 알아서 일을 한다는 믿음입니다. 글로벌 지수추종 ETF 한두 개로 단순하게 장기 보유합니다.',
     alloc: [
@@ -123,7 +119,7 @@ const STRATEGIES = {
     tags: ['인덱스투자', '장기복리', '패시브'],
     tip: '<i class="fa-solid fa-lightbulb"></i> 매달 일정액을 자동 매수(적립식)하면 평균 단가를 낮출 수 있습니다.',
   },
-  s6: {
+  long_active: {
     emoji: '<i class="fa-solid fa-bullseye"></i>', name: '장기액티브형',
     desc: '섹터, 테마, 팩터 전략으로 시장 평균보다 높은 수익(알파)을 추구합니다. 경험을 활용해 능동적으로 포트폴리오를 관리합니다.',
     alloc: [
@@ -139,6 +135,45 @@ const STRATEGIES = {
     tip: '<i class="fa-solid fa-lightbulb"></i> 과도한 집중투자는 포트폴리오 전체를 위험에 빠뜨릴 수 있습니다. 분산은 필수입니다.',
   },
 };
+
+// ── Tree data (generated from PERIOD_BRANCHES) ────────────────────────────────
+function buildNodes() {
+  const nodes = {
+    q1: {
+      id: 'q1', type: 'question',
+      text: ['투자 기간은?'],
+      cx: 450, cy: 68, w: 172, h: 52,
+      edges: [],
+    },
+  };
+
+  let resultSlot = 0;
+  PERIOD_BRANCHES.forEach((branch, bi) => {
+    const qId = `q2_${bi}`;
+    nodes.q1.edges.push({ to: qId, label: branch.period });
+
+    nodes[qId] = {
+      id: qId, type: 'question',
+      text: branch.followUp.text,
+      cx: branch.cx, cy: 218, w: 158, h: 52,
+      edges: [],
+    };
+
+    branch.followUp.answers.forEach(({ label, result }) => {
+      nodes[qId].edges.push({ to: result, label });
+      nodes[result] = {
+        id: result, type: 'result',
+        text: [STRATEGIES[result].name],
+        cx: 75 + resultSlot * 150, cy: 395, w: 126, h: 46,
+      };
+      resultSlot++;
+    });
+  });
+
+  return nodes;
+}
+
+const NODES = buildNodes();
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let _state = null;

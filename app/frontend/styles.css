@@ -38,7 +38,7 @@ html { font-size: 17px; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body {
-  margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -168,7 +168,8 @@ img { max-width: 100%; }
 .layout {
   display: flex;
   padding-top: var(--topbar-h);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -283,12 +284,15 @@ img { max-width: 100%; }
   width: calc(100% - var(--sidebar-w));
   min-width: 0;
   display: flex; flex-direction: column;
-  min-height: calc(100vh - var(--topbar-h));
+  height: 100%;
+  overflow: hidden;
   transition: margin-left .25s cubic-bezier(.4,0,.2,1), width .25s cubic-bezier(.4,0,.2,1);
   background: var(--bg);
 }
 .content-main {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 28px 36px 48px;
   width: 100%;
 }
@@ -309,6 +313,7 @@ img { max-width: 100%; }
    FOOTER
 ═══════════════════════════════════════════════════════ */
 .site-footer {
+  flex-shrink: 0;
   border-top: 1px solid var(--border);
   background: var(--surface-soft);
   padding: 20px 28px 18px;

@@ -516,7 +516,7 @@ function renderIndicators(content, state) {
     const lUp      = upper.filter(v => v != null).slice(-1)[0];
     const lLo      = lower.filter(v => v != null).slice(-1)[0];
     const bbPct    = ((lastC - lLo) / (lUp - lLo) * 100).toFixed(0);
-    const rsiSig   = lastRsi > 70 ? '과매수 ⚠' : lastRsi < 30 ? '과매도 ✓' : '중립';
+    const rsiSig   = lastRsi > 70 ? '과매수 <i class="fa-solid fa-triangle-exclamation"></i>' : lastRsi < 30 ? '과매도 <i class="fa-solid fa-check"></i>' : '중립';
     const macdSigTxt = lastMacd > lastSig ? '골든크로스 ↑' : '데드크로스 ↓';
 
     content.querySelector('#ind-signal').innerHTML = [
