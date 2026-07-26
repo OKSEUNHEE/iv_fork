@@ -35,17 +35,17 @@ import { taxAccountingView }         from './views/taxAccounting.js';
 import { dartFinancialAnalysisView } from './views/dartFinancialAnalysis.js';
 import { ollamaView }               from './views/ollama.js';
 import { api }                 from './api.js';
+import { LEARN_DOCS }          from './data/learnDocs.js';
 
 const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
 const TOPBAR_MARKETS = ['^KS11', '^IXIC', 'KRW=X'];
 const TOPBAR_REFRESH_MS = 30_000;
 
-const learnDocIds = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', 'voca'];
 const learnRoutes = Object.fromEntries(
-  learnDocIds.map((docId) => [
-    `learn-${docId}`,
-    { label: `학습 · ${docId === 'voca' ? '핵심 용어집' : `Day ${docId}`}`, render: () => learnView(app, docId) },
+  LEARN_DOCS.map((doc) => [
+    `learn-${doc.id}`,
+    { label: `학습 · ${doc.label}`, render: () => learnView(app, doc.id) },
   ]),
 );
 

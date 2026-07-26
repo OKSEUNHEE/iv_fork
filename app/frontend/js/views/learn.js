@@ -3,25 +3,6 @@
  * /api/learn/doc/{docId} 엔드포인트에서 markdown 텍스트를 받아 렌더링
  */
 
-const DOC_MAP = {
-  '01': { title: 'Day 1 · 법인·세무·회계 기초',        file: '01' },
-  '02': { title: 'Day 2 · 매크로 분석 및 금리',         file: '02' },
-  '03': { title: 'Day 3 · 경제지표 분석',               file: '03' },
-  '04': { title: 'Day 4 · 거시경제 상황 분석 실습',     file: '04' },
-  '05': { title: 'Day 5 · 산업 분석',                   file: '05' },
-  '06': { title: 'Day 6 · 산업 분석 실습',              file: '06' },
-  '07': { title: 'Day 7 · 재무제표 분석 I',             file: '07' },
-  '08': { title: 'Day 8 · 재무제표 분석 II',            file: '08' },
-  '09': { title: 'Day 9 · 상대가치 평가',               file: '09' },
-  '10': { title: 'Day 10 · 기술적 분석 I',              file: '10' },
-  '11': { title: 'Day 11 · 기술적 분석 II',             file: '11' },
-  '12': { title: 'Day 12 · 주식·배당·파생상품 기초',    file: '12' },
-  '13': { title: 'Day 13 · 금융상품의 구분',            file: '13' },
-  '14': { title: 'Day 14 · 파생상품 이해',              file: '14' },
-  '15': { title: 'Day 15 · 포트폴리오 이론 및 성과',    file: '15' },
-  'voca': { title: '핵심 용어집',                       file: 'voca' },
-};
-
 function ensureMarked() {
   if (window.marked) return Promise.resolve();
   return new Promise((resolve, reject) => {
@@ -125,12 +106,6 @@ function buildToc(container) {
 }
 
 export function learnView(app, docId) {
-  const info = DOC_MAP[docId];
-  if (!info) {
-    app.innerHTML = `<div class="card"><p>문서를 찾을 수 없습니다: ${docId}</p></div>`;
-    return;
-  }
-
   app.innerHTML = `
     <div class="loading-wrap">
       <div class="spinner"></div>
@@ -139,7 +114,7 @@ export function learnView(app, docId) {
 
   Promise.all([
     ensureMarked(),
-    fetch(`/api/learn/doc/${info.file}`).then(r => {
+    fetch(`/api/learn/doc/${encodeURIComponent(docId)}`).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     })

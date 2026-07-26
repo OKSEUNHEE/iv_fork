@@ -19,23 +19,5 @@ export const RESOURCE_TOPICS = [
   { category: '퀀트/ML',     label: 'LSTM·Transformer 시계열 예측',   query: 'LSTM Transformer 주가 시계열 예측' },
 ];
 
-/** docs/ 폴더에 실제로 존재하는 학습 자료 목록 (NotebookLM 업로드 안내용) */
-export const LEARN_DOCS = [
-  { file: '01.md', title: '개인·법인·세무·회계 기초 상식' },
-  { file: '02.md', title: '경제지표 분석 (물가, 유가 등)' },
-  { file: '03.md', title: '거시경제 상황 분석 실습' },
-  { file: '04.md', title: '산업 분석' },
-  { file: '05.md', title: '산업 분석 실습' },
-  { file: '06.md', title: '재무제표 분석 I (손익계산서 & 대차대조표)' },
-  { file: '07.md', title: '재무제표 분석 II (현금흐름표 & 기업가치)' },
-  { file: '08.md', title: '상대가치 평가 (밸류에이션 멀티플)' },
-  { file: '09.md', title: '기술적 분석 I (추세 & 지표)' },
-  { file: '10.md', title: '기술적 분석 II (패턴 & 엘리어트 파동)' },
-  { file: '11.md', title: '주식·배당·금융상품 기초 상식' },
-  { file: '12.md', title: '금융상품의 구분 (자본시장법 기준)' },
-  { file: '13.md', title: 'ETF 심화 (일반펀드 vs ETF 비교)' },
-  { file: '14.md', title: '포트폴리오 이론 및 성과 분석' },
-  { file: '15.md', title: '자산배분 모델' },
-  { file: '16.md', title: '외국인 매수·매도 및 자본 국적 확인 방법' },
-  { file: 'voca.md', title: '투자분석 핵심 용어집' },
-];
+/** docs/*.md에서 자동 생성한 학습 자료 목록 (NotebookLM 안내와 학습 메뉴가 공유). */
+export { LEARN_DOCS } from './learnDocs.js';

@@ -19,7 +19,11 @@ RUN mkdir -p app/frontend/vendor \
     && test -s app/frontend/vendor/mermaid.min.js
 COPY docs/ ./docs/
 COPY scripts/upload_docs_to_qdrant.sh ./scripts/upload_docs_to_qdrant.sh
-RUN chmod +x ./scripts/upload_docs_to_qdrant.sh
+COPY scripts/sync_learning_menu.py ./scripts/sync_learning_menu.py
+COPY scripts/build_sidebar_partial.py ./scripts/build_sidebar_partial.py
+RUN chmod +x ./scripts/upload_docs_to_qdrant.sh \
+    && python ./scripts/sync_learning_menu.py \
+    && python ./scripts/build_sidebar_partial.py
 
 EXPOSE 8000
 
