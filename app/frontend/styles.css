@@ -518,6 +518,11 @@ img { max-width: 100%; }
   border-radius: var(--radius-sm);
 }
 .md-body .mermaid svg { max-width: none; }
+.md-body .mermaid-error {
+  color: var(--red);
+  text-align: left;
+  font-family: inherit;
+}
 .md-body blockquote { border-left: 4px solid var(--primary); margin: 14px 0; padding: 10px 16px; background: var(--primary-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: #444444; }
 .md-body strong { font-weight: 700; color: var(--text); }
 .md-body a { color: var(--primary); text-decoration: underline; }

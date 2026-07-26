@@ -34,9 +34,18 @@ function ensureMarked() {
 }
 
 let mermaidLoader;
+let mermaidInitialized = false;
+
+function initializeMermaid() {
+  if (!mermaidInitialized) {
+    window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+    mermaidInitialized = true;
+  }
+  return window.mermaid;
+}
 
 function ensureMermaid() {
-  if (window.mermaid) return Promise.resolve(window.mermaid);
+  if (window.mermaid) return Promise.resolve(initializeMermaid());
   if (mermaidLoader) return mermaidLoader;
 
   // 인라인 module 스크립트는 import 실패를 안정적으로 reject하지 못해 Mermaid
@@ -50,8 +59,7 @@ function ensureMermaid() {
         reject(new Error('Mermaid 라이브러리를 초기화하지 못했습니다.'));
         return;
       }
-      window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-      resolve(window.mermaid);
+      resolve(initializeMermaid());
     };
     s.onerror = () => reject(new Error('Mermaid CDN을 불러오지 못했습니다.'));
     document.head.appendChild(s);
@@ -71,21 +79,30 @@ async function renderMermaidBlocks(root) {
 
   await ensureMermaid();
 
-  const nodes = blocks.map((code) => {
+  const diagrams = blocks.map((code, index) => {
     const pre = code.closest('pre');
     const graphDef = code.textContent;
     const wrap = document.createElement('div');
     wrap.className = 'mermaid';
     wrap.textContent = graphDef;
     pre.replaceWith(wrap);
-    return wrap;
+    return { graphDef, wrap, index };
   });
 
-  try {
-    await window.mermaid.run({ nodes });
-  } catch (err) {
-    console.error('mermaid 렌더링 실패:', err);
-  }
+  // run() 대신 render()를 사용하면 Markdown에서 만든 각 블록을 즉시 SVG로
+  // 교체할 수 있고, 다른 문서의 이전 렌더링 상태에 영향을 받지 않는다.
+  await Promise.all(diagrams.map(async ({ graphDef, wrap, index }) => {
+    try {
+      const id = `mermaid-${Date.now()}-${index}`;
+      const { svg, bindFunctions } = await window.mermaid.render(id, graphDef);
+      wrap.innerHTML = svg;
+      bindFunctions?.(wrap);
+    } catch (err) {
+      wrap.classList.add('mermaid-error');
+      wrap.textContent = '다이어그램을 렌더링하지 못했습니다. 문서의 Mermaid 문법을 확인하세요.';
+      console.error('mermaid 렌더링 실패:', err);
+    }
+  }));
 }
 
 function buildToc(container) {
