@@ -180,7 +180,8 @@ img { max-width: 100%; }
   top: var(--topbar-h); left: 0;
   width: var(--sidebar-w);
   height: calc(100vh - var(--topbar-h));
-  overflow-y: auto; overflow-x: hidden;
+  /* 메뉴만 스크롤하고, 하단 챗봇은 항상 사이드바 안에 고정한다. */
+  overflow: hidden;
   background: #ffffff;
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
@@ -189,9 +190,12 @@ img { max-width: 100%; }
 }
 
 .sidebar-nav {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 10px 0 8px;
   display: flex; flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 사이드바 하단 Enterprise 챗봇 */
@@ -203,6 +207,8 @@ img { max-width: 100%; }
   border-radius: 10px;
   background: linear-gradient(145deg, #f8fbff, #eef6ff);
   box-shadow: 0 2px 8px rgba(0, 69, 120, .08);
+  position: relative;
+  z-index: 1;
 }
 .sidebar-chatbot-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; color: #123b68; font-size: .76rem; font-weight: 800; }
 .sidebar-chatbot-head span { display: inline-flex; align-items: center; gap: 6px; }
