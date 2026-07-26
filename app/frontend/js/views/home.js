@@ -22,7 +22,7 @@ function chartCard(market) {
           <div class="home-market-periods" data-periods="${market.id}">
             ${PERIODS.map(([value, label]) => `<button type="button" data-period="${value}" class="${value === '3mo' ? 'active' : ''}">${label}</button>`).join('')}
           </div>
-          <button type="button" class="home-market-expand" data-expand="${market.id}" aria-label="${market.name} 차트 크게 보기">
+          <button type="button" class="home-market-expand" data-expand="${market.id}" aria-label="${market.name} 차트 크게 보기" aria-pressed="false">
             <i class="fa-solid fa-expand"></i><span>크게 보기</span>
           </button>
         </div>
@@ -42,7 +42,6 @@ export function homeView(container, navigate) {
   container.innerHTML = `
     <div class="home-dashboard" id="home-dashboard">
       <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
-      <div class="home-market-back-wrap"><button type="button" id="home-market-back"><i class="fa-solid fa-arrow-left"></i> 4개 차트 보기</button></div>
       <section class="home-quick-links">
         <button data-view="macro-realtime"><i class="fa-solid fa-satellite-dish"></i> 거시경제현황</button>
         <button data-view="industry-analysis"><i class="fa-solid fa-industry"></i> 산업 경쟁력 분석</button>
@@ -121,6 +120,16 @@ export function homeView(container, navigate) {
     const dashboard = container.querySelector('#home-dashboard');
     dashboard.classList.toggle('is-chart-expanded', Boolean(id));
     container.querySelectorAll('[data-market-card]').forEach((card) => card.classList.toggle('is-expanded', card.dataset.marketCard === id));
+    HOME_MARKETS.forEach((market) => {
+      const button = container.querySelector(`[data-expand="${market.id}"]`);
+      const isExpanded = market.id === id;
+      button.classList.toggle('is-collapse', isExpanded);
+      button.setAttribute('aria-pressed', String(isExpanded));
+      button.setAttribute('aria-label', `${market.name} 차트 ${isExpanded ? '작게 보기' : '크게 보기'}`);
+      button.innerHTML = isExpanded
+        ? '<i class="fa-solid fa-compress"></i><span>작게 보기</span>'
+        : '<i class="fa-solid fa-expand"></i><span>크게 보기</span>';
+    });
     if (id) loadChart(HOME_MARKETS.find((market) => market.id === id));
     else if (previousMarket) loadChart(HOME_MARKETS.find((market) => market.id === previousMarket));
   }
@@ -133,10 +142,9 @@ export function homeView(container, navigate) {
       container.querySelectorAll(`[data-periods="${market.id}"] [data-period]`).forEach((item) => item.classList.toggle('active', item === button));
       loadChart(market);
     });
-    container.querySelector(`[data-expand="${market.id}"]`).addEventListener('click', () => setExpanded(market.id));
+    container.querySelector(`[data-expand="${market.id}"]`).addEventListener('click', () => setExpanded(expandedMarket === market.id ? null : market.id));
     loadChart(market);
   });
-  container.querySelector('#home-market-back').addEventListener('click', () => setExpanded(null));
 
   window._viewCleanup = () => charts.forEach((chart) => { try { chart.destroy(); } catch {} });
 }
