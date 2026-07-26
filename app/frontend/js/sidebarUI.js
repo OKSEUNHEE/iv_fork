@@ -48,6 +48,19 @@ window._openNavSection = function(id) {
     if (chev) chev.style.transform = 'rotate(180deg)';
   }
 };
+// close every section (used before opening only the section(s) currently in use)
+function closeAllNavSections() {
+  document.querySelectorAll('.nav-children').forEach((el) => {
+    el.classList.remove('open');
+    const chev = document.getElementById('chev-' + el.id.replace(/^nav-/, ''));
+    if (chev) chev.style.transform = '';
+  });
+}
+// close everything, then open only the section(s) relevant to the current view
+window._setActiveNavSections = function(ids) {
+  closeAllNavSections();
+  (ids || []).forEach((id) => window._openNavSection(id));
+};
 
 window.addEventListener('resize', () => {
   const isMobile = window.innerWidth <= DESKTOP_BREAKPOINT;

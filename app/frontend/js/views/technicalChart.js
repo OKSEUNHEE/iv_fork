@@ -656,6 +656,10 @@ export function technicalChartView(container) {
   container.innerHTML = tabShell('기술적 분석 실습',
     '기업 선정부터 추세·이동평균·캔들패턴·보조지표·엘리어트파동·종합리포트까지 단계별로 실습합니다.', TABS);
 
+  // 다른 화면으로 이동할 때 이 화면이 만든 ApexCharts 인스턴스를 정리 (resize 리스너가
+  // 살아남아 사라진 컨테이너를 대상으로 NaN width 에러를 내는 것을 방지)
+  window._viewCleanup = () => destroyCharts(state);
+
   container.querySelectorAll('.tc-tab').forEach((btn, i) => {
     btn.addEventListener('click', () => activateTab(container, i, renders));
   });

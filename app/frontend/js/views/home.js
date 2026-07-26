@@ -129,6 +129,13 @@ export function homeView(container, navigate) {
   let currentPeriod = '3mo';
   let _chart = null;
 
+  // Destroy the ApexCharts instance when navigating away from this view —
+  // otherwise its internal window-resize listener stays alive and throws
+  // (NaN width/transform) once #kospi-chart is no longer in the DOM.
+  window._viewCleanup = () => {
+    if (_chart) { try { _chart.destroy(); } catch (e) {} _chart = null; }
+  };
+
   container.querySelectorAll('#kospi-period-btns button').forEach(btn => {
     btn.addEventListener('click', () => {
       currentPeriod = btn.dataset.period;

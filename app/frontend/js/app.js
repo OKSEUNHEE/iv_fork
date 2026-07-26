@@ -114,6 +114,16 @@ function navigate(view) {
   const route = routes[view] || routes['home'];
   currentView = view;
 
+  // Views that create resources needing teardown (e.g. ApexCharts instances,
+  // which keep an internal window-resize listener alive) register a cleanup
+  // via window._viewCleanup. Run it before swapping in the next view's HTML,
+  // otherwise the orphaned chart's resize handler fires against a detached
+  // container and throws (NaN width/transform errors from apexcharts).
+  if (typeof window._viewCleanup === 'function') {
+    try { window._viewCleanup(); } catch (e) { /* noop */ }
+  }
+  window._viewCleanup = null;
+
   // Update active sidebar link
   document.querySelectorAll('.nav-item[data-view], .sidebar-link[data-view]').forEach(a => {
     a.classList.toggle('active', a.dataset.view === view);
@@ -122,15 +132,18 @@ function navigate(view) {
   // Update breadcrumb
   if (breadcrumb) breadcrumb.textContent = route.label;
 
-  if (view?.startsWith('learn-') && typeof window._openNavSection === 'function') window._openNavSection('learn');
-  if (view?.startsWith('quiz-') && typeof window._openNavSection === 'function') window._openNavSection('quiz');
+  // 현재 화면이 속한 사이드바 섹션만 펼치고 나머지는 닫는다 (사용 중인 메뉴만 열림)
   const _practiceViews = ['macro-realtime','macro-simulation','kospi-excluded','industry-analysis',
     'dart-region-search','group-network','company-financial','financial-statement','valuation',
     'portfolio','risk','technical-chart','backtest','pipeline','cross-validation','random-forest',
     'kmeans','svm','mlp','linear-regression','lstm','transformer','market-snapshot','financial-knowledge'];
-  if (_practiceViews.includes(view) && typeof window._openNavSection === 'function') window._openNavSection('practice');
   const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting','ollama'];
-  if (_aiViews.includes(view) && typeof window._openNavSection === 'function') window._openNavSection('aitools');
+  const activeSections = [];
+  if (view?.startsWith('learn-')) activeSections.push('learn');
+  if (view?.startsWith('quiz-')) activeSections.push('quiz');
+  if (_practiceViews.includes(view)) activeSections.push('practice');
+  if (_aiViews.includes(view)) activeSections.push('aitools');
+  if (typeof window._setActiveNavSections === 'function') window._setActiveNavSections(activeSections);
 
   if (view?.startsWith('quiz-')) updateQuizSidebarLock();
 
