@@ -13,6 +13,44 @@ let ytPlayer = null;
 let ytApiPromise = null;
 let currentVideo = null;   // {videoId, title, channel}
 let openSession = null;    // 현재 진행 중(종료 시각 미확정)인 시청 기록
+let playerResizeObserver = null;
+
+function fitPlayerToContent() {
+  if (!document.body.classList.contains('is-video-playing')) return;
+
+  const main = document.querySelector('.content-main');
+  const card = document.querySelector('.yt-player-card');
+  const frame = document.getElementById('yt-player-frame');
+  if (!main || !card || !frame) return;
+
+  const mainStyle = getComputedStyle(main);
+  const cardStyle = getComputedStyle(card);
+  const horizontalSpace = main.clientWidth
+    - parseFloat(mainStyle.paddingLeft) - parseFloat(mainStyle.paddingRight)
+    - parseFloat(cardStyle.paddingLeft) - parseFloat(cardStyle.paddingRight);
+  const cardChrome = parseFloat(cardStyle.paddingTop) + parseFloat(cardStyle.paddingBottom)
+    + (card.querySelector('.card-title')?.getBoundingClientRect().height ?? 0)
+    + (document.getElementById('now-playing-title')?.getBoundingClientRect().height ?? 0)
+    + 28; // 제목·현재 영상명 사이의 여백
+  const verticalSpace = main.clientHeight
+    - parseFloat(mainStyle.paddingTop) - parseFloat(mainStyle.paddingBottom)
+    - cardChrome;
+  const width = Math.max(1, Math.min(horizontalSpace, Math.max(1, verticalSpace) * 16 / 9));
+  const height = width * 9 / 16;
+
+  frame.style.width = `${Math.floor(width)}px`;
+  frame.style.height = `${Math.floor(height)}px`;
+}
+
+function enterPlayerMode() {
+  document.body.classList.add('is-video-playing');
+  const main = document.querySelector('.content-main');
+  if (main && !playerResizeObserver) {
+    playerResizeObserver = new ResizeObserver(fitPlayerToContent);
+    playerResizeObserver.observe(main);
+  }
+  requestAnimationFrame(fitPlayerToContent);
+}
 
 function loadHistory() {
   try {
@@ -129,6 +167,7 @@ function onPlayerStateChange(event) {
 
 async function playVideo(video) {
   currentVideo = video;
+  enterPlayerMode();
   document.querySelectorAll('.video-card').forEach((c) => c.classList.toggle('now-playing', c.dataset.videoId === video.videoId));
   document.getElementById('yt-player-empty')?.classList.add('hidden');
 
@@ -223,7 +262,7 @@ async function render() {
       <p id="now-playing-title" class="now-playing-title"></p>
     </div>
 
-    <section class="card" style="margin:20px 0;">
+    <section class="card yt-watch-history" style="margin:20px 0;">
       <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i>내 시청 기록 (이 브라우저에 저장됨)</div>
       <div id="watch-history"></div>
       <button id="clear-history-btn" class="ghost-btn" type="button" style="margin-top:12px;">

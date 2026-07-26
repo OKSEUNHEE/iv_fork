@@ -131,6 +131,32 @@
   min-height: 1.2em;
 }
 
+/* 영상 선택 후에는 콘텐츠 영역 안에서만 재생한다. 화면 크기가 바뀌어도
+   JavaScript가 16:9 크기를 다시 계산하므로 본문 스크롤이 생기지 않는다. */
+body[data-page="youtube"].is-video-playing .content-main {
+  overflow: hidden;
+  padding: 16px 24px;
+}
+body[data-page="youtube"].is-video-playing #page-content { height: 100%; }
+body[data-page="youtube"].is-video-playing .resource-hero,
+body[data-page="youtube"].is-video-playing .yt-watch-history { display: none; }
+body[data-page="youtube"].is-video-playing .yt-player-card {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+body[data-page="youtube"].is-video-playing #yt-player-frame {
+  flex: 0 0 auto;
+  align-self: center;
+  margin: auto;
+}
+
+@media (max-width: 640px) {
+  body[data-page="youtube"].is-video-playing .content-main { padding: 10px; }
+  body[data-page="youtube"].is-video-playing .yt-player-card { padding: 12px; }
+}
+
 /* ── 시청 기록 테이블 ── */
 .watch-history-table {
   width: 100%;
