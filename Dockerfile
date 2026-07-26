@@ -8,7 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
+    grep -v '^torch$' requirements.txt > requirements.nogpu.txt \
+    && pip install --index-url https://download.pytorch.org/whl/cpu torch \
+    && pip install -r requirements.nogpu.txt
 
 COPY app/ ./app/
 COPY docs/ ./docs/
