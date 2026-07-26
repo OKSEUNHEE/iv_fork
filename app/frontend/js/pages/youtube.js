@@ -245,12 +245,6 @@ async function render() {
   el.innerHTML = `
     <div class="resource-hero">
       <h1><i class="fa-brands fa-youtube" style="color:#ff0000"></i> 유튜브 학습 영상</h1>
-      <p>
-        이 저장소의 학습 주제(<code>docs/*.md</code>)와 연결해 사전 선별한 유튜브 영상입니다
-        (<code>scripts/crawl_youtube_videos.py</code>로 수집, 임베드 재생 가능한 영상만 포함).
-        영상은 유튜브로 이동하지 않고 이 페이지 안에서 바로 재생되며, 시청 시작~종료 시각이
-        이 브라우저의 localStorage에 자동 기록됩니다.
-      </p>
     </div>
 
     <div id="yt-player-wrap" class="card yt-player-card">
