@@ -44,8 +44,8 @@ function topicCard(topic, index) {
         <button class="ghost-btn" type="button" data-copy-topic="${index}">
           <i class="fa-regular fa-copy"></i> 검색어 복사
         </button>
-        <a class="resource-cta" href="${NOTEBOOKLM_URL}" target="_blank" rel="noopener noreferrer">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i> NotebookLM 열기
+        <a class="resource-cta" href="${NOTEBOOKLM_URL}" target="_blank" rel="noopener noreferrer" data-open-topic="${index}">
+          <i class="fa-solid fa-magnifying-glass"></i> NotebookLM에서 검색
         </a>
       </div>
     </article>`;
@@ -60,7 +60,7 @@ function render() {
       <h1><i class="fa-solid fa-book-open"></i> NotebookLM 주식 리서치</h1>
       <p>
         주식 투자 학습에 필요한 웹 소스를 NotebookLM의 <strong>소스 검색</strong>으로 모으는 목록입니다.
-        아래 주제를 선택해 검색어를 복사한 뒤, NotebookLM에서 새 노트북 → 소스 추가 → 웹 검색에 붙여넣으세요.
+        각 카드의 <strong>NotebookLM에서 검색</strong>을 누르면 주제어가 복사되고 새 탭이 열립니다. 새 노트북 → 소스 추가 → 웹 검색에 바로 붙여넣으세요.
       </p>
       <div class="notebook-hero-actions">
         <button class="ghost-btn" id="copy-all-notebook-topics" type="button"><i class="fa-regular fa-copy"></i> 전체 검색어 복사</button>
@@ -88,6 +88,19 @@ function render() {
     button.addEventListener('click', async () => {
       const topic = STOCK_RESEARCH_TOPICS[Number(button.dataset.copyTopic)];
       if (await copyText(topic.prompt)) setCopied(button, '복사됨');
+    });
+  });
+  el.querySelectorAll('[data-open-topic]').forEach((link) => {
+    link.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const topic = STOCK_RESEARCH_TOPICS[Number(link.dataset.openTopic)];
+      // 팝업 차단을 피하기 위해 사용자 클릭 중에 먼저 새 탭을 연다.
+      window.open(NOTEBOOKLM_URL, '_blank', 'noopener');
+      if (await copyText(topic.prompt)) {
+        const original = link.innerHTML;
+        link.innerHTML = '<i class="fa-solid fa-check"></i> 검색어 복사됨';
+        setTimeout(() => { link.innerHTML = original; }, 1600);
+      }
     });
   });
   el.querySelector('#copy-all-notebook-topics')?.addEventListener('click', async (event) => {
