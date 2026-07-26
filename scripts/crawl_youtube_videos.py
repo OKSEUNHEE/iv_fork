@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""RESOURCE_TOPICS(app/frontend/js/data/resourceTopics.js)의 각 주제에 대해
-YouTube 검색 결과를 수집하고, 임베드 재생이 가능한(playableInEmbed) 영상만 골라
+"""주식 투자 학습 주제별 YouTube 검색 결과를 수집하고, 임베드 재생이 가능한 영상만 골라
 app/frontend/js/data/youtubeVideos.json 으로 저장한다.
 
 런타임(배포된 앱)에서는 크롤링을 하지 않는다 — 이 스크립트는 개발 중 수동으로
@@ -18,29 +17,33 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TOPICS_JS = ROOT / "app" / "frontend" / "js" / "data" / "resourceTopics.js"
 OUT_JSON = ROOT / "app" / "frontend" / "js" / "data" / "youtubeVideos.json"
 
 VIDEOS_PER_TOPIC = 3
-CANDIDATES_TO_CHECK = 8
+CANDIDATES_TO_CHECK = 12
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+
+# 페이지에는 총 30개(10개 주제 × 3개)만 노출한다. 개별 종목 추천·단기 시황 대신
+# 투자 판단에 재사용 가능한 기초, 기업 분석, 가치·기술 분석, ETF·리스크 관리 중심이다.
+STOCK_TOPICS = [
+    {"category": "주식 투자 기초", "label": "주식 투자 입문", "query": "주식 투자 기초 초보 강의"},
+    {"category": "기업 분석", "label": "재무제표로 기업 분석", "query": "주식 투자 재무제표 기업분석"},
+    {"category": "기업 분석", "label": "산업·경쟁력 분석", "query": "주식 투자 산업분석 기업 경쟁력"},
+    {"category": "가치 평가", "label": "PER·PBR·ROE 가치평가", "query": "주식 투자 PER PBR ROE 가치평가"},
+    {"category": "가치 평가", "label": "현금흐름·기업가치", "query": "주식 투자 현금흐름 DCF 기업가치"},
+    {"category": "기술적 분석", "label": "이동평균·추세 분석", "query": "주식 차트 이동평균 추세분석 강의"},
+    {"category": "기술적 분석", "label": "RSI·MACD 보조지표", "query": "주식 차트 RSI MACD 보조지표 강의"},
+    {"category": "ETF·배당", "label": "ETF 투자 기초", "query": "ETF 투자 기초 주식 강의"},
+    {"category": "ETF·배당", "label": "배당주·배당 ETF", "query": "주식 배당주 배당 ETF 투자 기초"},
+    {"category": "포트폴리오·리스크", "label": "분산투자와 리스크 관리", "query": "주식 투자 분산투자 리스크 관리 강의"},
+]
+EXCLUDED_TITLE_TERMS = ("비트코인", "코인", "가상자산", "부동산", "아파트")
 
 
 def fetch(url: str) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=15) as resp:
         return resp.read().decode("utf-8", errors="ignore")
-
-
-def parse_topics_from_js() -> list[dict]:
-    """resourceTopics.js의 RESOURCE_TOPICS 배열을 정규식으로 파싱 (JS 모듈이라 직접 import 불가)."""
-    text = TOPICS_JS.read_text(encoding="utf-8")
-    block = re.search(r"RESOURCE_TOPICS\s*=\s*\[(.*?)\];", text, re.S).group(1)
-    entries = re.findall(
-        r"\{\s*category:\s*'([^']*)',\s*label:\s*'([^']*)',\s*query:\s*'([^']*)'\s*\}",
-        block,
-    )
-    return [{"category": c, "label": l, "query": q} for c, l, q in entries]
 
 
 def search_candidates(query: str) -> list[dict]:
@@ -82,10 +85,11 @@ def check_embeddable(video_id: str) -> bool:
 
 
 def main() -> None:
-    topics = parse_topics_from_js()
+    topics = STOCK_TOPICS
     print(f"{len(topics)}개 주제에 대해 크롤링을 시작합니다.")
 
     result: dict[str, list[dict]] = {}
+    used_video_ids: set[str] = set()
     for t in topics:
         print(f"- {t['category']} / {t['label']} ({t['query']})")
         candidates = search_candidates(t["query"])
@@ -94,13 +98,13 @@ def main() -> None:
             if len(picked) >= VIDEOS_PER_TOPIC:
                 break
             vid = c.get("videoId")
-            if not vid:
+            title = "".join(r.get("text", "") for r in c.get("title", {}).get("runs", []))
+            if not vid or vid in used_video_ids or any(term in title for term in EXCLUDED_TITLE_TERMS):
                 continue
             time.sleep(0.3)
             if not check_embeddable(vid):
                 print(f"    skip (임베드 불가): {vid}")
                 continue
-            title = "".join(r.get("text", "") for r in c.get("title", {}).get("runs", []))
             channel = "".join(r.get("text", "") for r in c.get("ownerText", {}).get("runs", []))
             length = c.get("lengthText", {}).get("simpleText", "")
             thumbs = c.get("thumbnail", {}).get("thumbnails", [])
@@ -112,6 +116,7 @@ def main() -> None:
                 "length": length,
                 "thumbnail": thumb,
             })
+            used_video_ids.add(vid)
             print(f"    OK: {vid} - {title}")
         result[t["label"]] = {
             "category": t["category"],

@@ -244,7 +244,7 @@ async function render() {
 
   el.innerHTML = `
     <div class="resource-hero">
-      <h1><i class="fa-brands fa-youtube" style="color:#ff0000"></i> 유튜브 학습 영상</h1>
+      <h1><i class="fa-brands fa-youtube" style="color:#ff0000"></i> 주식 투자 학습 영상</h1>
     </div>
 
     <div id="yt-player-wrap" class="card yt-player-card">

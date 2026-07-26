@@ -1,69 +1,35 @@
 {
-  "법인세·소득세 기초": {
-    "category": "세무·회계",
-    "query": "법인세 소득세 기초 회계",
+  "주식 투자 입문": {
+    "category": "주식 투자 기초",
+    "query": "주식 투자 기초 초보 강의",
     "videos": [
       {
-        "videoId": "_1b5DkO86cY",
-        "title": "(교안-'더보기'란) 기초회계 1강 - 회계란 무엇인가? [회계의 정의, 부기의 종류(단식부기, 복식부기) 재무회계 vs 관리회계] (회계원리 1강)",
-        "channel": "떠먹여주는 세법, 박세준 세무사",
-        "length": "11:51",
-        "thumbnail": "https://i.ytimg.com/vi/_1b5DkO86cY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAYQOnqutwqqd0QzmWrazlx4xODcw"
+        "videoId": "nqbKOvQ8x1s",
+        "title": "초등학생도 이해하는 주식투자 기초 개념",
+        "channel": "마크의 지식서재",
+        "length": "7:18",
+        "thumbnail": "https://i.ytimg.com/vi/nqbKOvQ8x1s/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDnJ-mc3BiE-Bw2_DnS1zVmeeutrQ"
       },
       {
-        "videoId": "k20Wxp9xCQ4",
-        "title": "[스마트경영] 2025 스마트 한 세법 Review! 법인세 전편 몰아보기 by 양소영 회계사",
-        "channel": "스마트경영아카데미",
-        "length": "2:38:32",
-        "thumbnail": "https://i.ytimg.com/vi/k20Wxp9xCQ4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAVvxFDfs_N_Q7d9R67U54oFSApog"
+        "videoId": "vF9LuDhG82w",
+        "title": "주식 기초 강의, 이 영상 하나로 완벽히 끝내세요｜실패 없는 주린이 투자 공부",
+        "channel": "주식캐스터 여니",
+        "length": "14:35",
+        "thumbnail": "https://i.ytimg.com/vi/vF9LuDhG82w/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAYGHrKsv-Nv36nYfX0iGsHLbZI0A"
       },
       {
-        "videoId": "KsyiJ7SvnFE",
-        "title": "어려운 세금, 회계 용어. 꼭 필요한 것만 모아서 알려드립니다! | 김종석 대표 세무사",
-        "channel": "로뎀세무법인",
-        "length": "29:41",
-        "thumbnail": "https://i.ytimg.com/vi/KsyiJ7SvnFE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBpbFEpDR8-XkljDJC8zrpn30d49g"
+        "videoId": "s8DCYRNq1Zo",
+        "title": "\"이 영상 하나면 주식기초 마스터합니다..\" 초등학생도 이해하는 주식의 모든것 1시간 6분 총정리",
+        "channel": "유치한경제학",
+        "length": "1:06:24",
+        "thumbnail": "https://i.ytimg.com/vi/s8DCYRNq1Zo/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBuVJ_BPBDY7IFUqJgdqYciY3W3hg"
       }
     ]
   },
-  "금리와 경제지표 분석": {
-    "category": "거시경제",
-    "query": "기준금리 경제지표 분석",
+  "재무제표로 기업 분석": {
+    "category": "기업 분석",
+    "query": "주식 투자 재무제표 기업분석",
     "videos": [
-      {
-        "videoId": "OhkXR23v5s0",
-        "title": "금리, 환율 미치도록 쉽게 설명해드립니다. 딱 이것만 이해하세요ㅣ지식인초대석 EP.38 (오건영 단장 1부)",
-        "channel": "지식인사이드",
-        "length": "26:39",
-        "thumbnail": "https://i.ytimg.com/vi/OhkXR23v5s0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCt7zojF4hFvQXXMk137RqKDVGJag"
-      },
-      {
-        "videoId": "kAjg6dZ_Xdw",
-        "title": "[오늘의 경제지표] 한은 \"기준금리 0.25%p 인상\"...증시 상황은? / YTN",
-        "channel": " YTN",
-        "length": "1:21",
-        "thumbnail": "https://i.ytimg.com/vi/kAjg6dZ_Xdw/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD3k5wnjnr9yS8oAjs866dDKpJ6yA"
-      },
-      {
-        "videoId": "afAPCByEbiQ",
-        "title": "슈카가 쉽게 설명해주는 금리란 무엇인가?🧐ㅣ경제유튜버 슈카ㅣ유민상의 배고픈 라디오",
-        "channel": "SBS Radio 에라오",
-        "length": "0:54",
-        "thumbnail": "https://i.ytimg.com/vi/afAPCByEbiQ/hq720_2.jpg?sqp=-oaymwE2CNAFEJQDSFXyq4qpAygIARUAAIhCGABwAcABBvABAfgBtgiAAoAPigIMCAAQARhIIFQoZTAP&rs=AOn4CLC9vSNz4LD0jR1l6TGXpnu2J9UH1A"
-      }
-    ]
-  },
-  "산업 분석 방법론": {
-    "category": "거시경제",
-    "query": "산업분석 방법론 주식투자",
-    "videos": [
-      {
-        "videoId": "8dQDU7g4P2Q",
-        "title": "종목분석보다 개미투자자가 더 챙겨야 할 투자분석 '산업분석'",
-        "channel": "캔들스토리TV",
-        "length": "16:06",
-        "thumbnail": "https://i.ytimg.com/vi/8dQDU7g4P2Q/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDMbKCFwSRlrJXdKLOclSZ3wLFi4Q"
-      },
       {
         "videoId": "bFtO3EjqupU",
         "title": "기업분석 재무제표가 어렵다면 딱 여기서 2시간만 버텨보세요 / 주식 초보 주린이 탈출을 위한 주식투자 기초 강의 / 글로리아",
@@ -72,73 +38,6 @@
         "thumbnail": "https://i.ytimg.com/vi/bFtO3EjqupU/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLByMtZPyMxe0K9onS9hBPCB9m5hWw"
       },
       {
-        "videoId": "g3_xuqWCAqo",
-        "title": "주식 투자, 가장 안전하게 하는 방법 | 서재형의 투자교실",
-        "channel": "서재형의 투자교실",
-        "length": "25:14",
-        "thumbnail": "https://i.ytimg.com/vi/g3_xuqWCAqo/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLATuirwlknvjopUSK5bol72D6e6fw"
-      }
-    ]
-  },
-  "손익계산서·대차대조표 읽는 법": {
-    "category": "재무제표",
-    "query": "손익계산서 대차대조표 읽는법",
-    "videos": [
-      {
-        "videoId": "hzvys4Q3vRE",
-        "title": "딱 3가지👌로 가장 쉽게 재무제표 보는 법 (feat. 삼성전자)｜신화!머니? EP.20",
-        "channel": "매경 자이앤트",
-        "length": "9:07",
-        "thumbnail": "https://i.ytimg.com/vi/hzvys4Q3vRE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAnuxGrm0OQP1YOplKPV7JRTzsPCA"
-      },
-      {
-        "videoId": "oLdk8UTlCW4",
-        "title": "초보자도 알기 쉬운 5분 재무제표 읽기(Feat.손익계산서)",
-        "channel": "투자이너 JSK",
-        "length": "5:13",
-        "thumbnail": "https://i.ytimg.com/vi/oLdk8UTlCW4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCmBB304vEltvkGtpXR_w2VpMBSBg"
-      },
-      {
-        "videoId": "j7Nczjv9Ua0",
-        "title": "손익계산서 상세항목, 이제야 알겠네~ 알겠어~",
-        "channel": "경제인회계인",
-        "length": "6:03",
-        "thumbnail": "https://i.ytimg.com/vi/j7Nczjv9Ua0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAwmWBY9En2Tuvj-86kLHGzgQ3LsQ"
-      }
-    ]
-  },
-  "현금흐름표와 기업가치평가": {
-    "category": "재무제표",
-    "query": "현금흐름표 기업가치평가",
-    "videos": [
-      {
-        "videoId": "oOvvxltm1rw",
-        "title": "재무제표 1타 강사 특강!!! 이번엔  현금흐름표!! 오분순삭 ~~",
-        "channel": "연합뉴스경제TV",
-        "length": "5:45",
-        "thumbnail": "https://i.ytimg.com/vi/oOvvxltm1rw/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDTD1zLqi1XH2qnuSgBsGdz4gcn4A"
-      },
-      {
-        "videoId": "yArdAyOuZGE",
-        "title": "기업가치평가의 중요한 지표 EBITDA (1/3) | 기업가치평가",
-        "channel": "회계법인 마일스톤",
-        "length": "6:45",
-        "thumbnail": "https://i.ytimg.com/vi/yArdAyOuZGE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBEDRLU6AbGLsKdYHUzwJVjOUh1Ag"
-      },
-      {
-        "videoId": "h3if-rTgRDo",
-        "title": "[함께배우기] 180일차, 재무제표 Part5. 현금흐름표",
-        "channel": "염블리와 함께 [LS증권]",
-        "length": "31:59",
-        "thumbnail": "https://i.ytimg.com/vi/h3if-rTgRDo/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA-AOg6sP860_lVn8yVhgc5-w2AcQ"
-      }
-    ]
-  },
-  "PER·PBR 등 상대가치 평가": {
-    "category": "밸류에이션",
-    "query": "PER PBR 밸류에이션 멀티플",
-    "videos": [
-      {
         "videoId": "HGgwyFcslwk",
         "title": "[sub] 주식투자의 가장 기초적인 사실들",
         "channel": "머니코믹스 Money Comics",
@@ -146,11 +45,58 @@
         "thumbnail": "https://i.ytimg.com/vi/HGgwyFcslwk/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBtkjSs46kV_dx3g7ITb4wRWYDyrg"
       },
       {
+        "videoId": "bE1iSUYA0KI",
+        "title": "[주식] 드디어 배운 '재무제표' 읽는법(홍진경,슈카)",
+        "channel": "공부왕찐천재 홍진경",
+        "length": "18:08",
+        "thumbnail": "https://i.ytimg.com/vi/bE1iSUYA0KI/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAeU8zf9YlM34O9lTKNaf0nM10rRw"
+      }
+    ]
+  },
+  "산업·경쟁력 분석": {
+    "category": "기업 분석",
+    "query": "주식 투자 산업분석 기업 경쟁력",
+    "videos": [
+      {
+        "videoId": "aUubZYdbRgc",
+        "title": "직접 발로 뛰고 알아낸 글로벌 경쟁력 갖춘 ‘이 기업’을 주목하라 (서재영) | 인포맥스라이브 240620",
+        "channel": "연합뉴스경제TV",
+        "length": "42:42",
+        "thumbnail": "https://i.ytimg.com/vi/aUubZYdbRgc/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAj6CY_-r816_iSqyFdXHRGxh9VnQ"
+      },
+      {
+        "videoId": "WXNr6XWS_kM",
+        "title": "[함께배우기] 82차, 기업분석 너무 쉬워요! (버틀러와 함께라면~)",
+        "channel": "염블리와 함께 [LS증권]",
+        "length": "1:04:22",
+        "thumbnail": "https://i.ytimg.com/vi/WXNr6XWS_kM/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDNJS5xl1MQYsgNeltZi4kPpAhLBw"
+      },
+      {
+        "videoId": "RQKrZtvdciY",
+        "title": "네이버로 기업분석 끝내기, 딱 4가지만 알면 됩니다!! (feat.주식초보, 주린이) | 유진투자증권TV",
+        "channel": "유진투자증권TV",
+        "length": "7:07",
+        "thumbnail": "https://i.ytimg.com/vi/RQKrZtvdciY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC1matiQoym3keJc4sZa5Me7DapOg"
+      }
+    ]
+  },
+  "PER·PBR·ROE 가치평가": {
+    "category": "가치 평가",
+    "query": "주식 투자 PER PBR ROE 가치평가",
+    "videos": [
+      {
         "videoId": "L3wtVInxKK0",
         "title": "저평가 주식으로 돈 버는 가치투자자라면 PER, PBR, ROE 지표는 꼭! 보세요｜주식 초보를 위한 가치투자 용어 총정리｜신화!머니? EP.21",
         "channel": "매경 자이앤트",
         "length": "7:41",
         "thumbnail": "https://i.ytimg.com/vi/L3wtVInxKK0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBpsPSS462fAG2c54_qfgudS_tMkg"
+      },
+      {
+        "videoId": "h9SjKnYVB6g",
+        "title": "투자 실패를 막는 3가지 숫자 PER PBR ROE 이해부터 활용법까지",
+        "channel": "구조를 이해하는 사고",
+        "length": "16:12",
+        "thumbnail": "https://i.ytimg.com/vi/h9SjKnYVB6g/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDu3wgwvLOHWVPpctcV_crQIkd8Ug"
       },
       {
         "videoId": "TSbx2pq9p38",
@@ -161,10 +107,71 @@
       }
     ]
   },
-  "추세·보조지표 분석": {
-    "category": "기술적분석",
-    "query": "기술적분석 이동평균 RSI",
+  "현금흐름·기업가치": {
+    "category": "가치 평가",
+    "query": "주식 투자 현금흐름 DCF 기업가치",
     "videos": [
+      {
+        "videoId": "Mp-ikfxs0K8",
+        "title": "단 5분으로 워렌버핏이 쓰는 가치 평가 방법을 배운다고?? (feat. DCF 밸류에이션)",
+        "channel": "타민더마켓",
+        "length": "4:52",
+        "thumbnail": "https://i.ytimg.com/vi/Mp-ikfxs0K8/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBpkV_WCr0R6XqcpPaPy5mF65zKDA"
+      },
+      {
+        "videoId": "nkPL4bY01z8",
+        "title": "워렌 버핏이 알려준 대로 테슬라 주식의 적정 주가를 구해보자 - 주린이를 위한 가치 평가/밸류에이션 기초 강의 (무료 DCF 엑셀 공유)",
+        "channel": "타민더마켓",
+        "length": "21:01",
+        "thumbnail": "https://i.ytimg.com/vi/nkPL4bY01z8/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAU_wYlYqNRk-4TNjw0N80hRgFzsQ"
+      },
+      {
+        "videoId": "FL0uFCPq_5I",
+        "title": "[하루10분 미국 주식공부] DCF 현금흐름 할인 모델을 통해 기업가치 분석하기",
+        "channel": "손주부 TV",
+        "length": "24:36",
+        "thumbnail": "https://i.ytimg.com/vi/FL0uFCPq_5I/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBu4m47_-8a6HhQscKDy63zS1fxYg"
+      }
+    ]
+  },
+  "이동평균·추세 분석": {
+    "category": "기술적 분석",
+    "query": "주식 차트 이동평균 추세분석 강의",
+    "videos": [
+      {
+        "videoId": "x28_ZmgrklQ",
+        "title": "이동평균선 보는법, 이 영상 하나면 끝납니다",
+        "channel": "백타 트레이딩룸",
+        "length": "7:58",
+        "thumbnail": "https://i.ytimg.com/vi/x28_ZmgrklQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAV0h-SzBEHK-P1CO2sEVvlqfpj1w"
+      },
+      {
+        "videoId": "YPsBeQLc1nA",
+        "title": "주식차트에 쓰레기 같은 지표 다 지우고 '20일선' 딱 하나만 제대로 봐도 누구나 월 5천 벌 수 있습니다.",
+        "channel": "슈퍼개미 차트픽",
+        "length": "24:32",
+        "thumbnail": "https://i.ytimg.com/vi/YPsBeQLc1nA/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCn3ueEt85LLnVrPFgB3vhDUtyUmg"
+      },
+      {
+        "videoId": "YOQ_3ijdr9w",
+        "title": "이동평균선 차트 보는법, 이 영상 하나만 보면 됩니다. (원리, 매매법, 설정법 총정리 완결)",
+        "channel": "슈퍼트레이더",
+        "length": "27:02",
+        "thumbnail": "https://i.ytimg.com/vi/YOQ_3ijdr9w/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBXOa14xs_RLeUaRy1vmVVkh05Ohg"
+      }
+    ]
+  },
+  "RSI·MACD 보조지표": {
+    "category": "기술적 분석",
+    "query": "주식 차트 RSI MACD 보조지표 강의",
+    "videos": [
+      {
+        "videoId": "rcSHqfdvWtw",
+        "title": "[처음 배우는 주식차트] 28일 중기 지표의 대명사 MACD",
+        "channel": "친절한 재승씨",
+        "length": "17:51",
+        "thumbnail": "https://i.ytimg.com/vi/rcSHqfdvWtw/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA482VKplYy2BueP_A6ZCIN338GAg"
+      },
       {
         "videoId": "XsBcff4iVsQ",
         "title": "[처음 배우는 주식차트] 22일 주가 움직임의 강도 측정 RSI",
@@ -173,59 +180,45 @@
         "thumbnail": "https://i.ytimg.com/vi/XsBcff4iVsQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDs10F_zv1wCatFkSg6RY1AsGBjRw"
       },
       {
-        "videoId": "vMMt3a3pl3Q",
-        "title": "'RSI + 이동평균선' 만으로 간단하게 시장을 지배하는 매매전략,  이걸 알아야 크게 먹습니다 (차트분석, 차트설정)",
-        "channel": "비트고수",
-        "length": "30:42",
-        "thumbnail": "https://i.ytimg.com/vi/vMMt3a3pl3Q/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDCOH7n1VQWOnG1iu8nX2WfgvybPA"
-      },
-      {
-        "videoId": "Z_WyaDQDQNI",
-        "title": "차트 3개만 알면 주린이 탈출 / RSI 이동평균선 MACD / 하나증권 김현민 과장 (풀버전)",
-        "channel": "와이스트릿 - 지식과 자산의 복리효과",
-        "length": "1:03:54",
-        "thumbnail": "https://i.ytimg.com/vi/Z_WyaDQDQNI/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDrg2hoTFELw_D2g3A2H_ccc_URFQ"
+        "videoId": "TWO4NeDg6O4",
+        "title": "고수들만 몰래 쓰는 MACD+RSI 돈복사 매매법, 검색식까지 전부 공개합니다",
+        "channel": "엘리트강사의 기술적 분석",
+        "length": "35:12",
+        "thumbnail": "https://i.ytimg.com/vi/TWO4NeDg6O4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCEqwvKKQmNa03LNFDAppb-PnRoFw"
       }
     ]
   },
-  "엘리어트 파동·차트 패턴": {
-    "category": "기술적분석",
-    "query": "엘리어트 파동이론 차트패턴",
+  "ETF 투자 기초": {
+    "category": "ETF·배당",
+    "query": "ETF 투자 기초 주식 강의",
     "videos": [
       {
-        "videoId": "fEgZ0bGV0dM",
-        "title": "4분만에 알려드립니다. 이것도 이해 못하면 엘리어트 파동 하지 마세요.",
-        "channel": "차트보는 서울대생",
-        "length": "4:12",
-        "thumbnail": "https://i.ytimg.com/vi/fEgZ0bGV0dM/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDRFkS5XATdFXCWiQ81QP_AazDxOA"
+        "videoId": "CQJkUzwexXg",
+        "title": "ETF 투자방법 어르신들도 이해하기 쉬운 기초강의!! 이거 영상하나면 종결!!",
+        "channel": "방구석 워런버핏",
+        "length": "46:16",
+        "thumbnail": "https://i.ytimg.com/vi/CQJkUzwexXg/hq720.jpg?sqp=-oaymwEfCNAFEJQDSFXyq4qpAxEIARUAAIhCGAFwAcABBrgCGKLzl_8DCgik2eHMBhjgqAE=&rs=AOn4CLD3eT1eSoMIr06eueViv-fRcjohFg&usqp=CBg"
       },
       {
-        "videoId": "Kz7uJk9X-kI",
-        "title": "책에서 절대 가르쳐 주지 않는 엘리엇 파동의 3가지 패턴 공개! #주식단테 #주식강의 #주식공부",
-        "channel": "주식단테_20년차트고수",
-        "length": "4:44",
-        "thumbnail": "https://i.ytimg.com/vi/Kz7uJk9X-kI/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD63UQ4By1sJHgHlwESODURYfqf6Q"
+        "videoId": "rX4Y23mh1XY",
+        "title": "초등학생도 이해하기 쉽게 설명하는 ETF의 모든 것 | 투자 기초",
+        "channel": "보통사람의 재테크 사관학교 ",
+        "length": "18:35",
+        "thumbnail": "https://i.ytimg.com/vi/rX4Y23mh1XY/hq720.jpg?sqp=-oaymwEfCNAFEJQDSFXyq4qpAxEIARUAAIhCGAFwAcABBrgCGKLzl_8DCgi3_aLHBhjgqAE=&rs=AOn4CLDFkBZNkOAhxEHEHeM0_GmEU8LQcA&usqp=CBg"
       },
       {
-        "videoId": "xPnxp9fAjrc",
-        "title": "뼈 때리는 엘리어트 파동이론 강의 - 시골의사 박경철",
-        "channel": "매억남 요약 - 매요",
-        "length": "4:08:43",
-        "thumbnail": "https://i.ytimg.com/vi/xPnxp9fAjrc/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDS7x_XAJZ8O5HO9TeiIOB4dcitcw"
+        "videoId": "rkqAGRtX77Y",
+        "title": "왕초보를 위한 주식 기초용어 총정리",
+        "channel": "이효석아카데미",
+        "length": "2:49:27",
+        "thumbnail": "https://i.ytimg.com/vi/rkqAGRtX77Y/hq720.jpg?sqp=-oaymwEfCNAFEJQDSFXyq4qpAxEIARUAAIhCGAFwAcABBrgCGKLzl_8DCgi7tpXNBhjgqAE=&rs=AOn4CLCEGnwk_OC6DAEfEnrnMFxrFUdiIw&usqp=CBg"
       }
     ]
   },
-  "주식·배당·ETF 기초": {
-    "category": "금융상품",
-    "query": "주식 배당 ETF 기초",
+  "배당주·배당 ETF": {
+    "category": "ETF·배당",
+    "query": "주식 배당주 배당 ETF 투자 기초",
     "videos": [
-      {
-        "videoId": "YI-dTqs6PGQ",
-        "title": "요즘 핫한 배당형 ETF 이해하기",
-        "channel": "머니코믹스 Money Comics",
-        "length": "20:52",
-        "thumbnail": "https://i.ytimg.com/vi/YI-dTqs6PGQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBSok9CmeySPEKiRRb933KYxSe7Iw"
-      },
       {
         "videoId": "Qrpln889-rk",
         "title": "커버드콜부터 월배당 ETF까지! 배당투자 A to Z💰ㅣ타이머 / 14F",
@@ -234,146 +227,45 @@
         "thumbnail": "https://i.ytimg.com/vi/Qrpln889-rk/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCqEpRYcUDSvJze3m86RidEtTxaVg"
       },
       {
-        "videoId": "tQ95-h70f5w",
-        "title": "🗓️ 월배당ETF 풀버전ㅣ1시간 42분짜리 영상🎞️",
-        "channel": "박곰희TV",
-        "length": "1:42:36",
-        "thumbnail": "https://i.ytimg.com/vi/tQ95-h70f5w/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC-Mmso8XztiU7fwVIuYHb6RC9Zqw"
+        "videoId": "HXHmxc9xcQ4",
+        "title": "매달 월급처럼 돈 받는 월배당 ETF만 투자해도 될까?",
+        "channel": "홍춘욱의 경제강의노트",
+        "length": "9:25",
+        "thumbnail": "https://i.ytimg.com/vi/HXHmxc9xcQ4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBZUu0dB0sZ33Sd1s7Y9r-iMCfkIQ"
+      },
+      {
+        "videoId": "lqM9PFrmqb0",
+        "title": "S&P500 ETF 시작하고 투자하는 법! 꼭 이만큼만 사두세요! 노후 돈 걱정 끝납니다 (박곰희 작가 통합본)",
+        "channel": "책과삶",
+        "length": "52:41",
+        "thumbnail": "https://i.ytimg.com/vi/lqM9PFrmqb0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLARfZUginSEafeXSVu9QxjTr6OBdQ"
       }
     ]
   },
-  "자본시장법과 금융상품 분류": {
-    "category": "금융상품",
-    "query": "자본시장법 금융상품 분류",
+  "분산투자와 리스크 관리": {
+    "category": "포트폴리오·리스크",
+    "query": "주식 투자 분산투자 리스크 관리 강의",
     "videos": [
       {
-        "videoId": "GCcZ53tnlLM",
-        "title": "2026 서호성 투운사 POINT CLIP 👓 자본시장법",
-        "channel": "인스TV - 금융·무역",
-        "length": "9:09",
-        "thumbnail": "https://i.ytimg.com/vi/GCcZ53tnlLM/hq720.jpg?sqp=-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLD-ikTacEs9e0ohONBgtYt90Fi6Cw"
+        "videoId": "5lHHAxyXI_g",
+        "title": "가장 기본적인 투자방법",
+        "channel": "머니코믹스 Money Comics",
+        "length": "19:17",
+        "thumbnail": "https://i.ytimg.com/vi/5lHHAxyXI_g/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBUoPYMvFffR0BeDiCos32WfCpiEA"
       },
       {
-        "videoId": "pCwEIgHxpow",
-        "title": "투자금융상품의 개요, 금융상품의 종류 [쉬운회계원리 35강]",
-        "channel": "사진찍는회계사",
-        "length": "19:11",
-        "thumbnail": "https://i.ytimg.com/vi/pCwEIgHxpow/hq720.jpg?sqp=-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLCS_3YTlL8ptl6F7TwVQw2a9xfouA"
+        "videoId": "dT2EcTLw0Nc",
+        "title": "적은 돈 불리고 싶다면 꼭 알아야 할 '포트폴리오 공식'ㅣ지식인초대석 EP.75 (오건영 단장 2부)",
+        "channel": "지식인사이드",
+        "length": "28:28",
+        "thumbnail": "https://i.ytimg.com/vi/dT2EcTLw0Nc/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCwt6wrgthb4FFS0IYEPEs5QWdtGg"
       },
       {
-        "videoId": "is5tlr1YfZQ",
-        "title": "[회계사클라쓰] 금융상품의 정의와 종류",
-        "channel": "회계사클라쓰",
-        "length": "3:20",
-        "thumbnail": "https://i.ytimg.com/vi/is5tlr1YfZQ/hqdefault.jpg?sqp=-oaymwEgCOADEI4CSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDRdfIpyRbjk3XMeDCKzVZ_Sggh5Q"
-      }
-    ]
-  },
-  "포트폴리오 이론과 자산배분": {
-    "category": "포트폴리오",
-    "query": "포트폴리오 이론 자산배분 마코위츠",
-    "videos": [
-      {
-        "videoId": "6UFsY2FEvJg",
-        "title": "해리 마코위츠(Harry M. Markowitz)의 포트폴리오 이론과 주식투자｜분산투자｜계란을 한바구니에 담지말라",
-        "channel": "명사명언 Famous Quotes",
-        "length": "5:47",
-        "thumbnail": "https://i.ytimg.com/vi/6UFsY2FEvJg/hq720.jpg?sqp=-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLAHQXgp0rGw40QwHC5xp8zHBeH3lg"
-      },
-      {
-        "videoId": "HTHpfVVVtfY",
-        "title": "KR) 분산투자, 포트폴리오 이론의 시작 (Markowitz, 1952)",
-        "channel": "재무박스 Finance_Box",
-        "length": "7:28",
-        "thumbnail": "https://i.ytimg.com/vi/HTHpfVVVtfY/hqdefault.jpg?sqp=-oaymwEgCOADEI4CSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBXLy3KAwbhIlc0aVxC60mQ4aV39w"
-      },
-      {
-        "videoId": "EnkrTSpyxVk",
-        "title": "[재무관리 입문강의] 31. 포트폴리오이론의 결론, 마코위츠의 효율적투자선",
-        "channel": "CPA지한송",
-        "length": "7:10",
-        "thumbnail": "https://i.ytimg.com/vi/EnkrTSpyxVk/hq720.jpg?sqp=-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBPSKwDu11sJwn8sMMUEOiNon-1OA"
-      }
-    ]
-  },
-  "VaR와 리스크 관리": {
-    "category": "리스크관리",
-    "query": "Value at Risk 리스크관리",
-    "videos": [
-      {
-        "videoId": "RctZ2-FldnI",
-        "title": "[투자자산운용사/토마토패스] 핵심종합반 리스크관리02",
-        "channel": "토마토패스",
-        "length": "10:50",
-        "thumbnail": "https://i.ytimg.com/vi/RctZ2-FldnI/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCFkQUwz90trEkdrvQFdhcBU7lcpg"
-      },
-      {
-        "videoId": "T0L_4dMmuuM",
-        "title": "VaR(Value at Risk)의 개념 및 활용",
-        "channel": "한국무역보험공사",
-        "length": "12:05",
-        "thumbnail": "https://i.ytimg.com/vi/T0L_4dMmuuM/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD92tR8wyY2MusHB0Kfzt4mVWOgwg"
-      },
-      {
-        "videoId": "TWtYAgKLydU",
-        "title": "투자자산운용사 꼭 알아야 할 '리스크 관리 풀이'  ┃ 해커스금융 민영기",
-        "channel": "해커스금융·무역자격증",
-        "length": "50:57",
-        "thumbnail": "https://i.ytimg.com/vi/TWtYAgKLydU/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDQEYKGqPQrJRs-6J1fWKt2f4G-oA"
-      }
-    ]
-  },
-  "퀀트 트레이딩과 백테스트": {
-    "category": "퀀트/ML",
-    "query": "퀀트 트레이딩 백테스트 전략",
-    "videos": [
-      {
-        "videoId": "BFkPzl1uziE",
-        "title": "[월가아재]퀀트 투자의 허와 실 - 제 1부: 어설프게 하면 독이 됩니다",
-        "channel": "월가아재의 과학적 투자",
-        "length": "44:57",
-        "thumbnail": "https://i.ytimg.com/vi/BFkPzl1uziE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB-FxhQMpbIEMpx7QnEadPpLH6V7w"
-      },
-      {
-        "videoId": "KuxwIrlU7NQ",
-        "title": "20년간 연수익률 40%을 낸, 백테스팅으로 검증된 전략이 있다구요?",
-        "channel": "월가아재의 과학적 투자",
-        "length": "25:41",
-        "thumbnail": "https://i.ytimg.com/vi/KuxwIrlU7NQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDFEW7zGgrNC03kuVuMpQ7yym2Jnw"
-      },
-      {
-        "videoId": "1ITUlCInyDU",
-        "title": "[파이썬 퀀트] 26강 - 퀀트 트레이딩 전략 백테스트 (추세추종전략, 롱숏전략, 평균회귀전략)",
-        "channel": "헨리의 금융MBA",
-        "length": "24:33",
-        "thumbnail": "https://i.ytimg.com/vi/1ITUlCInyDU/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD_ujFgG-TtSbIONz2kRN4DNumGHg"
-      }
-    ]
-  },
-  "LSTM·Transformer 시계열 예측": {
-    "category": "퀀트/ML",
-    "query": "LSTM Transformer 주가 시계열 예측",
-    "videos": [
-      {
-        "videoId": "yZoHlkCbNoM",
-        "title": "AI로 삼성전자의 주가를 예측해보자 (with LSTM)",
-        "channel": "흑우스토리",
-        "length": "11:08",
-        "thumbnail": "https://i.ytimg.com/vi/yZoHlkCbNoM/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLASJSauEbFdgfS0vccpdcm00H0jJQ"
-      },
-      {
-        "videoId": "IOARrKfS6yY",
-        "title": "[데이터분석] 시계열 분석 - 실습 | RNN, LSTM",
-        "channel": "준랩 | JoonLab",
-        "length": "13:33",
-        "thumbnail": "https://i.ytimg.com/vi/IOARrKfS6yY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCHlVRVoFmyGAhPH7kMZ05GaCIzVQ"
-      },
-      {
-        "videoId": "kkG6G5VHfwo",
-        "title": "인공지능으로 주가(시계열 데이터) 예측하기",
-        "channel": "seokkhong",
-        "length": "14:54",
-        "thumbnail": "https://i.ytimg.com/vi/kkG6G5VHfwo/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCjUJXLx4vZGYr0BsRR_n21sJe0LQ"
+        "videoId": "t65cnR6SuDs",
+        "title": "[🔥돈을 부르는 영상🔥] 투자 전문가들이 말하는 공통점들, 어떻게 하면 돈을 배로 불릴수 있을까? 박소연 애널리스트의 투자 교육 #몰아볼교양",
+        "channel": "EBSCulture (EBS 교양)",
+        "length": "1:06:54",
+        "thumbnail": "https://i.ytimg.com/vi/t65cnR6SuDs/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAXwsHmRfp3MQaekFQiIbc2DmDEww"
       }
     ]
   }
