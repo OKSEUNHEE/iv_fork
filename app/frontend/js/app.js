@@ -36,6 +36,7 @@ import { dartFinancialAnalysisView } from './views/dartFinancialAnalysis.js';
 import { ollamaView }               from './views/ollama.js';
 import { api }                 from './api.js';
 import { LEARN_DOCS }          from './data/learnDocs.js';
+import { restoreFormState, saveFormState } from './utils/localState.js';
 
 const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
@@ -261,12 +262,19 @@ function navigate(view) {
   if (view?.startsWith('quiz-')) updateQuizSidebarLock();
 
   route.render();
+  // MongoDB를 사용하지 않는 화면의 사용자 입력은 화면별로 브라우저에 보관한다.
+  // 렌더링 직후 실행해 각 뷰의 기본값 대신 마지막 입력값을 복원한다.
+  requestAnimationFrame(() => restoreFormState(view, app));
   addPracticeGuide(view);
 
   if (window.innerWidth <= MOBILE_BREAKPOINT && typeof closeSidebar === 'function') closeSidebar();
 }
 
 window.navigate = navigate;
+
+// 개별 뷰마다 저장 코드를 반복하지 않고 모든 입력·선택 변경을 자동 보관한다.
+app.addEventListener('input', (event) => saveFormState(currentView, app));
+app.addEventListener('change', (event) => saveFormState(currentView, app));
 
 // Wire up sidebar links
 document.querySelectorAll('.nav-item[data-view], .sidebar-link[data-view]').forEach(a => {

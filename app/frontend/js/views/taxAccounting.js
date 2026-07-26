@@ -1,4 +1,5 @@
 import { apiFetch } from '../api.js';
+import { loadViewPayload, saveViewPayload } from '../utils/localState.js';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -449,8 +450,16 @@ export function taxAccountingView(container) {
   `;
 
   // ── state ────────────────────────────────────────────────────────────────
-  let _transactions = null;
-  let _simResult    = null;
+  const savedState = loadViewPayload('tax-accounting') || {};
+  let _transactions = savedState.transactions || null;
+  let _simResult    = savedState.simResult || null;
+
+  function persistTaxState() {
+    saveViewPayload('tax-accounting', {
+      transactions: _transactions,
+      simResult: _simResult,
+    });
+  }
 
   const step1 = container.querySelector('#tax-step1');
   const step2 = container.querySelector('#tax-step2');
@@ -492,6 +501,8 @@ export function taxAccountingView(container) {
       const data = await fetch('/api/tax/upload', { method: 'POST', body: fd }).then(r => r.json());
       if (data.detail) throw new Error(data.detail);
       _transactions = data.transactions;
+      _simResult = null;
+      persistTaxState();
       statusEl.innerHTML = `<span style="color:#22c55e;"><i class="fa-solid fa-circle-check"></i> ${data.rows}건 로드 완료 · ${file.name}</span>`;
       showStep2(_transactions);
     } catch (e) {
@@ -505,6 +516,8 @@ export function taxAccountingView(container) {
     try {
       const data = await apiFetch('/api/tax/sample');
       _transactions = data.transactions;
+      _simResult = null;
+      persistTaxState();
       statusEl.innerHTML = `<span style="color:#22c55e;"><i class="fa-solid fa-circle-check"></i> 샘플 데이터 ${data.rows}건 로드 완료</span>`;
       showStep2(_transactions);
     } catch (e) {
@@ -556,6 +569,7 @@ export function taxAccountingView(container) {
       };
 
       _simResult = await apiFetch('/api/tax/simulate', { method: 'POST', body: JSON.stringify(body) });
+      persistTaxState();
 
       step3.style.display = 'block';
       renderAuditReport(_simResult, container.querySelector('#tax-result-audit'));
@@ -587,4 +601,17 @@ export function taxAccountingView(container) {
   container.querySelector('#tax-print-btn').addEventListener('click', () => {
     window.print();
   });
+
+  // 업로드 원본 파일 자체는 브라우저 정책상 복원할 수 없지만, 파싱된 거래내역과
+  // 마지막 결과는 보관하므로 새로고침 후에도 바로 이어서 검토할 수 있다.
+  if (_transactions?.length) {
+    statusEl.innerHTML = `<span style="color:#22c55e;"><i class="fa-solid fa-clock-rotate-left"></i> 이전에 저장한 거래 내역 ${_transactions.length}건을 복원했습니다.</span>`;
+    showStep2(_transactions);
+  }
+  if (_simResult) {
+    step3.style.display = 'block';
+    renderAuditReport(_simResult, container.querySelector('#tax-result-audit'));
+    renderTaxOfficeReport(_simResult, container.querySelector('#tax-result-taxoffice'));
+    switchTab('audit');
+  }
 }
