@@ -139,6 +139,14 @@ export function learnView(app, docId) {
     // mermaid 코드블록(```mermaid ... ```) 렌더링
     renderMermaidBlocks(mdContent);
 
+    // 문서 안의 youtube.com 링크는 외부로 바로 나가지 않고, 자체 뷰어가 있는
+    // "외부 자료 > 유튜브 학습 영상" 페이지로 연결한다.
+    mdContent.querySelectorAll('a[href*="youtube.com"], a[href*="youtu.be"]').forEach((a) => {
+      a.href = 'pages/youtube.html';
+      a.removeAttribute('target');
+      a.title = '유튜브 학습 영상 목록으로 이동';
+    });
+
     // inject TOC (문서에 소제목이 없으면 목차 버튼도 숨김)
     const tocEl = app.querySelector('#toc-placeholder');
     const tocHtml = buildToc(mdContent);

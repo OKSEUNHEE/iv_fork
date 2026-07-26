@@ -237,14 +237,13 @@ app.add_middleware(
 
 @app.middleware("http")
 async def no_cache_static_assets(request, call_next):
-    """StaticFiles only sets ETag/Last-Modified, so browsers fall back to
-    heuristic caching and can keep serving a pre-deploy JS/CSS file after a
-    redeploy. Force revalidation on every request for anything outside
-    /api/ so a redeploy is always picked up (still cheap: unchanged files
-    get a 304 via the existing ETag)."""
+    """StaticFiles only sets ETag/Last-Modified, so browsers could otherwise
+    keep serving a pre-deploy JS/CSS file after a redeploy. no-store forbids
+    the browser from caching these responses at all, so every load fetches
+    the current deploy instead of depending on cache revalidation."""
     response = await call_next(request)
     if not request.url.path.startswith("/api/"):
-        response.headers["Cache-Control"] = "no-cache"
+        response.headers["Cache-Control"] = "no-store"
     return response
 
 
