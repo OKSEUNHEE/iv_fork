@@ -235,6 +235,19 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def no_cache_static_assets(request, call_next):
+    """StaticFiles only sets ETag/Last-Modified, so browsers fall back to
+    heuristic caching and can keep serving a pre-deploy JS/CSS file after a
+    redeploy. Force revalidation on every request for anything outside
+    /api/ so a redeploy is always picked up (still cheap: unchanged files
+    get a 304 via the existing ETag)."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 class CrossValidationRequest(BaseModel):
     n_samples: int = Field(default=1000, ge=200, le=20000)
     n_features: int = Field(default=10, ge=2, le=100)
