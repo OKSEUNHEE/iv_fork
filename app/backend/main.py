@@ -3761,16 +3761,23 @@ def company_financials(req: CompanyFinancialsRequest) -> dict[str, object]:
 
 
 PERIOD_DAYS = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365}
+HOME_MARKETS = {
+    "kospi":  {"ticker": "^KS11", "name": "KOSPI", "base_price": 2650.0, "seed": 42},
+    "kosdaq": {"ticker": "^KQ11", "name": "KOSDAQ", "base_price": 850.0, "seed": 73},
+    "nasdaq": {"ticker": "^IXIC", "name": "NASDAQ", "base_price": 18000.0, "seed": 109},
+    "sp500":  {"ticker": "^GSPC", "name": "S&P 500", "base_price": 5200.0, "seed": 151},
+}
 
 
-@app.get("/api/home/kospi-candle")
-def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
+@app.get("/api/home/market-candle")
+def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, object]:
     if period not in PERIOD_DAYS:
         period = "3mo"
+    config = HOME_MARKETS.get(market, HOME_MARKETS["kospi"])
     import pandas as pd
     try:
         import yfinance as yf
-        df = yf.download("^KS11", period=period, interval="1d", progress=False,
+        df = yf.download(config["ticker"], period=period, interval="1d", progress=False,
                          auto_adjust=True, threads=False)
         if df.empty:
             raise ValueError("empty")
@@ -3789,10 +3796,10 @@ def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
                 "l": _f("Low"),  "c": _f("Close"),
                 "v": int(_f("Volume") or 0),
             })
-        return {"ohlcv": ohlcv, "is_simulated": False}
+        return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv, "is_simulated": False}
     except Exception:
         import numpy as np, math
-        rng_state = 42
+        rng_state = config["seed"]
         def _rand():
             nonlocal rng_state
             rng_state = (rng_state * 1664525 + 1013904223) % 2**32
@@ -3800,7 +3807,7 @@ def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
         def _randn():
             u, v = max(_rand(), 1e-10), _rand()
             return math.sqrt(-2 * math.log(u)) * math.cos(2 * math.pi * v)
-        price = 2650.0
+        price = config["base_price"]
         ohlcv = []
         days = PERIOD_DAYS[period]
         n_bars = int(days * 0.72)
@@ -3815,7 +3822,13 @@ def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
             ohlcv.append({"date": date, "o": round(o, 2), "h": round(h, 2),
                           "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e8)})
             price = c
-        return {"ohlcv": ohlcv, "is_simulated": True}
+        return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv, "is_simulated": True}
+
+
+@app.get("/api/home/kospi-candle")
+def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
+    """Backward-compatible KOSPI endpoint for older clients."""
+    return home_market_candle("kospi", period)
 
 
 # ─── DART Financial Analysis ─────────────────────────────────────────────────

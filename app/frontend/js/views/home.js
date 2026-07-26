@@ -1,229 +1,142 @@
-// ── Home view — KOSPI chart via ApexCharts ───────────────────────────────────
+const HOME_MARKETS = [
+  { id: 'kospi',  name: 'KOSPI',   ticker: '^KS11', color: '#0078d4' },
+  { id: 'kosdaq', name: 'KOSDAQ',  ticker: '^KQ11', color: '#8b5cf6' },
+  { id: 'nasdaq', name: 'NASDAQ',  ticker: '^IXIC', color: '#0f766e' },
+  { id: 'sp500',  name: 'S&P 500', ticker: '^GSPC', color: '#d97706' },
+];
+
+const PERIODS = [['1mo', '1M'], ['3mo', '3M'], ['6mo', '6M'], ['1y', '1Y']];
+
+function chartCard(market) {
+  return `
+    <section class="home-market-card" data-market-card="${market.id}">
+      <header class="home-market-card-head">
+        <div>
+          <div class="home-market-name">${market.name} <span>· ${market.ticker}</span></div>
+          <div class="home-market-price-row">
+            <strong data-price="${market.id}">--</strong>
+            <em data-change="${market.id}">--</em>
+          </div>
+        </div>
+        <div class="home-market-actions">
+          <div class="home-market-periods" data-periods="${market.id}">
+            ${PERIODS.map(([value, label]) => `<button type="button" data-period="${value}" class="${value === '3mo' ? 'active' : ''}">${label}</button>`).join('')}
+          </div>
+          <button type="button" class="home-market-expand" data-expand="${market.id}" aria-label="${market.name} 차트 크게 보기">
+            <i class="fa-solid fa-expand"></i><span>크게 보기</span>
+          </button>
+        </div>
+      </header>
+      <div class="home-market-chart-wrap">
+        <div class="home-market-chart" data-chart="${market.id}"></div>
+        <div class="home-market-loading" data-loading="${market.id}"><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
+      </div>
+      <footer class="home-market-foot">
+        <span><i class="fa-solid fa-chart-line"></i> 일봉 · MA20</span>
+        <span data-simulated="${market.id}"></span>
+      </footer>
+    </section>`;
+}
+
 export function homeView(container, navigate) {
-  const groups = [
-    {
-      title: '매크로 분석',
-      icon: 'fa-solid fa-globe',
-      items: [
-        { icon: 'fa-solid fa-satellite-dish', name: '거시경제현황 1', tag: '실시간', view: 'macro-realtime' },
-        { icon: 'fa-solid fa-chart-area',     name: '거시경제현황 2', tag: '시뮬레이션', view: 'macro-simulation' },
-      ],
-    },
-    {
-      title: '산업적 분석',
-      icon: 'fa-solid fa-industry',
-      items: [
-        { icon: 'fa-solid fa-industry', name: '산업 경쟁력 분석', tag: 'Porter · SWOT', view: 'industry-analysis' },
-      ],
-    },
-    {
-      title: '기본적 분석',
-      icon: 'fa-solid fa-file-invoice-dollar',
-      items: [
-        { icon: 'fa-solid fa-magnifying-glass-chart', name: 'DART 기업검색',    tag: '종목코드', view: 'dart-company-search' },
-        { icon: 'fa-solid fa-scale-balanced',          name: '재무제표분석',     tag: 'IS · BS · CF', view: 'financial-statement' },
-        { icon: 'fa-solid fa-briefcase',               name: '포트폴리오 최적화', tag: '샤프비율', view: 'portfolio' },
-        { icon: 'fa-solid fa-shield-halved',           name: '리스크 분석',     tag: 'VaR', view: 'risk' },
-        { icon: 'fa-solid fa-calculator',              name: '밸류에이션',      tag: 'DCF · EVA', view: 'valuation' },
-      ],
-    },
-    {
-      title: '기술적 분석',
-      icon: 'fa-solid fa-chart-line',
-      items: [
-        { icon: 'fa-solid fa-chart-candlestick', name: '기술적 분석',    tag: 'MA · 캔들 · 지표', view: 'technical-chart' },
-        { icon: 'fa-solid fa-clock-rotate-left', name: '백테스트',      tag: 'MA 크로스오버', view: 'backtest' },
-        { icon: 'fa-solid fa-diagram-project',   name: '퀀트 파이프라인', tag: 'RSI · MACD · ML', view: 'pipeline' },
-      ],
-    },
-    {
-      title: '퀀트 금융 지식',
-      icon: 'fa-solid fa-layer-group',
-      items: [
-        { icon: 'fa-solid fa-sitemap',       name: '투자 성향 분석',    tag: '의사결정 트리', view: 'investment-tree' },
-        { icon: 'fa-solid fa-layer-group',   name: '금융상품·자산배분', tag: '5일 커리큘럼', view: 'financial-knowledge' },
-        { icon: 'fa-solid fa-briefcase',     name: '자산배분 최적화',   tag: 'Risk-Parity', view: 'portfolio' },
-        { icon: 'fa-solid fa-shield-halved', name: '리스크 지표',      tag: 'VaR · CVaR', view: 'risk' },
-      ],
-    },
-  ];
-
   container.innerHTML = `
-    <!-- ── KOSPI 캔들 차트 ── -->
-    <div id="home-kospi-section" style="
-      background:#ffffff; border:1px solid #e8e8e8;
-      border-radius:10px; padding:20px 24px 10px;
-      margin-bottom:16px; box-shadow:0 2px 10px rgba(0,0,0,.06);
-    ">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-          <span style="font-size:0.82rem; font-weight:600; color:#757575; letter-spacing:.02em;">KOSPI &nbsp;·&nbsp; ^KS11</span>
-          <span id="kospi-price" style="font-size:1.6rem; font-weight:700; color:#111; letter-spacing:-.5px; line-height:1;">--</span>
-          <span id="kospi-change" style="font-size:0.82rem; font-weight:600; padding:3px 10px; border-radius:20px; background:#f5f5f5; color:#757575;">--</span>
-        </div>
-        <div style="display:flex; gap:4px;" id="kospi-period-btns">
-          ${['1mo','3mo','6mo','1y'].map(p => `
-            <button data-period="${p}" style="
-              padding:4px 12px; border-radius:5px; font-size:0.78rem; font-weight:600;
-              cursor:pointer; transition:all .12s; letter-spacing:.01em;
-              border:1px solid ${p === '3mo' ? '#0078d4' : '#e0e0e0'};
-              background:${p === '3mo' ? '#0078d4' : '#fff'};
-              color:${p === '3mo' ? '#fff' : '#757575'};">
-              ${p === '1mo' ? '1M' : p === '3mo' ? '3M' : p === '6mo' ? '6M' : '1Y'}
-            </button>`).join('')}
-        </div>
-      </div>
+    <div class="home-dashboard" id="home-dashboard">
+      <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
+      <div class="home-market-back-wrap"><button type="button" id="home-market-back"><i class="fa-solid fa-arrow-left"></i> 4개 차트 보기</button></div>
+      <section class="home-quick-links">
+        <button data-view="macro-realtime"><i class="fa-solid fa-satellite-dish"></i> 거시경제현황</button>
+        <button data-view="industry-analysis"><i class="fa-solid fa-industry"></i> 산업 경쟁력 분석</button>
+        <button data-view="dart-financial-analysis"><i class="fa-solid fa-file-invoice-dollar"></i> DART 재무 AI 분석</button>
+        <button data-view="technical-chart"><i class="fa-solid fa-chart-candlestick"></i> 기술적 분석</button>
+      </section>
+    </div>`;
 
-      <div style="position:relative; min-height:260px;">
-        <div id="kospi-chart" style="width:100%;"></div>
-        <div id="kospi-loading" style="
-          position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-          font-size:0.9rem; color:#9e9e9e; background:#fff; border-radius:8px;">
-          <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px; color:#0078d4;"></i>데이터 불러오는 중…
-        </div>
-      </div>
+  container.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => navigate(button.dataset.view)));
 
-      <div style="display:flex; align-items:center; gap:14px; margin-top:6px; flex-wrap:wrap;">
-        <div style="display:flex; align-items:center; gap:12px; font-size:0.73rem; color:#bdbdbd;">
-          <span><span style="display:inline-block;width:20px;height:2px;background:#0078d4;vertical-align:middle;margin-right:4px;border-radius:1px;"></span>MA20</span>
-          <span><span style="display:inline-block;width:9px;height:9px;background:#e6f4ea;border:1.5px solid #107c10;border-radius:1px;vertical-align:middle;margin-right:3px;"></span>상승</span>
-          <span><span style="display:inline-block;width:9px;height:9px;background:#c50f1f;border-radius:1px;vertical-align:middle;margin-right:3px;"></span>하락</span>
-          <span>· yfinance 15분 지연</span>
-        </div>
-        <div id="kospi-simulated-notice" style="display:none; font-size:0.73rem;
-             color:#c47900; background:#fff8e1; border:1px solid #ffe082;
-             border-radius:4px; padding:3px 10px;">
-          <i class="fa-solid fa-triangle-exclamation" style="margin-right:4px;"></i>시뮬레이션 데이터
-        </div>
-      </div>
-    </div>
+  const charts = new Map();
+  const periods = new Map(HOME_MARKETS.map((market) => [market.id, '3mo']));
+  let expandedMarket = null;
 
-    <!-- ── 분석 카드 그리드 ── -->
-    <div id="home-cards-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px;">
-      ${groups.map(group => `
-        <div class="home-mini-group">
-          <div class="home-mini-group-head">
-            <i class="${group.icon}"></i>
-            <span>${group.title}</span>
-          </div>
-          <div class="home-mini-items">
-            ${group.items.map(item => `
-              <div class="home-mini-card ${item.disabled ? 'is-disabled' : ''}"
-                   ${item.view ? `data-view="${item.view}"` : ''}>
-                <i class="${item.icon} home-mini-icon"></i>
-                <div class="home-mini-text">
-                  <div class="home-mini-name">${item.name}</div>
-                  <div class="home-mini-tag">${item.tag}</div>
-                </div>
-                <i class="fa-solid fa-chevron-right home-mini-arrow"></i>
-              </div>`).join('')}
-          </div>
-        </div>`).join('')}
-    </div>
-  `;
+  function destroyChart(id) {
+    const chart = charts.get(id);
+    if (chart) { try { chart.destroy(); } catch {} charts.delete(id); }
+  }
 
-  container.querySelectorAll('[data-view]').forEach(el => {
-    el.addEventListener('click', () => navigate(el.dataset.view));
-  });
+  function chartHeight(id) {
+    return expandedMarket === id ? 600 : 230;
+  }
 
-  let currentPeriod = '3mo';
-  let _chart = null;
-
-  // Destroy the ApexCharts instance when navigating away from this view —
-  // otherwise its internal window-resize listener stays alive and throws
-  // (NaN width/transform) once #kospi-chart is no longer in the DOM.
-  window._viewCleanup = () => {
-    if (_chart) { try { _chart.destroy(); } catch (e) {} _chart = null; }
-  };
-
-  container.querySelectorAll('#kospi-period-btns button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentPeriod = btn.dataset.period;
-      container.querySelectorAll('#kospi-period-btns button').forEach(b => {
-        const on = b === btn;
-        b.style.background  = on ? '#0078d4' : '#fff';
-        b.style.color       = on ? '#fff'    : '#757575';
-        b.style.borderColor = on ? '#0078d4' : '#e0e0e0';
-      });
-      loadChart(currentPeriod);
-    });
-  });
-
-  async function loadChart(period) {
-    const chartEl  = container.querySelector('#kospi-chart');
-    const loading  = container.querySelector('#kospi-loading');
-    const simNote  = container.querySelector('#kospi-simulated-notice');
-    const priceEl  = container.querySelector('#kospi-price');
-    const changeEl = container.querySelector('#kospi-change');
-
+  async function loadChart(market) {
+    const id = market.id;
+    const card = container.querySelector(`[data-market-card="${id}"]`);
+    const chartEl = card.querySelector(`[data-chart="${id}"]`);
+    const loading = card.querySelector(`[data-loading="${id}"]`);
+    const price = card.querySelector(`[data-price="${id}"]`);
+    const change = card.querySelector(`[data-change="${id}"]`);
+    const simulated = card.querySelector(`[data-simulated="${id}"]`);
     loading.style.display = 'flex';
-    if (_chart) { try { _chart.destroy(); } catch(e) {} _chart = null; }
+    destroyChart(id);
 
     try {
-      const res   = await fetch(`/api/home/kospi-candle?period=${period}`);
-      const data  = await res.json();
+      const res = await fetch(`/api/home/market-candle?market=${encodeURIComponent(id)}&period=${periods.get(id)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
       const ohlcv = data.ohlcv || [];
+      if (!ohlcv.length) throw new Error('데이터 없음');
+      const last = ohlcv.at(-1);
+      const prev = ohlcv.length > 1 ? ohlcv.at(-2).c : last.o;
+      const pct = ((last.c / prev) - 1) * 100;
+      const up = pct >= 0;
+      price.textContent = last.c.toLocaleString(undefined, { maximumFractionDigits: 2 });
+      change.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(2)}%`;
+      change.className = up ? 'is-up' : 'is-down';
+      simulated.textContent = data.is_simulated ? '시뮬레이션 데이터' : 'Yahoo Finance · 15분 지연';
+      simulated.classList.toggle('is-simulated', Boolean(data.is_simulated));
 
-      simNote.style.display = data.is_simulated ? 'flex' : 'none';
-
-      if (!ohlcv.length) { loading.innerHTML = '<span style="color:#9e9e9e;">데이터 없음</span>'; return; }
-
-      const last = ohlcv[ohlcv.length - 1];
-      const prev = ohlcv.length > 1 ? ohlcv[ohlcv.length - 2].c : last.o;
-      const chg  = ((last.c / prev) - 1) * 100;
-      const isUp = chg >= 0;
-
-      priceEl.textContent         = last.c.toLocaleString(undefined, { maximumFractionDigits: 2 });
-      changeEl.textContent        = `${isUp ? '▲' : '▼'} ${Math.abs(chg).toFixed(2)}%`;
-      changeEl.style.background   = isUp ? '#e6f4ea' : '#fde7e9';
-      changeEl.style.color        = isUp ? '#107c10' : '#c50f1f';
-
-      const candleSeries = ohlcv.map(p => ({ x: new Date(p.date).getTime(), y: [p.o, p.h, p.l, p.c] }));
-      const ma20Series   = ohlcv.map((p, i) => ({
-        x: new Date(p.date).getTime(),
-        y: i < 19 ? null : ohlcv.slice(i - 19, i + 1).reduce((s, pt) => s + pt.c, 0) / 20,
+      const candles = ohlcv.map((point) => ({ x: new Date(point.date).getTime(), y: [point.o, point.h, point.l, point.c] }));
+      const ma20 = ohlcv.map((point, index) => ({
+        x: new Date(point.date).getTime(),
+        y: index < 19 ? null : ohlcv.slice(index - 19, index + 1).reduce((sum, item) => sum + item.c, 0) / 20,
       }));
-
-      _chart = new ApexCharts(chartEl, {
-        chart: {
-          type: 'candlestick', height: 260,
-          toolbar: { show: false }, zoom: { enabled: false },
-          background: '#fff', animations: { enabled: false },
-          fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif',
-        },
-        series: [
-          { name: 'KOSPI', type: 'candlestick', data: candleSeries },
-          { name: 'MA20',  type: 'line',         data: ma20Series  },
-        ],
-        plotOptions: {
-          candlestick: { colors: { upward: '#107c10', downward: '#c50f1f' }, wick: { useFillColor: true } }
-        },
-        colors: ['#107c10', '#0078d4'],
-        stroke: { curve: 'smooth', width: [1, 1.8] },
-        xaxis: {
-          type: 'datetime',
-          labels: { format: 'MM-dd', style: { fontSize: '11px', colors: '#9e9e9e', fontFamily: 'Pretendard, sans-serif' }, hideOverlappingLabels: true, datetimeUTC: false },
-          axisBorder: { show: false }, axisTicks: { show: false },
-        },
-        yaxis: {
-          labels: {
-            formatter: v => v ? Math.round(v).toLocaleString() : '',
-            style: { fontSize: '11px', colors: '#9e9e9e', fontFamily: 'Pretendard, sans-serif' }
-          }
-        },
-        grid: { borderColor: '#f0f0f0', strokeDashArray: 4, padding: { right: 12 } },
-        tooltip: { shared: false, x: { format: 'yyyy-MM-dd' } },
-        legend: { show: false },
-        theme: { mode: 'light' },
+      const chart = new ApexCharts(chartEl, {
+        chart: { type: 'candlestick', height: chartHeight(id), toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
+        series: [{ name: market.name, type: 'candlestick', data: candles }, { name: 'MA20', type: 'line', data: ma20 }],
+        plotOptions: { candlestick: { colors: { upward: '#e11d48', downward: '#2563eb' }, wick: { useFillColor: true } } },
+        colors: ['#2563eb', market.color], stroke: { curve: 'smooth', width: [1, 1.7] },
+        xaxis: { type: 'datetime', labels: { format: 'MM-dd', style: { fontSize: '10px', colors: '#94a3b8' }, hideOverlappingLabels: true, datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { formatter: (value) => value ? Math.round(value).toLocaleString() : '', style: { fontSize: '10px', colors: '#94a3b8' } } },
+        grid: { borderColor: '#eef2f7', strokeDashArray: 3, padding: { right: 10, left: 4 } }, tooltip: { shared: false, x: { format: 'yyyy-MM-dd' } }, legend: { show: false },
       });
-      await _chart.render();
+      charts.set(id, chart);
+      await chart.render();
       loading.style.display = 'none';
-
-    } catch (e) {
-      loading.innerHTML     = `<span style="color:#c50f1f; font-size:0.85rem;">데이터 오류: ${e.message}</span>`;
-      loading.style.display = 'flex';
+    } catch (error) {
+      loading.innerHTML = `<span class="home-market-error">데이터 오류: ${error.message}</span>`;
     }
   }
 
-  loadChart(currentPeriod);
+  function setExpanded(id) {
+    const previousMarket = expandedMarket;
+    expandedMarket = id;
+    const dashboard = container.querySelector('#home-dashboard');
+    dashboard.classList.toggle('is-chart-expanded', Boolean(id));
+    container.querySelectorAll('[data-market-card]').forEach((card) => card.classList.toggle('is-expanded', card.dataset.marketCard === id));
+    if (id) loadChart(HOME_MARKETS.find((market) => market.id === id));
+    else if (previousMarket) loadChart(HOME_MARKETS.find((market) => market.id === previousMarket));
+  }
+
+  HOME_MARKETS.forEach((market) => {
+    container.querySelector(`[data-periods="${market.id}"]`).addEventListener('click', (event) => {
+      const button = event.target.closest('[data-period]');
+      if (!button) return;
+      periods.set(market.id, button.dataset.period);
+      container.querySelectorAll(`[data-periods="${market.id}"] [data-period]`).forEach((item) => item.classList.toggle('active', item === button));
+      loadChart(market);
+    });
+    container.querySelector(`[data-expand="${market.id}"]`).addEventListener('click', () => setExpanded(market.id));
+    loadChart(market);
+  });
+  container.querySelector('#home-market-back').addEventListener('click', () => setExpanded(null));
+
+  window._viewCleanup = () => charts.forEach((chart) => { try { chart.destroy(); } catch {} });
 }
