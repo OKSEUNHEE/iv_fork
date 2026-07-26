@@ -24,6 +24,45 @@ function orderSidebarSections() {
 }
 window._orderSidebarSections = orderSidebarSections;
 
+function ensureSidebarChatbot() {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar || sidebar.querySelector('#sidebar-chatbot')) return;
+
+  sidebar.insertAdjacentHTML('beforeend', `
+    <section class="sidebar-chatbot" id="sidebar-chatbot" aria-label="AI 투자 도우미">
+      <div class="sidebar-chatbot-head">
+        <span><i class="fa-solid fa-robot"></i> AI 투자 도우미</span>
+        <em>Enterprise</em>
+      </div>
+      <div class="sidebar-chatbot-messages" id="sidebar-chatbot-messages" aria-live="polite">
+        <p class="sidebar-chatbot-welcome">궁금한 내용을 입력해 보세요.</p>
+      </div>
+      <form class="sidebar-chatbot-form" id="sidebar-chatbot-form">
+        <input id="sidebar-chatbot-input" type="text" maxlength="300" placeholder="질문을 입력하세요" aria-label="챗봇 질문" />
+        <button type="submit" aria-label="질문 보내기"><i class="fa-solid fa-paper-plane"></i></button>
+      </form>
+    </section>`);
+
+  const form = document.getElementById('sidebar-chatbot-form');
+  const input = document.getElementById('sidebar-chatbot-input');
+  const messages = document.getElementById('sidebar-chatbot-messages');
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const question = input?.value.trim();
+    if (!question || !messages) return;
+
+    const userMessage = document.createElement('p');
+    userMessage.className = 'sidebar-chatbot-message is-user';
+    userMessage.textContent = question;
+    const enterpriseMessage = document.createElement('p');
+    enterpriseMessage.className = 'sidebar-chatbot-message is-enterprise';
+    enterpriseMessage.textContent = 'Enterprise 버전입니다.';
+    messages.replaceChildren(userMessage, enterpriseMessage);
+    input.value = '';
+  });
+}
+window._ensureSidebarChatbot = ensureSidebarChatbot;
+
 function syncSidebarToggle() {
   const toggle = document.getElementById('sidebar-toggle');
   if (!toggle) return;
@@ -101,4 +140,5 @@ if (window.innerWidth > DESKTOP_BREAKPOINT) {
   document.getElementById('sidebar').classList.add('open');
 }
 orderSidebarSections();
+ensureSidebarChatbot();
 syncSidebarToggle();
