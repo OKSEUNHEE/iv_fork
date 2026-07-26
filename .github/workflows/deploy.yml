@@ -13,6 +13,11 @@ permissions:
   contents: read
   packages: write
 
+# 최신 커밋만 EC2에 배포해 동시에 실행된 이전 배포가 최신 이미지를 덮어쓰지 않게 한다.
+concurrency:
+  group: investment-analysis-main
+  cancel-in-progress: true
+
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/investment-analysis-backend
 
@@ -45,6 +50,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect Markdown document changes
+        id: docs_changed
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || ! git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only HEAD^ HEAD -- docs/ | grep -qE '\.md$'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Configure SSH
         run: |
@@ -96,11 +115,6 @@ jobs:
             export BACKEND_IMAGE=$IMAGE:$GITHUB_SHA
             sudo -E docker compose -f docker-compose.prod.yml pull backend
             sudo -E docker compose -f docker-compose.prod.yml up -d
-            # Qdrant data is persisted in a Docker volume, so rebuilding the
-            # backend image alone does not update the RAG collection. Rebuild
-            # it from the docs bundled in this exact deployment image.
-            sudo -E docker compose -f docker-compose.prod.yml exec -T backend \
-              bash /app/scripts/upload_docs_to_qdrant.sh
             sudo docker image prune -f
           "
         env:
@@ -110,6 +124,20 @@ jobs:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
           IMAGE: ${{ env.IMAGE }}
+
+      - name: Reindex RAG documents
+        if: steps.docs_changed.outputs.changed == 'true'
+        run: |
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" "
+            set -e
+            cd $DEPLOY_PATH
+            sudo docker compose -f docker-compose.prod.yml exec -T backend \
+              bash /app/scripts/upload_docs_to_qdrant.sh
+          "
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          DEPLOY_PATH: /opt/investment-analysis
 
       - name: Health check
         run: |
