@@ -3,6 +3,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl \
       fonts-nanum \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,6 +18,8 @@ RUN mkdir -p app/frontend/vendor \
     && python -c "import pathlib, urllib.request; pathlib.Path('app/frontend/vendor/mermaid.min.js').write_bytes(urllib.request.urlopen('https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js', timeout=90).read())" \
     && test -s app/frontend/vendor/mermaid.min.js
 COPY docs/ ./docs/
+COPY scripts/upload_docs_to_qdrant.sh ./scripts/upload_docs_to_qdrant.sh
+RUN chmod +x ./scripts/upload_docs_to_qdrant.sh
 
 EXPOSE 8000
 

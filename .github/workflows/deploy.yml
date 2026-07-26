@@ -96,6 +96,11 @@ jobs:
             export BACKEND_IMAGE=$IMAGE:$GITHUB_SHA
             sudo -E docker compose -f docker-compose.prod.yml pull backend
             sudo -E docker compose -f docker-compose.prod.yml up -d
+            # Qdrant data is persisted in a Docker volume, so rebuilding the
+            # backend image alone does not update the RAG collection. Rebuild
+            # it from the docs bundled in this exact deployment image.
+            sudo -E docker compose -f docker-compose.prod.yml exec -T backend \
+              bash /app/scripts/upload_docs_to_qdrant.sh
             sudo docker image prune -f
           "
         env:
