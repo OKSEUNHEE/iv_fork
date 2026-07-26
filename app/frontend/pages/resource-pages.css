@@ -92,6 +92,22 @@
 }
 .resource-cta:hover { opacity: .92; }
 
+/* ── NotebookLM 주식 리서치 ── */
+.notebook-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.notebook-search-guide {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin: 0 0 18px; padding: 12px 14px;
+  border: 1px solid #bfdbfe; border-left: 3px solid var(--primary); border-radius: 7px;
+  background: #f0f7ff; color: #334155; font-size: .84rem; line-height: 1.5;
+}
+.notebook-search-guide i { margin-top: 3px; color: var(--primary); }
+.notebook-topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.notebook-search-card { display: flex; flex-direction: column; min-width: 0; }
+.notebook-search-card h3 { margin: 0 0 8px; font-size: 1rem; }
+.notebook-search-card p { margin: 0; color: var(--text-muted); font-size: .84rem; line-height: 1.55; }
+.notebook-card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 16px; }
+.notebook-card-actions .resource-cta { padding: 8px 11px; font-size: .78rem; }
+
 .ghost-btn {
   display: inline-flex;
   align-items: center;
@@ -254,4 +270,5 @@ body[data-page="youtube"].is-video-playing #yt-player-frame {
 @media (max-width: 860px) {
   .grid-3 { grid-template-columns: 1fr; }
   .video-list-panel { width: 92vw; }
+  .notebook-topic-grid { grid-template-columns: 1fr; }
 }
