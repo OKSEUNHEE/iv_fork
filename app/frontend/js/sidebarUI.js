@@ -4,6 +4,25 @@
  */
 const DESKTOP_BREAKPOINT = 1024;
 let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;
+const MENU_SECTION_ORDER = ['learn', 'quiz', 'external', 'aitools', 'practice'];
+
+// SPA와 정적 외부 자료 페이지가 같은 메뉴 순서를 유지하도록 실제 DOM 순서를 맞춘다.
+function orderSidebarSections() {
+  const nav = document.querySelector('.sidebar-nav');
+  if (!nav) return;
+
+  const sections = new Map(
+    [...nav.querySelectorAll(':scope > .nav-section')].map((section) => {
+      const id = MENU_SECTION_ORDER.find((item) => section.querySelector(`#nav-${item}`));
+      return [id, section];
+    }),
+  );
+  MENU_SECTION_ORDER.forEach((id) => {
+    const section = sections.get(id);
+    if (section) nav.append(section);
+  });
+}
+window._orderSidebarSections = orderSidebarSections;
 
 function syncSidebarToggle() {
   const toggle = document.getElementById('sidebar-toggle');
@@ -81,4 +100,5 @@ window.addEventListener('resize', () => {
 if (window.innerWidth > DESKTOP_BREAKPOINT) {
   document.getElementById('sidebar').classList.add('open');
 }
+orderSidebarSections();
 syncSidebarToggle();

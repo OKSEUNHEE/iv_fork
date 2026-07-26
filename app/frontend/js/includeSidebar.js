@@ -20,6 +20,8 @@
     return;
   }
 
+  if (typeof window._orderSidebarSections === 'function') window._orderSidebarSections();
+
   // 현재 페이지에 해당하는 외부 자료 링크를 활성 표시
   const page = document.body.dataset.page;
   if (page) {
