@@ -33,21 +33,34 @@ function ensureMarked() {
   });
 }
 
+let mermaidLoader;
+
 function ensureMermaid() {
-  if (window.mermaid) return Promise.resolve();
-  return new Promise((resolve, reject) => {
+  if (window.mermaid) return Promise.resolve(window.mermaid);
+  if (mermaidLoader) return mermaidLoader;
+
+  // 인라인 module 스크립트는 import 실패를 안정적으로 reject하지 못해 Mermaid
+  // 렌더링이 대기 상태에 남을 수 있다. 전역 번들을 명시적으로 로드한다.
+  mermaidLoader = new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.type = 'module';
-    s.textContent = `
-      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-      mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-      window.mermaid = mermaid;
-      window.dispatchEvent(new Event('mermaid-ready'));
-    `;
-    window.addEventListener('mermaid-ready', () => resolve(), { once: true });
-    s.onerror = reject;
+    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+    s.async = true;
+    s.onload = () => {
+      if (!window.mermaid) {
+        reject(new Error('Mermaid 라이브러리를 초기화하지 못했습니다.'));
+        return;
+      }
+      window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+      resolve(window.mermaid);
+    };
+    s.onerror = () => reject(new Error('Mermaid CDN을 불러오지 못했습니다.'));
     document.head.appendChild(s);
+  }).catch((err) => {
+    mermaidLoader = null;
+    throw err;
   });
+
+  return mermaidLoader;
 }
 
 /** marked이 만든 <pre><code class="language-mermaid"> 블록을 mermaid가 인식하는
@@ -58,17 +71,18 @@ async function renderMermaidBlocks(root) {
 
   await ensureMermaid();
 
-  blocks.forEach((code) => {
+  const nodes = blocks.map((code) => {
     const pre = code.closest('pre');
     const graphDef = code.textContent;
-    const wrap = document.createElement('pre');
+    const wrap = document.createElement('div');
     wrap.className = 'mermaid';
     wrap.textContent = graphDef;
     pre.replaceWith(wrap);
+    return wrap;
   });
 
   try {
-    await window.mermaid.run({ nodes: root.querySelectorAll('pre.mermaid') });
+    await window.mermaid.run({ nodes });
   } catch (err) {
     console.error('mermaid 렌더링 실패:', err);
   }
@@ -77,7 +91,7 @@ async function renderMermaidBlocks(root) {
 function buildToc(container) {
   const heads = [...container.querySelectorAll('h2, h3')];
   if (!heads.length) return '';
-  return `<div class="learn-toc" id="learn-toc">
+  return `<aside class="learn-toc" id="learn-toc" aria-hidden="true" aria-label="문서 목차">
     <div class="learn-toc-hdr">
       <div class="learn-toc-title"><i class="fa-solid fa-list-ul"></i> 목차</div>
       <button class="learn-toc-close" id="learn-toc-close" type="button" aria-label="목차 닫기">
@@ -90,7 +104,7 @@ function buildToc(container) {
         return `<li class="${cls}" data-id="${h.id}">${h.textContent.replace(/^[#\s]+/,'')}</li>`;
       }).join('')}
     </ul>
-  </div>`;
+  </aside>`;
 }
 
 export function learnView(app, docId) {
@@ -120,15 +134,12 @@ export function learnView(app, docId) {
         <div class="learn-body">
           <div class="md-body" id="md-content">${html}</div>
         </div>
-        <button class="toc-toggle-btn" id="toc-toggle" type="button">
+        <button class="toc-toggle-btn" id="toc-toggle" type="button" aria-controls="learn-toc" aria-expanded="false">
           <i class="fa-solid fa-list-ul"></i> 목차
         </button>
         <div class="toc-overlay" id="toc-overlay"></div>
         <div id="toc-placeholder"></div>
       </div>`;
-
-    // 화면 전환 시(다른 학습 문서/뷰로 이동) 열려 있던 목차 offcanvas를 정리
-    window._viewCleanup = () => closeToc();
 
     // add heading IDs for TOC navigation
     const mdContent = app.querySelector('#md-content');
@@ -137,7 +148,7 @@ export function learnView(app, docId) {
     });
 
     // mermaid 코드블록(```mermaid ... ```) 렌더링
-    renderMermaidBlocks(mdContent);
+    renderMermaidBlocks(mdContent).catch((err) => console.error('Mermaid 로드 실패:', err));
 
     // 문서 안의 youtube.com 링크는 외부로 바로 나가지 않고, 자체 뷰어가 있는
     // "외부 자료 > 유튜브 학습 영상" 페이지로 연결한다.
@@ -155,13 +166,30 @@ export function learnView(app, docId) {
 
     // 목차 offcanvas 열기/닫기
     function openToc() {
-      app.querySelector('#learn-toc')?.classList.add('open');
+      const toc = app.querySelector('#learn-toc');
+      toc?.classList.add('open');
+      toc?.setAttribute('aria-hidden', 'false');
       app.querySelector('#toc-overlay')?.classList.add('show');
+      app.querySelector('#toc-toggle')?.setAttribute('aria-expanded', 'true');
     }
     function closeToc() {
-      app.querySelector('#learn-toc')?.classList.remove('open');
+      const toc = app.querySelector('#learn-toc');
+      toc?.classList.remove('open');
+      toc?.setAttribute('aria-hidden', 'true');
       app.querySelector('#toc-overlay')?.classList.remove('show');
+      app.querySelector('#toc-toggle')?.setAttribute('aria-expanded', 'false');
     }
+    const onKeydown = (event) => {
+      if (event.key === 'Escape') closeToc();
+    };
+    document.addEventListener('keydown', onKeydown);
+
+    // 화면 전환 시 열려 있던 목차와 observer/event listener를 정리한다.
+    window._viewCleanup = () => {
+      closeToc();
+      observer.disconnect();
+      document.removeEventListener('keydown', onKeydown);
+    };
     app.querySelector('#toc-toggle')?.addEventListener('click', openToc);
     app.querySelector('#toc-overlay')?.addEventListener('click', closeToc);
     app.querySelector('#learn-toc-close')?.addEventListener('click', closeToc);

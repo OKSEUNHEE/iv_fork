@@ -449,10 +449,16 @@ img { max-width: 100%; }
   padding: 18px 16px;
   box-shadow: var(--shadow-lg);
   z-index: 59;
+  visibility: hidden;
+  pointer-events: none;
   transform: translateX(100%);
   transition: transform .22s cubic-bezier(.4,0,.2,1);
 }
-.learn-toc.open { transform: translateX(0); }
+.learn-toc.open {
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
 .learn-toc-close {
   display: flex; align-items: center; justify-content: center;
   width: 28px; height: 28px;
@@ -502,6 +508,16 @@ img { max-width: 100%; }
 .md-body code { background: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 1px 5px; font-size: .85em; font-family: "Fira Code", "Cascadia Code", monospace; }
 .md-body pre  { background: #1e1e1e; border-radius: var(--radius-sm); padding: 16px; overflow-x: auto; margin: 16px 0; border: 1px solid #333; }
 .md-body pre code { background: none; border: none; color: #e2e8f0; font-size: .85rem; }
+.md-body .mermaid {
+  margin: 16px 0;
+  padding: 16px;
+  overflow-x: auto;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.md-body .mermaid svg { max-width: none; }
 .md-body blockquote { border-left: 4px solid var(--primary); margin: 14px 0; padding: 10px 16px; background: var(--primary-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: #444444; }
 .md-body strong { font-weight: 700; color: var(--text); }
 .md-body a { color: var(--primary); text-decoration: underline; }
