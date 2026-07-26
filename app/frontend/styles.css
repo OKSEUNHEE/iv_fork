@@ -806,6 +806,34 @@ img { max-width: 100%; }
   line-height: 1.5; margin: 0;
 }
 
+/* 실습 화면 — 분석/ML 기법 쉬운 설명 */
+.practice-guide {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  color: var(--text);
+  background: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-sm);
+}
+.practice-guide-icon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 50%;
+}
+.practice-guide-title { font-size: .9rem; font-weight: 800; }
+.practice-guide-title span { margin-left: 6px; color: var(--primary); }
+.practice-guide p { margin: 4px 0 0; color: var(--text-muted); font-size: .88rem; line-height: 1.6; }
+
 .home-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

@@ -96,6 +96,119 @@ const routes = {
   ...learnRoutes,
 };
 
+const PRACTICE_GUIDES = {
+  'macro-realtime': {
+    technique: '실시간 지표 비교',
+    text: '금리·유가·환율처럼 경제의 온도를 알려주는 숫자를 한곳에 모아 봅니다. 여러 온도계를 함께 보면 시장이 뜨거운지, 식는지 더 쉽게 짐작할 수 있습니다.',
+  },
+  'macro-simulation': {
+    technique: 'GBM 확률 시뮬레이션',
+    text: '주가와 경제지표가 매일 조금씩 흔들린다고 가정하고, 가능한 미래 길을 여러 번 그려 보는 방법입니다. 하나의 정답을 맞히기보다 어떤 상황이 나올 수 있는지 연습합니다.',
+  },
+  'kospi-excluded': {
+    technique: '비교 지수 분석',
+    text: '큰 종목이나 특정 산업을 빼고 지수를 다시 계산해 봅니다. 마치 과일 바구니에서 사과만 빼 보고 전체 맛이 얼마나 달라지는지 확인하는 것과 같습니다.',
+  },
+  'industry-analysis': {
+    technique: 'Porter 5 Forces와 비교 분석',
+    text: '한 산업에서 누가 힘이 센지, 새 경쟁자가 들어오기 쉬운지 같은 질문을 점수와 표로 정리합니다. 회사 하나만 보지 않고 그 회사가 뛰는 운동장을 함께 살펴보는 방법입니다.',
+  },
+  'dart-financial-analysis': {
+    technique: '재무비율 계산과 AI 요약',
+    text: '공시 속 숫자에서 매출, 빚, 이익의 관계를 먼저 계산하고 AI가 핵심 흐름을 글로 정리합니다. AI의 의견은 힌트이므로 원래 숫자와 공시도 함께 확인하는 것이 중요합니다.',
+  },
+  'dart-company-search': {
+    technique: '기업명 검색·정규화',
+    text: '입력한 회사 이름에서 띄어쓰기 같은 작은 차이를 줄이고, 비슷한 이름의 상장회사를 찾아줍니다. 도서관에서 책 제목 일부로 원하는 책을 찾는 것과 비슷합니다.',
+  },
+  'dart-region-search': {
+    technique: '조건 필터링',
+    text: '지역, 직원 수처럼 고른 조건에 맞는 회사만 골라냅니다. 많은 카드 더미에서 “서울에 있고 직원 수가 이 범위인 카드만” 찾는 간단한 분류입니다.',
+  },
+  'group-network': {
+    technique: '네트워크 그래프',
+    text: '회사들을 점으로, 관계를 선으로 이어서 한 그룹의 연결 모습을 보여줍니다. 가족 관계도를 그리듯 어떤 회사가 중심인지 한눈에 살펴볼 수 있습니다.',
+  },
+  'company-financial': {
+    technique: '재무 시계열 시각화',
+    text: '여러 해의 매출·이익·빚을 그래프로 나란히 봅니다. 숫자 표를 길게 읽지 않아도 좋아지는 방향인지 나빠지는 방향인지 빠르게 찾는 방법입니다.',
+  },
+  'financial-statement': {
+    technique: '재무제표 구조 읽기',
+    text: '회사가 번 돈, 가진 것, 갚아야 할 돈이 어떻게 연결되는지 차례대로 살펴봅니다. 가계부에서 수입·지출·통장을 함께 보는 것과 비슷합니다.',
+  },
+  'valuation': {
+    technique: '현금흐름 기반 가치평가',
+    text: '회사가 앞으로 벌 수 있는 돈을 추정해 오늘의 값으로 바꿔 봅니다. 지금 받는 1만원과 몇 년 뒤 받는 1만원의 가치가 다르다는 생각에서 출발합니다.',
+  },
+  'portfolio': {
+    technique: '몬테카를로 시뮬레이션',
+    text: '자산을 섞는 방법을 아주 많이 만들어 보고, 수익과 위험의 균형이 좋은 조합을 찾습니다. 여러 재료로 음료를 만들어 가장 알맞은 맛을 고르는 것과 같습니다.',
+  },
+  'risk': {
+    technique: 'VaR·CVaR 손실 추정',
+    text: '평소가 아니라 특히 나쁜 날에 얼마나 잃을 수 있는지 가늠합니다. “가장 큰 비를 만났을 때 우산이 충분한가”를 미리 확인하는 안전 점검입니다.',
+  },
+  'technical-chart': {
+    technique: '기술적 지표 계산',
+    text: '가격의 움직임을 이동평균·RSI·MACD 같은 간단한 규칙으로 정리합니다. 매일의 점을 이어 큰 흐름과 너무 빠르게 움직인 구간을 찾는 방법입니다.',
+  },
+  'backtest': {
+    technique: '규칙 검증과 백테스트',
+    text: '“이때 사고 저때 판다”는 규칙을 과거 또는 가상 가격에 적용해 봅니다. 새 게임 규칙을 실제 경기 전에 연습 경기로 시험하는 것과 같습니다.',
+  },
+  'pipeline': {
+    technique: '퀀트 파이프라인과 Random Forest',
+    text: '가격 데이터를 정리하고 지표를 만들고 규칙을 시험한 뒤 여러 결정나무의 의견을 모아 예측합니다. 작은 판단자 여러 명이 투표해 결론을 내리는 방식입니다.',
+  },
+  'cross-validation': {
+    technique: '교차 검증',
+    text: '데이터를 여러 조각으로 나눠 번갈아 시험합니다. 한 번의 시험 점수만 보지 않고 자리를 바꿔가며 여러 번 확인해 모델이 정말 안정적인지 살펴봅니다.',
+  },
+  'random-forest': {
+    technique: 'Random Forest',
+    text: '서로 조금씩 다른 결정나무를 많이 만들고 다수결로 답을 고릅니다. 한 사람의 추측보다 여러 사람의 의견을 모아 결정하는 것과 같습니다.',
+  },
+  'kmeans': {
+    technique: 'K-Means 군집화',
+    text: '정답 이름을 알려주지 않아도 서로 닮은 데이터끼리 모둠을 만듭니다. 색이나 모양이 비슷한 구슬을 자연스럽게 같은 바구니에 담는 방식입니다.',
+  },
+  'svm': {
+    technique: 'SVM 분류',
+    text: '서로 다른 두 무리 사이에 가장 넓은 빈 공간을 찾아 경계선을 긋습니다. 두 팀이 섞이지 않게 운동장 한가운데에 가장 안전한 선을 긋는 모습과 비슷합니다.',
+  },
+  'mlp': {
+    technique: 'MLP 신경망',
+    text: '여러 층의 작은 계산기가 앞 단계의 결과를 받아 조금씩 판단을 더합니다. 단서를 하나씩 합쳐서 점점 더 알맞은 답에 가까워지는 구조입니다.',
+  },
+  'linear-regression': {
+    technique: '선형·다항 회귀',
+    text: '흩어진 점들 사이에서 전체 흐름을 가장 잘 설명하는 선 또는 곡선을 찾습니다. 점들이 올라가는지 내려가는지 보고 다음 위치를 조심스럽게 예상하는 방법입니다.',
+  },
+  'lstm': {
+    technique: 'LSTM 시계열 예측',
+    text: '최근 값만 보지 않고 중요한 앞부분의 흐름을 기억하며 다음 값을 예상합니다. 긴 노래의 앞 멜로디를 기억해 다음 소절을 짐작하는 것과 비슷합니다.',
+  },
+  'transformer': {
+    technique: 'Transformer 어텐션',
+    text: '긴 데이터 중에서 지금 예측에 특히 중요한 부분에 더 집중합니다. 긴 글을 읽을 때 중요한 문장에 밑줄을 그어 뜻을 파악하는 것과 비슷합니다.',
+  },
+};
+
+function addPracticeGuide(view) {
+  const guide = PRACTICE_GUIDES[view];
+  if (!guide || app.querySelector('.practice-guide')) return;
+
+  app.insertAdjacentHTML('afterbegin', `
+    <aside class="practice-guide" aria-label="분석 기법 쉬운 설명">
+      <div class="practice-guide-icon"><i class="fa-solid fa-lightbulb"></i></div>
+      <div>
+        <div class="practice-guide-title">쉽게 이해하기 <span>${guide.technique}</span></div>
+        <p>${guide.text}</p>
+      </div>
+    </aside>`);
+}
+
 let currentView = null;
 const MOBILE_BREAKPOINT = 1024;
 
@@ -148,6 +261,7 @@ function navigate(view) {
   if (view?.startsWith('quiz-')) updateQuizSidebarLock();
 
   route.render();
+  addPracticeGuide(view);
 
   if (window.innerWidth <= MOBILE_BREAKPOINT && typeof closeSidebar === 'function') closeSidebar();
 }
