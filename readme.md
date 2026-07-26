@@ -174,7 +174,7 @@
 | **Price Target** | 목표 주가 |
 | **Bullish / Bearish** | 강세 / 약세 전망 |
 
-> <i class="fa-solid fa-book"></i> 용어 사전: [docs/voca.md](docs/voca.md)
+
 
 ---
 
@@ -519,7 +519,7 @@ DART(전자공시시스템) API는 상장 기업의 재무제표·공시 데이�
 │   ├── 34.md   Day 049 — 상대가치 평가 (밸류에이션 멀티플)
 │   ├── 35.md   Day 050 — 기술적 분석 I (추세 & 지표)
 │   ├── 36.md   Day 051 — 기술적 분석 II + 통합 리포트
-│   └── voca.md 투자분석 핵심 용어집
+
 ├── requirements.txt
 └── readme.md
 ```
