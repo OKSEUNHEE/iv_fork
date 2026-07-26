@@ -52,38 +52,79 @@ function ensureMermaid() {
   return mermaidLoader;
 }
 
-/** marked이 만든 <pre><code class="language-mermaid"> 블록을 mermaid가 인식하는
- *  <pre class="mermaid"> 블록으로 바꾸고 렌더링한다. */
+/** Mermaid 소스는 VIEW 배지로 대체하고, 클릭할 때만 모달에서 렌더링한다. */
 async function renderMermaidBlocks(root) {
   const blocks = [...root.querySelectorAll('code.language-mermaid')];
   if (!blocks.length) return;
 
-  await ensureMermaid();
+  const modal = document.createElement('div');
+  modal.className = 'mermaid-modal-backdrop';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'Mermaid 차트');
+  modal.innerHTML = `
+    <section class="mermaid-modal" role="document">
+      <header class="mermaid-modal-header">
+        <div><i class="fa-solid fa-diagram-project"></i> Mermaid 차트</div>
+        <button type="button" class="mermaid-modal-close" aria-label="차트 닫기"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+      <div class="mermaid-modal-chart" aria-live="polite"></div>
+    </section>`;
+  document.body.appendChild(modal);
+
+  const chart = modal.querySelector('.mermaid-modal-chart');
+  const closeButton = modal.querySelector('.mermaid-modal-close');
+  let lastFocused = null;
+  const closeModal = () => {
+    modal.classList.remove('show');
+    chart.replaceChildren();
+    lastFocused?.focus();
+  };
+  const onKeydown = (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('show')) closeModal();
+  };
+  closeButton.addEventListener('click', closeModal);
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', onKeydown);
 
   const diagrams = blocks.map((code, index) => {
     const pre = code.closest('pre');
     const graphDef = code.textContent;
-    const wrap = document.createElement('div');
-    wrap.className = 'mermaid';
-    wrap.textContent = graphDef;
-    pre.replaceWith(wrap);
-    return { graphDef, wrap, index };
+    const badge = document.createElement('button');
+    badge.type = 'button';
+    badge.className = 'mermaid-view-badge';
+    badge.innerHTML = '<i class="fa-solid fa-eye"></i><span>VIEW</span><small>Mermaid 차트</small>';
+    pre.replaceWith(badge);
+    return { graphDef, badge, index };
   });
 
-  // run() 대신 render()를 사용하면 Markdown에서 만든 각 블록을 즉시 SVG로
-  // 교체할 수 있고, 다른 문서의 이전 렌더링 상태에 영향을 받지 않는다.
-  await Promise.all(diagrams.map(async ({ graphDef, wrap, index }) => {
-    try {
-      const id = `mermaid-${Date.now()}-${index}`;
-      const { svg, bindFunctions } = await window.mermaid.render(id, graphDef);
-      wrap.innerHTML = svg;
-      bindFunctions?.(wrap);
-    } catch (err) {
-      wrap.classList.add('mermaid-error');
-      wrap.textContent = '다이어그램을 렌더링하지 못했습니다. 문서의 Mermaid 문법을 확인하세요.';
-      console.error('mermaid 렌더링 실패:', err);
-    }
-  }));
+  diagrams.forEach(({ graphDef, badge, index }) => {
+    badge.addEventListener('click', async () => {
+      lastFocused = badge;
+      modal.classList.add('show');
+      chart.innerHTML = '<div class="mermaid-modal-loading"><i class="fa-solid fa-spinner fa-spin"></i> 차트를 렌더링하는 중…</div>';
+      closeButton.focus();
+      try {
+        await ensureMermaid();
+        const id = `mermaid-modal-${Date.now()}-${index}`;
+        const { svg, bindFunctions } = await window.mermaid.render(id, graphDef);
+        chart.innerHTML = svg;
+        bindFunctions?.(chart);
+      } catch (err) {
+        chart.innerHTML = '<p class="mermaid-modal-error">차트를 렌더링하지 못했습니다. 문서의 Mermaid 문법을 확인하세요.</p>';
+        console.error('mermaid 렌더링 실패:', err);
+      }
+    });
+  });
+
+  const previousCleanup = window._viewCleanup;
+  window._viewCleanup = () => {
+    previousCleanup?.();
+    document.removeEventListener('keydown', onKeydown);
+    modal.remove();
+  };
 }
 
 function buildToc(container) {
@@ -139,7 +180,7 @@ export function learnView(app, docId) {
       if (!h.id) h.id = `heading-${i}`;
     });
 
-    // mermaid 코드블록(```mermaid ... ```) 렌더링
+    // Mermaid 소스는 VIEW 배지로 표시하고 클릭 시 모달에서 렌더링한다.
     renderMermaidBlocks(mdContent).catch((err) => console.error('Mermaid 로드 실패:', err));
 
     // 문서 안의 youtube.com 링크는 외부로 바로 나가지 않고, 자체 뷰어가 있는
@@ -177,7 +218,9 @@ export function learnView(app, docId) {
     document.addEventListener('keydown', onKeydown);
 
     // 화면 전환 시 열려 있던 목차와 observer/event listener를 정리한다.
+    const previousCleanup = window._viewCleanup;
     window._viewCleanup = () => {
+      previousCleanup?.();
       closeToc();
       observer.disconnect();
       document.removeEventListener('keydown', onKeydown);

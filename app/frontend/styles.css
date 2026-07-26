@@ -508,20 +508,51 @@ img { max-width: 100%; }
 .md-body code { background: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 1px 5px; font-size: .85em; font-family: "Fira Code", "Cascadia Code", monospace; }
 .md-body pre  { background: #1e1e1e; border-radius: var(--radius-sm); padding: 16px; overflow-x: auto; margin: 16px 0; border: 1px solid #333; }
 .md-body pre code { background: none; border: none; color: #e2e8f0; font-size: .85rem; }
-.md-body .mermaid {
-  margin: 16px 0;
-  padding: 16px;
-  overflow-x: auto;
-  text-align: center;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+.mermaid-view-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin: 16px 0; padding: 7px 10px;
+  color: #075985; background: #e0f2fe;
+  border: 1px solid #7dd3fc; border-radius: 999px;
+  font-size: .76rem; font-weight: 800; letter-spacing: .04em;
+  transition: transform .15s, background .15s, box-shadow .15s;
 }
-.md-body .mermaid svg { max-width: none; }
-.md-body .mermaid-error {
-  color: var(--red);
-  text-align: left;
-  font-family: inherit;
+.mermaid-view-badge small { font-weight: 600; letter-spacing: 0; color: #0369a1; }
+.mermaid-view-badge:hover { background: #bae6fd; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(2,132,199,.18); }
+.mermaid-view-badge:focus-visible { outline: 3px solid rgba(14,165,233,.35); outline-offset: 2px; }
+.mermaid-modal-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  align-items: center; justify-content: center; padding: 24px;
+  background: rgba(15,23,42,.62); backdrop-filter: blur(3px);
+}
+.mermaid-modal-backdrop.show { display: flex; }
+.mermaid-modal {
+  width: min(1000px, 96vw); max-height: min(780px, 90vh);
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 20px 65px rgba(15,23,42,.35);
+}
+.mermaid-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border);
+  font-size: .95rem; font-weight: 750;
+}
+.mermaid-modal-header i { color: var(--primary); margin-right: 7px; }
+.mermaid-modal-close {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 50%; color: var(--text-muted);
+}
+.mermaid-modal-close:hover { background: var(--surface-soft); color: var(--text); }
+.mermaid-modal-chart {
+  min-height: 180px; overflow: auto; padding: 28px; background: #fff;
+  text-align: center;
+}
+.mermaid-modal-chart svg { max-width: none; min-width: min-content; }
+.mermaid-modal-loading { padding: 60px 20px; color: var(--text-muted); }
+.mermaid-modal-error { margin: 0; padding: 36px 12px; color: var(--red); text-align: center; }
+@media (max-width: 640px) {
+  .mermaid-modal-backdrop { padding: 10px; }
+  .mermaid-modal { width: 100%; max-height: 94vh; }
+  .mermaid-modal-chart { padding: 18px; }
 }
 .md-body blockquote { border-left: 4px solid var(--primary); margin: 14px 0; padding: 10px 16px; background: var(--primary-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: #444444; }
 .md-body strong { font-weight: 700; color: var(--text); }
