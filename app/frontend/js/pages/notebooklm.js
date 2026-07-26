@@ -60,9 +60,16 @@ function render() {
     <div class="resource-hero">
       <h1><i class="fa-solid fa-book-open"></i> NotebookLM 주식 리서치</h1>
       <p>
-        주식 투자 학습에 필요한 웹 소스를 NotebookLM의 <strong>소스 검색</strong>으로 모으는 목록입니다.
-        각 카드의 <strong>새 노트북에서 소스 검색</strong>을 누르면 주제어가 복사되고 새 노트북이 열립니다. 소스 추가 → 웹 검색 또는 Deep Research에 바로 붙여넣으세요.
+        아래 주제를 선택하면 주식 투자 자료를 NotebookLM에서 찾아 모을 수 있습니다.
       </p>
+      <div class="notebook-quick-steps" aria-label="NotebookLM 검색 방법">
+        <div><b>1</b><span>새 노트북</span></div>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        <div><b>2</b><span>소스 추가</span></div>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        <div><b>3</b><span>웹 검색</span></div>
+      </div>
+      <p class="notebook-quick-tip"><strong>카드의 “새 노트북에서 소스 검색”을 누르세요.</strong> 검색어가 자동으로 복사됩니다. 마지막에 <strong>웹 검색</strong> 또는 <strong>Deep Research</strong> 칸에 붙여넣으면 됩니다.</p>
       <div class="notebook-hero-actions">
         <button class="ghost-btn" id="copy-all-notebook-topics" type="button"><i class="fa-regular fa-copy"></i> 전체 검색어 복사</button>
         <a class="resource-cta" href="${NOTEBOOKLM_URL}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-arrow-up-right-from-square"></i> NotebookLM 열기</a>
@@ -71,7 +78,7 @@ function render() {
 
     <div class="notebook-search-guide">
       <i class="fa-solid fa-circle-info"></i>
-      <span>NotebookLM 검색 결과와 수집한 소스는 로그인한 개인 계정의 노트북에 저장됩니다. 검색 결과에서 출처와 발행일을 확인한 뒤 필요한 자료만 추가하세요.</span>
+      <span>검색 결과에서 출처와 발행일을 확인한 뒤 필요한 자료만 추가하세요. 수집한 자료는 로그인한 내 NotebookLM 노트북에 저장됩니다.</span>
     </div>
 
     <section class="notebook-topic-grid">

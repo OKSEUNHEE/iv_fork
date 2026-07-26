@@ -94,6 +94,11 @@
 
 /* ── NotebookLM 주식 리서치 ── */
 .notebook-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.notebook-quick-steps { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+.notebook-quick-steps div { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid #bfdbfe; border-radius: 9px; background: #f0f7ff; color: #0f3f6d; font-size: 1.02rem; font-weight: 800; }
+.notebook-quick-steps b { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: .8rem; }
+.notebook-quick-steps > i { color: var(--primary); font-size: .92rem; }
+.notebook-quick-tip { margin: 12px 0 0 !important; color: #1e3a5f !important; font-size: .98rem !important; line-height: 1.65 !important; }
 .notebook-search-guide {
   display: flex; align-items: flex-start; gap: 9px;
   margin: 0 0 18px; padding: 12px 14px;
@@ -271,4 +276,5 @@ body[data-page="youtube"].is-video-playing #yt-player-frame {
   .grid-3 { grid-template-columns: 1fr; }
   .video-list-panel { width: 92vw; }
   .notebook-topic-grid { grid-template-columns: 1fr; }
+  .notebook-quick-steps > i { transform: rotate(90deg); }
 }
