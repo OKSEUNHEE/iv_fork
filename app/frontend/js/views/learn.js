@@ -52,7 +52,7 @@ function ensureMermaid() {
   // 렌더링이 대기 상태에 남을 수 있다. 전역 번들을 명시적으로 로드한다.
   mermaidLoader = new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+    s.src = 'vendor/mermaid.min.js?v=11.16.0';
     s.async = true;
     s.onload = () => {
       if (!window.mermaid) {
