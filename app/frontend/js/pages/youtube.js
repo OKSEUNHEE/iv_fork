@@ -132,6 +132,10 @@ async function playVideo(video) {
   document.querySelectorAll('.video-card').forEach((c) => c.classList.toggle('now-playing', c.dataset.videoId === video.videoId));
   document.getElementById('yt-player-empty')?.classList.add('hidden');
 
+  // 영상을 고르면 목록 패널을 닫아 재생 화면이 바로 보이게 한다
+  document.getElementById('video-list-panel')?.classList.remove('open');
+  document.getElementById('video-list-overlay')?.classList.remove('show');
+
   const nowPlayingEl = document.getElementById('now-playing-title');
   if (nowPlayingEl) nowPlayingEl.textContent = `${video.title} · ${video.channel}`;
 
@@ -227,8 +231,33 @@ async function render() {
       </button>
     </section>
 
-    ${topicSections}
+    <button class="video-list-toggle" id="video-list-toggle" type="button">
+      <i class="fa-solid fa-list"></i> 영상 목록
+    </button>
+    <div class="video-list-overlay" id="video-list-overlay"></div>
+    <aside class="video-list-panel" id="video-list-panel">
+      <div class="video-list-hdr">
+        <div class="video-list-title"><i class="fa-brands fa-youtube" style="color:#ff0000"></i> 영상 목록</div>
+        <button class="video-list-close" id="video-list-close" type="button" aria-label="영상 목록 닫기">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      ${topicSections}
+    </aside>
   `;
+
+  // 영상 목록 offcanvas 열기/닫기
+  function openVideoList() {
+    document.getElementById('video-list-panel')?.classList.add('open');
+    document.getElementById('video-list-overlay')?.classList.add('show');
+  }
+  function closeVideoList() {
+    document.getElementById('video-list-panel')?.classList.remove('open');
+    document.getElementById('video-list-overlay')?.classList.remove('show');
+  }
+  document.getElementById('video-list-toggle')?.addEventListener('click', openVideoList);
+  document.getElementById('video-list-overlay')?.addEventListener('click', closeVideoList);
+  document.getElementById('video-list-close')?.addEventListener('click', closeVideoList);
 
   el.querySelectorAll('.video-card').forEach((card) => {
     const videoId = card.dataset.videoId;

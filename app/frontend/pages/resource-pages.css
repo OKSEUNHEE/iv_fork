@@ -166,6 +166,66 @@
 .video-channel { font-size: .8rem; color: var(--text-muted); margin: 0 0 12px; }
 .video-play-btn { width: 100%; justify-content: center; border: none; cursor: pointer; margin-top: auto; }
 
+/* ── 영상 목록 offcanvas (우측에서 슬라이드 인) ── */
+.video-list-toggle {
+  position: fixed;
+  top: calc(var(--topbar-h) + 16px);
+  right: 20px;
+  z-index: 55;
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: .82rem; font-weight: 600;
+  cursor: pointer;
+}
+.video-list-toggle:hover { background: var(--surface-hover); }
+.video-list-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.35);
+  z-index: 58;
+  backdrop-filter: blur(2px);
+}
+.video-list-overlay.show { display: block; }
+.video-list-panel {
+  position: fixed;
+  top: var(--topbar-h);
+  right: 0;
+  width: 420px;
+  max-width: 92vw;
+  height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 18px 18px 32px;
+  box-shadow: var(--shadow-lg);
+  z-index: 59;
+  transform: translateX(100%);
+  transition: transform .22s cubic-bezier(.4,0,.2,1);
+}
+.video-list-panel.open { transform: translateX(0); }
+.video-list-hdr { display: flex; align-items: center; margin-bottom: 14px; }
+.video-list-title {
+  font-size: .95rem; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.video-list-close {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border: none; border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: auto;
+}
+.video-list-close:hover { background: var(--surface-hover); color: var(--text); }
+.video-list-panel .grid-3 { grid-template-columns: 1fr; }
+
 @media (max-width: 860px) {
   .grid-3 { grid-template-columns: 1fr; }
+  .video-list-panel { width: 92vw; }
 }
