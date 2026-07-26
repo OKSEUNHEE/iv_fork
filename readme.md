@@ -466,11 +466,22 @@ DART(전자공시시스템) API는 상장 기업의 재무제표·공시 데이�
 │   │       ├── api.js                   # Fetch API 래퍼
 │   │       └── views
 │   │           ├── home.js
+│   │           ├── learn.js              # 학습 자료 (docs/*.md 뷰어)
+│   │           ├── quiz.js               # 퀴즈 (MongoDB quiz_questions)
+│   │           ├── taxAccounting.js      # 세무·회계 시뮬레이션
+│   │           ├── financialKnowledge.js # 주식·금융상품 기초 상식
+│   │           ├── ollama.js             # Ollama 로컬 LLM 관리
 │   │           ├── macroRealtime.js     # 매크로 실시간 분석
 │   │           ├── macroSimulation.js   # GBM 시뮬레이션
 │   │           ├── industryAnalysis.js  # 산업 분석
 │   │           ├── financialStatement.js # 재무제표
+│   │           ├── companyFinancial.js   # DART 재무 AI 분석
 │   │           ├── dartCompanySearch.js  # DART 기업 검색
+│   │           ├── dartFinancialAnalysis.js # DART 재무제표 조회
+│   │           ├── dartRegionSearch.js   # DART 지역·고용 검색
+│   │           ├── groupNetwork.js       # 그룹(계열사) 네트워크
+│   │           ├── kospiExcluded.js      # 코스피 제외 종목 조회
+│   │           ├── investmentTree.js     # 투자 의사결정 트리
 │   │           ├── valuation.js          # 밸류에이션
 │   │           ├── technicalChart.js     # 기술적 분석 (7개 탭)
 │   │           ├── backtest.js           # 백테스트
@@ -509,17 +520,27 @@ DART(전자공시시스템) API는 상장 기업의 재무제표·공시 데이�
 │       ├── CNNTimeSeries.py
 │       ├── LSTMPredictor.py
 │       └── TransformerTimeSeries.py
-├── docs
-│   ├── 27.md   Day 042 — 매크로 분석 개요 및 금리 분석
-│   ├── 28.md   Day 043 — 경제지표 분석 (물가·유가 등)
-│   ├── 29.md   Day 044 — 거시경제 상황 분석 실습
-│   ├── 30.md   Day 045 — 산업 분석
-│   ├── 31.md   Day 046 — 산업 분석 실습
-│   ├── 32.md   Day 047 — 재무제표 분석 I
-│   ├── 33.md   Day 048 — 재무제표 분석 II (현금흐름표 & 기업가치)
-│   ├── 34.md   Day 049 — 상대가치 평가 (밸류에이션 멀티플)
-│   ├── 35.md   Day 050 — 기술적 분석 I (추세 & 지표)
-│   ├── 36.md   Day 051 — 기술적 분석 II + 통합 리포트
+├── docs                                  # RAG(Qdrant) 업로드 대상 + /api/learn/doc 학습 자료
+│   ├── 01.md   개인·법인·세무·회계 기초 상식
+│   ├── 02.md   경제지표 분석 (물가, 유가 등)
+│   ├── 03.md   거시경제 상황 분석 실습
+│   ├── 04.md   산업 분석
+│   ├── 05.md   산업 분석 실습
+│   ├── 06.md   재무제표 분석 I (손익계산서 & 대차대조표)
+│   ├── 07.md   재무제표 분석 II (현금흐름표 & 기업가치)
+│   ├── 08.md   상대가치 평가 (밸류에이션 멀티플)
+│   ├── 09.md   기술적 분석 I (추세 & 지표)
+│   ├── 10.md   기술적 분석 II (패턴 & 엘리어트 파동)
+│   ├── 11.md   주식·배당·금융상품 기초 상식
+│   ├── 12.md   금융상품의 구분 (자본시장법 기준)
+│   ├── 13.md   ETF 심화 (일반펀드 vs ETF 비교)
+│   ├── 14.md   포트폴리오 이론 및 성과 분석
+│   ├── 15.md   자산배분 모델
+│   ├── 16.md   외국인 매수·매도 및 자본 국적 확인 방법
+│   ├── voca.md 투자분석 핵심 용어집
+│   ├── image.png, image-1.png, image-2.png  # 본문 삽입 이미지
+│   ├── images/                          # 예: 증권사 HTS/MTS 스크린샷
+│   └── 국내주식 종목별 투자 현황(2024년 말).xlsx
 
 ├── requirements.txt
 └── readme.md

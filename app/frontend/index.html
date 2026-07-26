@@ -193,6 +193,19 @@
           </div>
         </div>
 
+        <!-- ─────── 외부 자료 (별도 정적 페이지) ─────── -->
+        <div class="nav-section">
+          <button class="nav-section-hdr" onclick="toggleNav('external')">
+            <span><i class="fa-solid fa-up-right-from-square"></i>외부 자료</span>
+            <i class="fa-solid fa-chevron-down nav-chev" id="chev-external"></i>
+          </button>
+          <div class="nav-children" id="nav-external">
+            <a class="nav-item" href="pages/youtube.html"><i class="fa-brands fa-youtube"></i>유튜브 학습 영상</a>
+            <a class="nav-item" href="pages/wikimedia.html"><i class="fa-brands fa-wikipedia-w"></i>위키백과 참고자료</a>
+            <a class="nav-item" href="pages/notebooklm.html"><i class="fa-solid fa-book-open"></i>NotebookLM 학습노트</a>
+          </div>
+        </div>
+
       </nav>
 
       <div class="sidebar-footer">
@@ -230,74 +243,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
   <script type="module" src="js/app.js?v=5"></script>
-  <script>
-    const DESKTOP_BREAKPOINT = 1024;
-    let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;
-
-    function syncSidebarToggle() {
-      const toggle = document.getElementById('sidebar-toggle');
-      if (!toggle) return;
-      toggle.setAttribute('aria-expanded', String(_sidebarOpen));
-      toggle.setAttribute('aria-label', _sidebarOpen ? '메뉴 닫기' : '메뉴 열기');
-    }
-
-    function toggleSidebar() {
-      _sidebarOpen ? closeSidebar() : openSidebar();
-    }
-    function openSidebar() {
-      document.getElementById('sidebar').classList.add('open');
-      document.body.classList.remove('sidebar-collapsed');
-      if (window.innerWidth <= DESKTOP_BREAKPOINT) {
-        document.getElementById('overlay').classList.add('show');
-      }
-      _sidebarOpen = true;
-      syncSidebarToggle();
-    }
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('overlay').classList.remove('show');
-      if (window.innerWidth > DESKTOP_BREAKPOINT) {
-        document.body.classList.add('sidebar-collapsed');
-      }
-      _sidebarOpen = false;
-      syncSidebarToggle();
-    }
-    function toggleNav(id) {
-      const el = document.getElementById('nav-' + id);
-      const chev = document.getElementById('chev-' + id);
-      const open = el.classList.toggle('open');
-      chev.style.transform = open ? 'rotate(180deg)' : '';
-    }
-    // auto-open quiz section if quiz view active
-    window._openNavSection = function(id) {
-      const el = document.getElementById('nav-' + id);
-      const chev = document.getElementById('chev-' + id);
-      if (el && !el.classList.contains('open')) {
-        el.classList.add('open');
-        if (chev) chev.style.transform = 'rotate(180deg)';
-      }
-    };
-
-    window.addEventListener('resize', () => {
-      const isMobile = window.innerWidth <= DESKTOP_BREAKPOINT;
-      document.getElementById('overlay').classList.remove('show');
-
-      if (isMobile) {
-        document.body.classList.remove('sidebar-collapsed');
-        document.getElementById('sidebar').classList.remove('open');
-        _sidebarOpen = false;
-      } else {
-        document.getElementById('sidebar').classList.toggle('open', !document.body.classList.contains('sidebar-collapsed'));
-        _sidebarOpen = !document.body.classList.contains('sidebar-collapsed');
-      }
-
-      syncSidebarToggle();
-    });
-
-    if (window.innerWidth > DESKTOP_BREAKPOINT) {
-      document.getElementById('sidebar').classList.add('open');
-    }
-    syncSidebarToggle();
-  </script>
+  <script src="js/sidebarUI.js?v=1"></script>
 </body>
 </html>
