@@ -3,7 +3,6 @@ FROM python:3.12-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      curl \
       fonts-nanum \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,10 +14,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY app/ ./app/
 RUN mkdir -p app/frontend/vendor \
-    && curl --fail --silent --show-error --location --retry 3 \
-      --connect-timeout 15 --max-time 90 \
-      https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js \
-      -o app/frontend/vendor/mermaid.min.js
+    && python -c "import pathlib, urllib.request; pathlib.Path('app/frontend/vendor/mermaid.min.js').write_bytes(urllib.request.urlopen('https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js', timeout=90).read())" \
+    && test -s app/frontend/vendor/mermaid.min.js
 COPY docs/ ./docs/
 
 EXPOSE 8000
