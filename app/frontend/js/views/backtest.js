@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function backtestView(container) {
   container.innerHTML = `
@@ -33,7 +34,8 @@ export function backtestView(container) {
       </div>
       <button class="run-btn" id="bt-run">▶ 백테스트 실행</button>
       <div id="bt-result" style="margin-top:20px;"></div>
-    </div>`;
+    </div>
+    ${cloudResourceCard('backtest')}`;
 
   container.querySelector('#bt-run').addEventListener('click', async () => {
     const btn = container.querySelector('#bt-run');

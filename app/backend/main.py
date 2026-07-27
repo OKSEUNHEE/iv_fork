@@ -3831,6 +3831,93 @@ def home_kospi_candle(period: str = "3mo") -> dict[str, object]:
     return home_market_candle("kospi", period)
 
 
+@app.get("/api/home/box-range")
+def home_box_range(market: str = "kospi", start: str = "", end: str = "") -> dict[str, object]:
+    """지정한 from~to 기간의 박스권(최고가·최저가) 상단/하단 퍼센티지를 계산한다."""
+    import datetime as _dt
+    config = HOME_MARKETS.get(market, HOME_MARKETS["kospi"])
+
+    today = _dt.date.today()
+    try:
+        end_date = _dt.date.fromisoformat(end) if end else today
+    except ValueError:
+        end_date = today
+    try:
+        start_date = _dt.date.fromisoformat(start) if start else end_date - _dt.timedelta(days=90)
+    except ValueError:
+        start_date = end_date - _dt.timedelta(days=90)
+    if start_date >= end_date:
+        start_date = end_date - _dt.timedelta(days=1)
+
+    import pandas as pd
+    ohlcv: list[dict] = []
+    is_simulated = True
+    try:
+        import yfinance as yf
+        df = yf.download(config["ticker"], start=start_date.isoformat(),
+                         end=(end_date + _dt.timedelta(days=1)).isoformat(),
+                         interval="1d", progress=False, auto_adjust=True, threads=False)
+        if df.empty:
+            raise ValueError("empty")
+        for idx, row in df.iterrows():
+            def _f(col):
+                v = row.get(col)
+                if v is None:
+                    return None
+                if hasattr(v, '__iter__') and not isinstance(v, (str, float, int)):
+                    v = list(v)[0]
+                return round(float(v), 2)
+            ohlcv.append({
+                "date": str(idx)[:10],
+                "o": _f("Open"), "h": _f("High"),
+                "l": _f("Low"),  "c": _f("Close"),
+            })
+        is_simulated = False
+    except Exception:
+        import math
+        rng_state = config["seed"]
+        def _rand():
+            nonlocal rng_state
+            rng_state = (rng_state * 1664525 + 1013904223) % 2**32
+            return rng_state / 2**32
+        def _randn():
+            u, v = max(_rand(), 1e-10), _rand()
+            return math.sqrt(-2 * math.log(u)) * math.cos(2 * math.pi * v)
+        price = config["base_price"]
+        n_days = max(1, (end_date - start_date).days)
+        n_bars = max(1, int(n_days * 0.72))
+        for i in range(n_bars):
+            date = (start_date + _dt.timedelta(days=int(i / 0.72) + 1)).isoformat()
+            chg = _randn() * price * 0.012
+            o = price
+            c = max(o * 0.9, o + chg)
+            h = max(o, c) * (1 + _rand() * 0.008)
+            l = min(o, c) * (1 - _rand() * 0.008)
+            ohlcv.append({"date": date, "o": round(o, 2), "h": round(h, 2),
+                          "l": round(l, 2), "c": round(c, 2)})
+            price = c
+
+    if not ohlcv:
+        raise HTTPException(status_code=404, detail="해당 기간의 시세 데이터를 찾을 수 없습니다.")
+
+    box_high = max(bar["h"] for bar in ohlcv)
+    box_low  = min(bar["l"] for bar in ohlcv)
+    last_close = ohlcv[-1]["c"]
+    box_range = box_high - box_low
+    upper_pct    = round((box_high - last_close) / last_close * 100, 2) if last_close else None
+    lower_pct    = round((last_close - box_low) / last_close * 100, 2) if last_close else None
+    position_pct = round((last_close - box_low) / box_range * 100, 2) if box_range else None
+
+    return {
+        "market": market, "name": config["name"], "ticker": config["ticker"],
+        "start": start_date.isoformat(), "end": end_date.isoformat(),
+        "ohlcv": ohlcv, "is_simulated": is_simulated,
+        "box_high": round(box_high, 2), "box_low": round(box_low, 2),
+        "last_close": last_close,
+        "upper_pct": upper_pct, "lower_pct": lower_pct, "position_pct": position_pct,
+    }
+
+
 # ─── DART Financial Analysis ─────────────────────────────────────────────────
 
 class DartFinancialAnalysisRequest(BaseModel):

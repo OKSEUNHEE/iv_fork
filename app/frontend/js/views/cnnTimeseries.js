@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function cnnTimeseriesView(container) {
   container.innerHTML = `
@@ -25,7 +26,8 @@ export function cnnTimeseriesView(container) {
       </div>
       <button class="run-btn" id="cnn-run">▶ 학습 및 예측</button>
       <div id="cnn-result" style="margin-top:20px;"></div>
-    </div>`;
+    </div>
+    ${cloudResourceCard('cnn-timeseries')}`;
 
   container.querySelector('#cnn-run').addEventListener('click', async () => {
     const btn = container.querySelector('#cnn-run');

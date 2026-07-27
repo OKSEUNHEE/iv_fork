@@ -162,6 +162,52 @@ img { max-width: 100%; }
   transition: background .3s;
 }
 
+.auth-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 99px;
+  font-size: .74rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.auth-badge:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+/* ── Enterprise 안내 모달 ── */
+.enterprise-modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 23, 42, .45);
+  padding: 16px;
+}
+.enterprise-modal-overlay[hidden] { display: none; }
+.enterprise-modal {
+  position: relative; width: 100%; max-width: 380px;
+  background: #fff; border-radius: 14px; padding: 28px 24px 22px;
+  text-align: center; box-shadow: 0 20px 50px rgba(15, 23, 42, .25);
+}
+.enterprise-modal-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); background: var(--surface-soft); border: none;
+}
+.enterprise-modal-close:hover { background: var(--border); color: var(--text); }
+.enterprise-modal-icon {
+  width: 52px; height: 52px; margin: 0 auto 14px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #004578 0%, #0078d4 55%, #2b88d8 100%);
+  color: #fff; font-size: 1.3rem;
+  box-shadow: 0 4px 14px rgba(0, 120, 212, .35);
+}
+.enterprise-modal h3 { margin: 0 0 8px; font-size: 1.02rem; font-weight: 800; color: #1a1a1a; }
+.enterprise-modal p { margin: 0 0 18px; font-size: .82rem; color: var(--text-muted); line-height: 1.55; }
+.enterprise-modal-cta {
+  padding: 8px 22px; border-radius: 8px; border: none;
+  background: var(--primary); color: #fff; font-size: .82rem; font-weight: 700;
+}
+.enterprise-modal-cta:hover { background: var(--primary-dark); }
+
 /* ═══════════════════════════════════════════════════════
    LAYOUT SHELL
 ═══════════════════════════════════════════════════════ */
@@ -632,6 +678,32 @@ img { max-width: 100%; }
 .home-dashboard.is-chart-expanded .home-quick-links { display: none; }
 @media (max-width: 1000px) { .home-market-grid { grid-template-columns: 1fr; } .home-quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .home-market-card-head { flex-direction: column; } .home-market-actions { justify-content: flex-start; } .home-quick-links { grid-template-columns: 1fr; } .home-market-expand span { display: none; } .home-dashboard.is-chart-expanded .home-market-card.is-expanded { padding: 14px; } }
+
+/* ── Home box-range (박스권) card ── */
+.home-box-card {
+  min-width: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 16px 18px 18px; margin-top: 14px; box-shadow: 0 2px 10px rgba(15,23,42,.05);
+}
+.home-box-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+.home-box-title { font-size: .85rem; font-weight: 800; color: #334155; letter-spacing: .02em; }
+.home-box-title i { color: #7c3aed; margin-right: 6px; }
+.home-box-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.home-box-controls select,
+.home-box-controls input[type="date"] { border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; font-size: .75rem; color: #334155; background: #fff; }
+.home-box-controls label { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; color: #64748b; font-weight: 700; }
+.home-box-controls button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; border: 1px solid #0078d4; background: #0078d4; color: #fff; font-size: .75rem; font-weight: 750; }
+.home-box-controls button:hover { background: #106ebe; }
+.home-box-desc { font-size: .74rem; color: #94a3b8; line-height: 1.6; margin: 4px 0 12px; }
+.home-box-body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr); gap: 16px; align-items: stretch; }
+.home-box-chart-wrap { position: relative; min-height: 300px; }
+.home-box-chart { width: 100%; }
+.home-box-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; color: #94a3b8; font-size: .78rem; background: rgba(255,255,255,.85); }
+.home-box-stats { display: grid; grid-template-columns: 1fr; gap: 8px; align-content: start; }
+.home-box-stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border: 1px solid #f1f5f9; border-radius: 8px; background: #fafafa; }
+.home-box-stat-label { font-size: .72rem; color: #64748b; font-weight: 700; }
+.home-box-stat-value { font-size: .88rem; font-weight: 800; }
+@media (max-width: 800px) { .home-box-body { grid-template-columns: 1fr; } .home-box-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .home-box-stats { grid-template-columns: 1fr; } }
 
 /* ═══════════════════════════════════════════════════════
    QUIZ VIEW

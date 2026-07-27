@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function pipelineView(container) {
   container.innerHTML = `
@@ -38,7 +39,8 @@ export function pipelineView(container) {
       </div>
       <button class="run-btn" id="pl-run">▶ 파이프라인 실행</button>
       <div id="pl-result" style="margin-top:20px;"></div>
-    </div>`;
+    </div>
+    ${cloudResourceCard('pipeline')}`;
 
   container.querySelector('#pl-run').addEventListener('click', async () => {
     const btn = container.querySelector('#pl-run');

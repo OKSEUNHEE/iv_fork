@@ -1,4 +1,5 @@
 import { apiPost, withLoading, renderMetrics, renderImage, renderError } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function kmeansView(container) {
   container.innerHTML = `
@@ -25,6 +26,7 @@ export function kmeansView(container) {
       <button class="run" id="kmRun">&#x25B6; 클러스터링 / Cluster</button>
       <div id="kmResult"></div>
     </section>
+    ${cloudResourceCard('kmeans')}
   `;
 
   container.querySelector('#kmRun').addEventListener('click', async (e) => {

@@ -1,4 +1,5 @@
 import { apiPost, withLoading, renderMetrics, renderImage, renderError } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function crossValidationView(container) {
   container.innerHTML = `
@@ -25,6 +26,7 @@ export function crossValidationView(container) {
       <button class="run" id="cvRun">▶ 실행 / Run</button>
       <div id="cvResult"></div>
     </section>
+    ${cloudResourceCard('cross-validation')}
   `;
 
   container.querySelector('#cvRun').addEventListener('click', async (e) => {

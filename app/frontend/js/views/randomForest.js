@@ -1,4 +1,5 @@
 import { apiPost, withLoading, renderMetrics, renderError } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function randomForestView(container) {
   container.innerHTML = `
@@ -17,6 +18,7 @@ export function randomForestView(container) {
       <button class="run" id="rfRun">▶ 평가 실행 / Run</button>
       <div id="rfResult"></div>
     </section>
+    ${cloudResourceCard('random-forest')}
   `;
 
   container.querySelector('#rfRun').addEventListener('click', async (e) => {

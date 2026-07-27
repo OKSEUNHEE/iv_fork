@@ -63,6 +63,34 @@ function ensureSidebarChatbot() {
 }
 window._ensureSidebarChatbot = ensureSidebarChatbot;
 
+// ── Enterprise 안내 모달 (회원가입/로그인, 에이전트, 증시뉴스 클릭 시) ──
+function openEnterpriseModal() {
+  const overlay = document.getElementById('enterprise-modal-overlay');
+  if (!overlay) return;
+  overlay.hidden = false;
+  document.body.classList.add('modal-open');
+}
+function closeEnterpriseModal() {
+  const overlay = document.getElementById('enterprise-modal-overlay');
+  if (!overlay) return;
+  overlay.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+window.closeEnterpriseModal = closeEnterpriseModal;
+
+document.querySelectorAll('.js-enterprise-gate').forEach((el) => {
+  el.addEventListener('click', (event) => {
+    event.preventDefault();
+    openEnterpriseModal();
+  });
+});
+document.getElementById('enterprise-modal-overlay')?.addEventListener('click', (event) => {
+  if (event.target.id === 'enterprise-modal-overlay') closeEnterpriseModal();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeEnterpriseModal();
+});
+
 function syncSidebarToggle() {
   const toggle = document.getElementById('sidebar-toggle');
   if (!toggle) return;

@@ -1,4 +1,5 @@
 import { apiPost, withLoading, renderMetrics, renderImage, renderError } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function svmView(container) {
   container.innerHTML = `
@@ -25,6 +26,7 @@ export function svmView(container) {
       <button class="run" id="svmRun">&#x25B6; 학습 / Train</button>
       <div id="svmResult"></div>
     </section>
+    ${cloudResourceCard('svm')}
   `;
 
   container.querySelector('#svmRun').addEventListener('click', async (e) => {

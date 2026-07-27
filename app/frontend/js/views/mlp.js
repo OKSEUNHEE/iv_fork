@@ -1,4 +1,5 @@
 import { apiPost, withLoading, renderMetrics, renderImage, renderError } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function mlpView(container) {
   container.innerHTML = `
@@ -25,6 +26,7 @@ export function mlpView(container) {
       <button class="run" id="mlpRun">&#x25B6; 학습 / Train</button>
       <div id="mlpResult"></div>
     </section>
+    ${cloudResourceCard('mlp')}
   `;
 
   container.querySelector('#mlpRun').addEventListener('click', async (e) => {

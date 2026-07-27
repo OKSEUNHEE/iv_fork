@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function transformerView(container) {
   container.innerHTML = `
@@ -29,7 +30,8 @@ export function transformerView(container) {
       </div>
       <button class="run-btn" id="tf-run">▶ 학습 및 예측</button>
       <div id="tf-result" style="margin-top:20px;"></div>
-    </div>`;
+    </div>
+    ${cloudResourceCard('transformer')}`;
 
   container.querySelector('#tf-run').addEventListener('click', async () => {
     const btn = container.querySelector('#tf-run');

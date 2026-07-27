@@ -1,4 +1,5 @@
 import { apiPost, withLoading, renderMetrics, renderImage, renderError } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function linearRegressionView(container) {
   container.innerHTML = `
@@ -25,6 +26,7 @@ export function linearRegressionView(container) {
       <button class="run" id="regRun">&#x25B6; 학습 / Fit</button>
       <div id="regResult"></div>
     </section>
+    ${cloudResourceCard('linear-regression')}
   `;
 
   container.querySelector('#regRun').addEventListener('click', async (e) => {

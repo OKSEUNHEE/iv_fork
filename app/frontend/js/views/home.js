@@ -38,10 +38,42 @@ function chartCard(market) {
     </section>`;
 }
 
+function todayISO(offsetDays = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
+
+function boxRangeCard() {
+  return `
+    <section class="home-box-card" id="home-box-card">
+      <header class="home-box-head">
+        <div class="home-box-title"><i class="fa-solid fa-box-archive"></i> 박스권(지지·저항) 분석</div>
+        <div class="home-box-controls">
+          <select data-box-market>
+            ${HOME_MARKETS.map((m) => `<option value="${m.id}">${m.name}</option>`).join('')}
+          </select>
+          <label>From <input type="date" data-box-start value="${todayISO(-90)}"></label>
+          <label>To <input type="date" data-box-end value="${todayISO(0)}"></label>
+          <button type="button" data-box-run><i class="fa-solid fa-magnifying-glass"></i> 조회</button>
+        </div>
+      </header>
+      <p class="home-box-desc">선택한 기간(from~to) 안에서 가장 높았던 가격(박스 상단)과 가장 낮았던 가격(박스 하단)을 구하고, 현재가가 그 상단·하단까지 각각 몇 % 남았는지 보여줍니다.</p>
+      <div class="home-box-body">
+        <div class="home-box-chart-wrap">
+          <div class="home-box-chart" data-box-chart></div>
+          <div class="home-box-loading" data-box-loading><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
+        </div>
+        <div class="home-box-stats" data-box-stats></div>
+      </div>
+    </section>`;
+}
+
 export function homeView(container, navigate) {
   container.innerHTML = `
     <div class="home-dashboard" id="home-dashboard">
       <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
+      ${boxRangeCard()}
       <section class="home-quick-links">
         <button data-view="macro-realtime"><i class="fa-solid fa-satellite-dish"></i> 거시경제현황</button>
         <button data-view="industry-analysis"><i class="fa-solid fa-industry"></i> 산업 경쟁력 분석</button>
@@ -146,5 +178,77 @@ export function homeView(container, navigate) {
     loadChart(market);
   });
 
-  window._viewCleanup = () => charts.forEach((chart) => { try { chart.destroy(); } catch {} });
+  // ── 박스권(지지·저항) 분석 ────────────────────────────────────────────────
+  let boxChart = null;
+  const boxCard    = container.querySelector('#home-box-card');
+  const boxMarket   = boxCard.querySelector('[data-box-market]');
+  const boxStart    = boxCard.querySelector('[data-box-start]');
+  const boxEnd      = boxCard.querySelector('[data-box-end]');
+  const boxChartEl  = boxCard.querySelector('[data-box-chart]');
+  const boxLoading  = boxCard.querySelector('[data-box-loading]');
+  const boxStatsEl  = boxCard.querySelector('[data-box-stats]');
+
+  function destroyBoxChart() {
+    if (boxChart) { try { boxChart.destroy(); } catch {} boxChart = null; }
+  }
+
+  function renderBoxStats(data) {
+    const stats = [
+      ['박스 상단(최고가)', `${data.box_high.toLocaleString()}`, '#e11d48'],
+      ['현재가',            `${data.last_close.toLocaleString()}`, '#0f172a'],
+      ['박스 하단(최저가)', `${data.box_low.toLocaleString()}`, '#2563eb'],
+      ['상단까지 여력',      data.upper_pct != null ? `+${data.upper_pct}%` : '-', '#e11d48'],
+      ['하단까지 여력',      data.lower_pct != null ? `-${data.lower_pct}%` : '-', '#2563eb'],
+      ['박스권 내 위치',     data.position_pct != null ? `${data.position_pct}%` : '-', '#7c3aed'],
+    ];
+    boxStatsEl.innerHTML = stats.map(([label, value, color]) => `
+      <div class="home-box-stat">
+        <span class="home-box-stat-label">${label}</span>
+        <strong class="home-box-stat-value" style="color:${color};">${value}</strong>
+      </div>`).join('');
+  }
+
+  async function loadBoxRange() {
+    const market = boxMarket.value;
+    const start  = boxStart.value;
+    const end    = boxEnd.value;
+    boxLoading.style.display = 'flex';
+    destroyBoxChart();
+    try {
+      const res = await fetch(`/api/home/box-range?market=${encodeURIComponent(market)}&start=${start}&end=${end}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const ohlcv = data.ohlcv || [];
+      if (!ohlcv.length) throw new Error('데이터 없음');
+
+      renderBoxStats(data);
+
+      const candles = ohlcv.map((point) => ({ x: new Date(point.date).getTime(), y: [point.o, point.h, point.l, point.c] }));
+      boxChart = new ApexCharts(boxChartEl, {
+        chart: { type: 'candlestick', height: 300, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
+        series: [{ name: data.name, type: 'candlestick', data: candles }],
+        plotOptions: { candlestick: { colors: { upward: '#e11d48', downward: '#2563eb' }, wick: { useFillColor: true } } },
+        xaxis: { type: 'datetime', labels: { format: 'MM-dd', style: { fontSize: '10px', colors: '#94a3b8' }, hideOverlappingLabels: true, datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { formatter: (value) => value ? Math.round(value).toLocaleString() : '', style: { fontSize: '10px', colors: '#94a3b8' } } },
+        grid: { borderColor: '#eef2f7', strokeDashArray: 3, padding: { right: 10, left: 4 } },
+        annotations: { yaxis: [
+          { y: data.box_high, borderColor: '#e11d48', strokeDashArray: 4, label: { text: `박스 상단 ${data.box_high.toLocaleString()}`, style: { background: '#e11d48', color: '#fff', fontSize: '10px' } } },
+          { y: data.box_low,  borderColor: '#2563eb', strokeDashArray: 4, label: { text: `박스 하단 ${data.box_low.toLocaleString()}`, style: { background: '#2563eb', color: '#fff', fontSize: '10px' } } },
+        ] },
+        tooltip: { shared: false, x: { format: 'yyyy-MM-dd' } }, legend: { show: false },
+      });
+      await boxChart.render();
+      boxLoading.style.display = 'none';
+    } catch (error) {
+      boxLoading.innerHTML = `<span class="home-market-error">데이터 오류: ${error.message}</span>`;
+    }
+  }
+
+  boxCard.querySelector('[data-box-run]').addEventListener('click', loadBoxRange);
+  loadBoxRange();
+
+  window._viewCleanup = () => {
+    charts.forEach((chart) => { try { chart.destroy(); } catch {} });
+    destroyBoxChart();
+  };
 }

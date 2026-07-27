@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { cloudResourceCard } from './cloudAiResources.js';
 
 export function lstmView(container) {
   container.innerHTML = `
@@ -29,7 +30,8 @@ export function lstmView(container) {
       </div>
       <button class="run-btn" id="lstm-run">▶ 학습 및 예측</button>
       <div id="lstm-result" style="margin-top:20px;"></div>
-    </div>`;
+    </div>
+    ${cloudResourceCard('lstm')}`;
 
   container.querySelector('#lstm-run').addEventListener('click', async () => {
     const btn = container.querySelector('#lstm-run');
