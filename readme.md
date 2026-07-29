@@ -1013,3 +1013,6 @@ OLLAMA_MODEL=llama3:latest             # 기본 분석 모델
 local_lake/
 ├── raw/            # 크롤링하거나 다운로드한 원본 파일 (CSV, JSON 등)
 └── processed/      # 결측치 처리, 피처 엔지니어링이 완료된 학습용 데이터 (Parquet)
+```
+
+## github sample - https://github.com/parknahye-dot/Eye-Brow-Architect
