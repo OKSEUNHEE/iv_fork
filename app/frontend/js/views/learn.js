@@ -191,6 +191,13 @@ export function learnView(app, docId) {
       a.title = '유튜브 학습 영상 목록으로 이동';
     });
 
+    // docs/*.md의 외부 홈페이지 링크는 학습 화면을 유지한 채 새 탭에서 연다.
+    // YouTube 링크는 위에서 자체 자료 페이지로 바뀌므로 이 대상에 포함되지 않는다.
+    mdContent.querySelectorAll('a[href^="http://"], a[href^="https://"]').forEach((a) => {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    });
+
     // inject TOC (문서에 소제목이 없으면 목차 버튼도 숨김)
     const tocEl = app.querySelector('#toc-placeholder');
     const tocHtml = buildToc(mdContent);
