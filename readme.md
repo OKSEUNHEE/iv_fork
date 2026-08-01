@@ -1016,3 +1016,25 @@ local_lake/
 ```
 
 ## github sample - https://github.com/parknahye-dot/Eye-Brow-Architect
+
+---
+
+## Pylint 검사 결과
+
+`pylint 4.0.6`으로 `test` 폴더의 Python 소스 파일 6개를 검사했습니다.
+
+- **점수:** 5.95/10
+- **실행 명령:** `find test -type f -name '*.py' -print0 | xargs -0 .venv/bin/python -m pylint`
+
+### 오류
+
+- `test/0201.py` 8, 10, 12, 13행: 정의되지 않은 `oil` 변수 사용 (`undefined-variable`)
+
+### 경고 및 스타일 개선 항목
+
+- 모든 검사 파일: 모듈 docstring 누락, 숫자로만 된 모듈명
+- `test/0201.py`: 사용하지 않는 `yfinance`, `pandas` import
+- `test/0202.py`: 사용하지 않는 `numpy` import
+- `test/0102.py`, `test/0401.py`: 외부 스코프 변수명 재정의
+- `test/0301.py`: 100자 초과 줄 4개 및 import 순서 문제
+- `test/0102.py`, `test/0401.py`: 함수 docstring 누락
