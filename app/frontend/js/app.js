@@ -41,6 +41,8 @@ const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
 const TOPBAR_MARKETS = ['^KS11', '^IXIC', 'KRW=X'];
 const TOPBAR_REFRESH_MS = 30_000;
+const VISITOR_HEARTBEAT_MS = 30_000;
+const VISITOR_ID_KEY = 'investment_analysis_visitor_id';
 
 const learnRoutes = Object.fromEntries(
   LEARN_DOCS.map((doc) => [
@@ -365,10 +367,43 @@ async function refreshTopbarMarkets() {
   }
 }
 
+function visitorId() {
+  const createId = () => {
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID().replaceAll('-', '');
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+  };
+  try {
+    const saved = localStorage.getItem(VISITOR_ID_KEY);
+    if (saved) return saved;
+    const id = createId();
+    localStorage.setItem(VISITOR_ID_KEY, id);
+    return id;
+  } catch {
+    return createId();
+  }
+}
+
+async function refreshVisitorCount() {
+  const badge = document.getElementById('visitor-count');
+  const text = badge?.querySelector('span');
+  if (!text) return;
+  try {
+    const data = await api.visitorHeartbeat({ visitor_id: visitorId() });
+    text.textContent = `현재 접속 ${Number(data.active_visitors || 0).toLocaleString('ko-KR')}명`;
+  } catch {
+    text.textContent = '현재 접속 확인 불가';
+  }
+}
+
 checkHealth();
 setInterval(checkHealth, 30000);
 refreshTopbarMarkets();
 setInterval(refreshTopbarMarkets, TOPBAR_REFRESH_MS);
+refreshVisitorCount();
+setInterval(refreshVisitorCount, VISITOR_HEARTBEAT_MS);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refreshVisitorCount();
+});
 
 // Boot
 // pages/*.html 정적 페이지의 사이드바 링크가 index.html?view=xxx 형태로

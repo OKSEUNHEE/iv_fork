@@ -147,6 +147,18 @@ img { max-width: 100%; }
 .up { color: var(--green); }
 .dn { color: var(--red); }
 
+.visitor-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 99px;
+  font-size: .72rem; font-weight: 650; color: #1d4ed8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.visitor-badge i { color: var(--primary); }
+
 .health-badge {
   display: flex; align-items: center; gap: 6px;
   padding: 4px 10px;
@@ -155,6 +167,12 @@ img { max-width: 100%; }
   border-radius: 99px;
   font-size: .72rem; color: var(--text-muted);
   flex-shrink: 0;
+}
+.health-docs-link { text-decoration: none; }
+.health-docs-link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-light);
 }
 .health-dot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -598,15 +616,15 @@ img { max-width: 100%; }
 .mermaid-view-badge:focus-visible { outline: 3px solid rgba(14,165,233,.35); outline-offset: 2px; }
 .mermaid-modal-backdrop {
   display: none; position: fixed; inset: 0; z-index: 200;
-  align-items: center; justify-content: center; padding: 24px;
+  align-items: center; justify-content: center; padding: 0;
   background: rgba(15,23,42,.62); backdrop-filter: blur(3px);
 }
 .mermaid-modal-backdrop.show { display: flex; }
 .mermaid-modal {
-  width: min(1000px, 96vw); max-height: min(780px, 90vh);
+  width: 100vw; height: 100vh; max-width: none; max-height: none;
   display: flex; flex-direction: column; overflow: hidden;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-  box-shadow: 0 20px 65px rgba(15,23,42,.35);
+  background: var(--surface); border: 0; border-radius: 0;
+  box-shadow: none;
 }
 .mermaid-modal-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -620,16 +638,18 @@ img { max-width: 100%; }
 }
 .mermaid-modal-close:hover { background: var(--surface-soft); color: var(--text); }
 .mermaid-modal-chart {
-  min-height: 180px; overflow: auto; padding: 28px; background: #fff;
+  flex: 1; min-height: 0; overflow: auto; padding: 40px; background: #fff;
+  display: flex; align-items: center; justify-content: center;
   text-align: center;
 }
-.mermaid-modal-chart svg { max-width: none; min-width: min-content; }
+.mermaid-modal-chart svg {
+  width: max(100%, 1200px); height: auto; max-width: none; min-width: 0;
+}
 .mermaid-modal-loading { padding: 60px 20px; color: var(--text-muted); }
 .mermaid-modal-error { margin: 0; padding: 36px 12px; color: var(--red); text-align: center; }
 @media (max-width: 640px) {
-  .mermaid-modal-backdrop { padding: 10px; }
-  .mermaid-modal { width: 100%; max-height: 94vh; }
-  .mermaid-modal-chart { padding: 18px; }
+  .mermaid-modal-chart { padding: 18px; align-items: flex-start; }
+  .mermaid-modal-chart svg { width: 1200px; }
 }
 .md-body blockquote { border-left: 4px solid var(--primary); margin: 14px 0; padding: 10px 16px; background: var(--primary-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: #444444; }
 .md-body strong { font-weight: 700; color: var(--text); }

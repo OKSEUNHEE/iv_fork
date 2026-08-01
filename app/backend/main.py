@@ -5,6 +5,8 @@ import io
 import json
 import os
 import re
+from threading import Lock
+from time import monotonic
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -49,6 +51,9 @@ QUIZ_SQL_PATH = ROOT_DIR / "app" / "backend" / "quiz_seed.sql"
 DOCS_DIR = ROOT_DIR / "docs"
 GENERATED_DIR.mkdir(parents=True, exist_ok=True)
 _MATPLOTLIB_FONT_CONFIGURED = False
+ACTIVE_VISITOR_TTL_SECONDS = 90
+_active_visitors: dict[str, float] = {}
+_active_visitors_lock = Lock()
 
 def _learn_document_map() -> dict[str, Path]:
     """Expose exactly the Markdown files shipped in docs/, without traversal."""
@@ -123,13 +128,20 @@ app.include_router(quant_router)
 
 @app.middleware("http")
 async def no_cache_static_assets(request, call_next):
-    """StaticFiles only sets ETag/Last-Modified, so browsers could otherwise
-    keep serving a pre-deploy JS/CSS file after a redeploy. no-store forbids
-    the browser from caching these responses at all, so every load fetches
-    the current deploy instead of depending on cache revalidation."""
+    """Always fetch the latest local HTML, JavaScript, and CSS on page load.
+
+    StaticFiles normally uses ETag/Last-Modified revalidation. The learning
+    app is deployed as a single image, so an old shell or module can otherwise
+    survive a deployment in a browser cache. ``no-store`` plus legacy
+    revalidation headers makes local frontend assets non-cacheable for both
+    browsers and intermediary proxies.
+    """
     response = await call_next(request)
-    if not request.url.path.startswith("/api/"):
-        response.headers["Cache-Control"] = "no-store"
+    path = request.url.path
+    if path == "/" or path.endswith((".html", ".js", ".css")):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
     return response
 
 
@@ -154,6 +166,32 @@ class DartCompanyListRequest(BaseModel):
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+class VisitorHeartbeatRequest(BaseModel):
+    visitor_id: str = Field(min_length=16, max_length=80, pattern=r"^[A-Za-z0-9_-]+$")
+
+
+@app.post("/api/visitors/heartbeat")
+def visitor_heartbeat(payload: VisitorHeartbeatRequest) -> dict[str, int]:
+    """Register one browser briefly and return the current active-browser count.
+
+    This is an in-memory presence indicator, not an analytics counter. A browser
+    remains active for 90 seconds after its latest heartbeat, so closed tabs
+    disappear without retaining personally identifiable visit history.
+    """
+    now = monotonic()
+    with _active_visitors_lock:
+        expired = [
+            visitor_id
+            for visitor_id, last_seen in _active_visitors.items()
+            if now - last_seen > ACTIVE_VISITOR_TTL_SECONDS
+        ]
+        for visitor_id in expired:
+            _active_visitors.pop(visitor_id, None)
+        _active_visitors[payload.visitor_id] = now
+        count = len(_active_visitors)
+    return {"active_visitors": count}
 
 
 @app.get("/api/learn/doc/{doc_id}")

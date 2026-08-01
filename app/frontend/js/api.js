@@ -36,6 +36,7 @@ export async function apiFetch(path, options = {}) {
 
 export const api = {
   health:           ()      => apiFetch('/api/health'),
+  visitorHeartbeat: (body)  => apiFetch('/api/visitors/heartbeat',         { method: 'POST', body: JSON.stringify(body) }),
   crossValidation:  (body)  => apiFetch('/api/ml/cross-validation',        { method: 'POST', body: JSON.stringify(body) }),
   decisionBoundary: ()      => apiFetch('/api/ml/decision-boundary'),
   randomForest:     (body)  => apiFetch('/api/ml/random-forest',           { method: 'POST', body: JSON.stringify(body) }),
