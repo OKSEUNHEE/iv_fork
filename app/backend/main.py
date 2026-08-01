@@ -91,11 +91,7 @@ app = FastAPI(
     title="Python Education Cloud API",
     version="2.0.0",
     description=(
-        "교육용 ML/DL API 서버 | Educational ML/DL API server. "
-        "Supports: Cross-Validation, Decision Boundary, Random Forest, "
-        "KMeans Clustering, SVM, MLP Neural Network, Linear/Polynomial Regression, "
-        "Text Classification (NLP), OpenCV Animation, HuggingFace Diffusion, "
-        "1D CNN Time Series, LSTM Predictor, Transformer Time Series."
+        "주식 투자 입문 가이드"
     ),
     default_response_class=DEFAULT_RESPONSE_CLASS,
 )

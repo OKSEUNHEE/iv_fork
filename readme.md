@@ -2,6 +2,8 @@
 
 로컬 PC에서 실행하는 학습용 웹앱입니다. 가장 간단한 방법은 Docker Compose를 사용하는 것입니다.
 
+## NotebookLM - https://notebook.google.com/notebook/42560d11-3e03-4b66-890d-67d52d52ccca
+
 ## 1. Docker로 실행하기 (권장)
 
 ### 준비물
