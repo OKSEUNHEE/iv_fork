@@ -4,11 +4,11 @@
  */
 
 const DAY_TOPICS = {
-  1: '주식 1 — 거시경제·산업 분석 (docs 03)',
-  2: '주식 2 — 재무제표·가치평가 (docs 04)',
-  3: '주식 3 — 기술적 분석·시장 수급 (docs 05)',
-  4: '주식 4 — 주식·금융상품·ETF (docs 06)',
-  5: '주식 5 — 포트폴리오·자산배분 (docs 07)',
+  1: '주식 1',
+  2: '주식 2',
+  3: '주식 3',
+  4: '주식 4',
+  5: '주식 5',
 };
 const QUESTIONS_PER_DAY = 20;
 const TOTAL_DAYS = Object.keys(DAY_TOPICS).length;

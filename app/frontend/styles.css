@@ -638,72 +638,12 @@ img { max-width: 100%; }
 
 /* ── Home market dashboard ── */
 .home-dashboard { min-width: 0; }
-.home-market-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.home-market-card {
-  min-width: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-  padding: 16px 18px 12px; box-shadow: 0 2px 10px rgba(15,23,42,.05);
-}
-.home-market-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.home-market-name { font-size: .8rem; font-weight: 800; color: #334155; letter-spacing: .03em; }
-.home-market-name span { color: #94a3b8; font-weight: 600; }
-.home-market-price-row { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
-.home-market-price-row strong { font-size: 1.35rem; line-height: 1; color: #0f172a; letter-spacing: -.03em; }
-.home-market-price-row em { font-style: normal; font-size: .72rem; font-weight: 750; padding: 3px 7px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
-.home-market-price-row em.is-up { background: #fff1f2; color: #e11d48; }
-.home-market-price-row em.is-down { background: #eff6ff; color: #2563eb; }
-.home-market-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
-.home-market-periods { display: inline-flex; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 6px; }
-.home-market-periods button { padding: 3px 7px; color: #64748b; font-size: .68rem; font-weight: 750; border-right: 1px solid #e2e8f0; }
-.home-market-periods button:last-child { border-right: 0; }
-.home-market-periods button.active { color: #fff; background: #0078d4; }
-.home-market-expand { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border: 1px solid #bfdbfe; border-radius: 6px; background: #eff6ff; color: #0369a1; font-size: .68rem; font-weight: 750; }
-.home-market-expand:hover { background: #dbeafe; }
-.home-market-expand.is-collapse { border-color: #bbf7d0; background: #f0fdf4; color: #15803d; }
-.home-market-expand.is-collapse:hover { background: #dcfce7; }
-.home-market-chart-wrap { position: relative; min-height: 230px; }
-.home-market-chart { width: 100%; }
-.home-market-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; color: #94a3b8; font-size: .78rem; background: rgba(255,255,255,.85); }
-.home-market-error { color: var(--red); }
-.home-market-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: #94a3b8; font-size: .67rem; }
-.home-market-foot .is-simulated { color: #a16207; }
-.home-quick-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.home-quick-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .home-quick-links button { display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); background: var(--surface); font-size: .78rem; font-weight: 700; }
 .home-quick-links button:hover { color: var(--primary-dark); background: var(--primary-light); border-color: #bfdbfe; }
 .home-quick-links i { color: var(--primary); }
-.home-dashboard.is-chart-expanded { min-height: calc(100vh - var(--topbar-h) - 34px); }
-.home-dashboard.is-chart-expanded .home-market-grid { display: block; }
-.home-dashboard.is-chart-expanded .home-market-card { display: none; }
-.home-dashboard.is-chart-expanded .home-market-card.is-expanded { display: block; min-height: calc(100vh - var(--topbar-h) - 92px); padding: 22px 24px 16px; }
-.home-dashboard.is-chart-expanded .home-market-card.is-expanded .home-market-chart-wrap { min-height: 600px; }
-.home-dashboard.is-chart-expanded .home-quick-links { display: none; }
-@media (max-width: 1000px) { .home-market-grid { grid-template-columns: 1fr; } .home-quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .home-market-card-head { flex-direction: column; } .home-market-actions { justify-content: flex-start; } .home-quick-links { grid-template-columns: 1fr; } .home-market-expand span { display: none; } .home-dashboard.is-chart-expanded .home-market-card.is-expanded { padding: 14px; } }
-
-/* ── Home box-range (박스권) card ── */
-.home-box-card {
-  min-width: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
-  padding: 16px 18px 18px; margin-top: 14px; box-shadow: 0 2px 10px rgba(15,23,42,.05);
-}
-.home-box-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
-.home-box-title { font-size: .85rem; font-weight: 800; color: #334155; letter-spacing: .02em; }
-.home-box-title i { color: #7c3aed; margin-right: 6px; }
-.home-box-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.home-box-controls select,
-.home-box-controls input[type="date"] { border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; font-size: .75rem; color: #334155; background: #fff; }
-.home-box-controls label { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; color: #64748b; font-weight: 700; }
-.home-box-controls button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; border: 1px solid #0078d4; background: #0078d4; color: #fff; font-size: .75rem; font-weight: 750; }
-.home-box-controls button:hover { background: #106ebe; }
-.home-box-desc { font-size: .74rem; color: #94a3b8; line-height: 1.6; margin: 4px 0 12px; }
-.home-box-body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr); gap: 16px; align-items: stretch; }
-.home-box-chart-wrap { position: relative; min-height: 300px; }
-.home-box-chart { width: 100%; }
-.home-box-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 7px; color: #94a3b8; font-size: .78rem; background: rgba(255,255,255,.85); }
-.home-box-stats { display: grid; grid-template-columns: 1fr; gap: 8px; align-content: start; }
-.home-box-stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border: 1px solid #f1f5f9; border-radius: 8px; background: #fafafa; }
-.home-box-stat-label { font-size: .72rem; color: #64748b; font-weight: 700; }
-.home-box-stat-value { font-size: .88rem; font-weight: 800; }
-@media (max-width: 800px) { .home-box-body { grid-template-columns: 1fr; } .home-box-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 480px) { .home-box-stats { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .home-quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .home-quick-links { grid-template-columns: 1fr; } }
 
 /* ═══════════════════════════════════════════════════════
    QUIZ VIEW
