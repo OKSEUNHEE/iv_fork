@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MongoDB에 퀴즈 데이터(Day 1–15, 총 450문항)를 적재합니다.
+# MongoDB에 퀴즈 데이터(Part 1–15, 총 450문항)를 적재합니다.
 # 이미 존재하는 문항은 건너뜁니다(upsert).
 set -euo pipefail
 
@@ -103,4 +103,4 @@ for (const doc of docs) {
 printjson({ inserted, total: coll.countDocuments({}) });
 "
 
-echo "[OK] MongoDB 초기화/데이터 적재 완료 (Day 1–15, 총 450문항)"
+echo "[OK] MongoDB 초기화/데이터 적재 완료 (Part 1–15, 총 450문항)"

@@ -1664,7 +1664,7 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
 
     coverage = [
         {
-            "day": "Day 052",
+            "day": "Part 052",
             "topic": "주식/ETF 상품",
             "document": "docs/37.md",
             "coverage": 0.96,
@@ -1672,7 +1672,7 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
             "items": ["주식/ETF 개요", "ETF 운용 전략", "성과 비교"],
         },
         {
-            "day": "Day 053",
+            "day": "Part 053",
             "topic": "채권 상품",
             "document": "docs/37.md",
             "coverage": 0.88,
@@ -1680,7 +1680,7 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
             "items": ["채권 개요", "듀레이션", "수익률 곡선", "운용 전략"],
         },
         {
-            "day": "Day 054",
+            "day": "Part 054",
             "topic": "파생상품",
             "document": "docs/38.md",
             "coverage": 0.86,
@@ -1688,7 +1688,7 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
             "items": ["선물", "옵션", "스왑", "헤징 전략"],
         },
         {
-            "day": "Day 055",
+            "day": "Part 055",
             "topic": "포트폴리오 이론",
             "document": "docs/39.md",
             "coverage": 0.94,
@@ -1696,7 +1696,7 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
             "items": ["MPT", "성과분석", "MDD", "Sharpe", "Sortino"],
         },
         {
-            "day": "Day 056",
+            "day": "Part 056",
             "topic": "자산배분 모델",
             "document": "docs/40.md",
             "coverage": 0.92,
@@ -1850,7 +1850,7 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
     plt.close(fig)
 
     diagnostics = [
-        {"area": "문서 커리큘럼", "status": "충분", "note": "37~40.md가 Day 052~056의 5일 과정을 모두 포함합니다."},
+        {"area": "문서 커리큘럼", "status": "충분", "note": "37~40.md가 Part 052~056의 5일 과정을 모두 포함합니다."},
         {"area": "기존 웹앱", "status": "부분 반영", "note": "포트폴리오 최적화와 리스크 분석은 있었지만 금융상품별 통합 화면은 부족했습니다."},
         {"area": "보완 웹앱", "status": "반영", "note": "주식/ETF, 채권, 파생상품, 포트폴리오 이론, 자산배분 모델을 한 화면에서 확인합니다."},
     ]
@@ -1861,11 +1861,11 @@ def quant_financial_knowledge(req: FinancialKnowledgeRequest) -> dict[str, objec
         "diagnostics": diagnostics,
         "strategies": strategy_payload,
         "curriculum": [
-            {"day": "Day 052", "title": "주식/ETF 상품 이해", "practice": "ETF 성과 비교"},
-            {"day": "Day 053", "title": "채권 상품 이해", "practice": "수익률 곡선·듀레이션"},
-            {"day": "Day 054", "title": "파생상품 이해", "practice": "옵션 손익 시뮬레이션"},
-            {"day": "Day 055", "title": "포트폴리오 이론 및 성과 분석", "practice": "CAGR·MDD·Sharpe"},
-            {"day": "Day 056", "title": "자산배분 모델 및 사례 분석", "practice": "평균분산·블랙리터만·Risk-Parity 비교"},
+            {"day": "Part 052", "title": "주식/ETF 상품 이해", "practice": "ETF 성과 비교"},
+            {"day": "Part 053", "title": "채권 상품 이해", "practice": "수익률 곡선·듀레이션"},
+            {"day": "Part 054", "title": "파생상품 이해", "practice": "옵션 손익 시뮬레이션"},
+            {"day": "Part 055", "title": "포트폴리오 이론 및 성과 분석", "practice": "CAGR·MDD·Sharpe"},
+            {"day": "Part 056", "title": "자산배분 모델 및 사례 분석", "practice": "평균분산·블랙리터만·Risk-Parity 비교"},
         ],
     }
 

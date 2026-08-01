@@ -20,7 +20,7 @@ CREATE TABLE quiz_questions (
 );
 
 -- =====================================================================
--- Day 1: docs/01.md — 세금 기초 (법인/자연인, 소득세, 법인세, VAT, 원천징수)
+-- Part 1: docs/01.md — 세금 기초 (법인/자연인, 소득세, 법인세, VAT, 원천징수)
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (1, 1, '01', '법적 주체', '법인이 자연인과 구별되는 핵심 특징으로 가장 적절한 것은?', '출생으로 성립한다', '법이 권리·의무 능력을 부여한 인위적 존재다', '세금을 내지 않는다', '해산해도 권리능력이 유지된다', 1, '법인은 설립 등기를 통해 성립하며, 법이 권리·의무의 주체성을 부여한 인위적 존재이다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (1, 2, '01', '사업자 형태', '개인사업자와 법인사업자의 비교로 옳은 것은?', '개인사업자는 대표자 급여를 비용 처리할 수 있다', '법인사업자는 무한책임이 원칙이다', '법인사업자는 주식 발행 등 외부 투자 유치가 상대적으로 용이하다', '개인사업자는 법인세를 낸다', 2, '법인사업자는 별도 법인격을 바탕으로 지분 구조 설계와 외부 투자 유치가 상대적으로 유리하다.');
@@ -52,7 +52,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (1, 28, '01', '세금 납부', '세금을 내야 할 기한을 넘겼을 때 추가로 부과되는 것은?', '가산세', '벌금', '과태료', '이자', 0, '가산세는 세법에서 정한 신고·납부 의무를 이행하지 않은 경우 본세에 추가하여 징수하는 금액이다. 무신고가산세, 납부불성실가산세 등이 있다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (1, 29, '01', '법인세', '법인세의 최고세율(24%)이 적용되는 과세표준은?', '200억원 초과', '500억원 초과', '3,000억원 초과', '1조원 초과', 2, '법인세는 과세표준 3,000억원 초과 구간에 24%의 최고세율이 적용된다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (1, 30, '01', '원천징수', '프리랜서(사업소득)에 적용되는 원천징수세율은?', '3.3%', '8.8%', '15.4%', '22%', 0, '프리랜서 등 사업소득자에게는 3.3%(소득세 3% + 지방소득세 0.3%)의 원천징수율이 적용된다.');
--- Day 2: docs/02.md — 거시경제 지표 (CPI, PPI, GDP, 환율, 실업률, 유가)
+-- Part 2: docs/02.md — 거시경제 지표 (CPI, PPI, GDP, 환율, 실업률, 유가)
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (2, 1, '02', 'CPI', '소비자물가지수(CPI)가 측정하는 것은?', '기업이 구매하는 원자재 가격', '일반 가계가 소비하는 재화·서비스의 평균 가격 변동', '수출품의 평균 가격', '부동산 가격 변동', 1, 'CPI는 도시 가계가 소비하는 대표적 품목 묶음의 가격 변화를 측정하는 지수로 인플레이션의 대표 지표이다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (2, 2, '02', 'PPI', '생산자물가지수(PPI)가 선행지표로 활용되는 이유는?', '소비자가격보다 항상 낮기 때문', '기업 원가 상승이 시차를 두고 소비자가격에 전가되기 때문', 'PPI는 GDP와 항상 동일하게 움직이기 때문', '수출입 가격을 직접 반영하기 때문', 1, 'PPI 상승은 기업 원가 증가를 의미하며, 이후 소비자가격(CPI) 상승으로 이어지는 경향이 있어 CPI의 선행지표로 사용된다.');
@@ -86,7 +86,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (2, 30, '02', 'GDP', '경제성장률이 잠재성장률을 초과할 때 일반적으로 나타나는 현상은?', '디플레이션', '인플레이션 압력 증가', '실업률 자동 상승', '수출 감소', 1, '실제 성장률이 잠재성장률(공급 능력)을 초과하면 수요 초과로 물가 상승(인플레이션) 압력이 높아진다.');
 
 -- =====================================================================
--- Day 3: docs/03.md — 경기사이클, 통화량, QE/QT
+-- Part 3: docs/03.md — 경기사이클, 통화량, QE/QT
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (3, 1, '03', '경기사이클', '경기사이클 4단계를 순서대로 나열한 것은?', '회복→확장→후퇴→수축', '확장→회복→수축→후퇴', '수축→후퇴→확장→회복', '후퇴→수축→회복→확장', 0, '경기사이클은 회복(recovery) → 확장(expansion) → 후퇴(slowdown) → 수축(contraction) 순으로 순환한다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (3, 2, '03', '선행지표', '다음 중 경기 선행지표에 해당하는 것은?', '실업률', '주식시장 지수', 'GDP 성장률', '소비자물가지수', 1, '주가지수는 기업의 미래 이익 기대를 반영하므로 경기 선행지표로 분류된다. 실업률과 GDP는 동행 또는 후행지표이다.');
@@ -120,7 +120,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (3, 30, '03', '경기지표', '다음 중 경기후행지표로 분류되는 것은?', '장단기 금리 스프레드', '제조업 신규 수주', '소비자물가지수(CPI)', 'M2 증가율', 2, 'CPI는 경제활동의 결과가 물가에 반영되기까지 시차가 있어 경기후행지표로 분류되는 경우가 많다.');
 
 -- =====================================================================
--- Day 4: docs/04.md — 산업분석 (Porter 5 Forces, SWOT, PEST, 산업수명주기)
+-- Part 4: docs/04.md — 산업분석 (Porter 5 Forces, SWOT, PEST, 산업수명주기)
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (4, 1, '04', 'Porter 5 Forces', 'Porter의 5가지 경쟁요인(Five Forces)에 포함되지 않는 것은?', '신규 진입자 위협', '대체재 위협', '정부 규제 강도', '구매자 교섭력', 2, 'Porter 5 Forces는 신규 진입자, 대체재, 구매자 교섭력, 공급자 교섭력, 기존 경쟁자 간 경쟁강도로 구성된다. 정부 규제는 직접 포함되지 않는다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (4, 2, '04', 'Porter 5 Forces', '구매자 교섭력이 강해지는 조건은?', '구매자 수가 많고 개별 구매량이 적을 때', '구매자 수가 적고 대량 구매할 때', '전환비용이 높을 때', '공급자가 독점일 때', 1, '구매자 교섭력은 구매자 수가 적고 대량 구매 시, 전환비용이 낮을수록 강해진다.');
@@ -154,7 +154,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (4, 30, '04', '산업분석', '산업분석과 기업분석의 관계를 설명한 것으로 가장 적절한 것은?', '기업분석만 하면 산업분석은 불필요하다', '산업의 매력도가 낮아도 개별 기업이 좋으면 무조건 좋은 투자이다', '좋은 산업에 있는 기업이 유리하지만, 기업 고유 역량도 중요하다', '산업 성장률이 높으면 모든 기업의 주가가 상승한다', 2, '투자 분석에서 산업 구조와 성장성은 중요한 배경이지만 개별 기업의 경쟁력과 재무 건전성도 함께 평가해야 한다.');
 
 -- =====================================================================
--- Day 5: docs/05.md — 산업 KPI, Peer Comparison, DART 공시
+-- Part 5: docs/05.md — 산업 KPI, Peer Comparison, DART 공시
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (5, 1, '05', 'DART', 'DART(Data Analysis, Retrieval and Transfer System)는 어떤 기관이 운영하는가?', '한국거래소(KRX)', '금융감독원(FSS)', '기획재정부', '한국은행', 1, 'DART는 금융감독원이 운영하는 전자공시시스템으로 상장기업의 사업보고서, 분기보고서 등을 공시한다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (5, 2, '05', 'DART', '기업이 DART에 공시해야 하는 주요 정기 보고서가 아닌 것은?', '사업보고서(연간)', '분기보고서(1·3분기)', '반기보고서(2분기)', '일간 매출 보고서', 3, 'DART 정기공시는 사업보고서(연간), 반기보고서(반기), 분기보고서(1·3분기) 등이다. 일간 매출 보고서는 공시 의무가 없다.');
@@ -188,7 +188,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (5, 30, '05', 'DART', '수시공시(수시보고서)가 필요한 경우가 아닌 것은?', '주요 계약 체결', '대규모 자산 처분', '경영진 이메일 발송', '최대주주 변경', 2, '수시공시는 기업에 중요한 영향을 미치는 사건(계약, 자산 처분, 지배구조 변경 등)이 발생할 때 즉시 공시해야 한다. 내부 이메일은 공시 대상이 아니다.');
 
 -- =====================================================================
--- Day 6: docs/06.md — 손익계산서, 영업레버리지, BEP
+-- Part 6: docs/06.md — 손익계산서, 영업레버리지, BEP
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (6, 1, '06', '손익계산서', '손익계산서에서 매출총이익(Gross Profit)의 계산식은?', '매출액 - 판관비', '매출액 - 매출원가', '영업이익 + 감가상각비', '당기순이익 + 이자비용', 1, '매출총이익 = 매출액 - 매출원가로, 제품 생산 원가를 제외한 기본 수익성을 나타낸다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (6, 2, '06', '손익계산서', '영업이익의 계산식은?', '매출총이익 - 판매비와관리비', '매출액 - 매출원가', '당기순이익 + 법인세', '매출총이익 + 영업외이익', 0, '영업이익 = 매출총이익 - 판매비와관리비(판관비)로, 영업활동에서 발생한 순수 이익이다.');
@@ -222,7 +222,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (6, 30, '06', '손익계산서', '같은 매출액에서 영업이익률이 개선되는 방법은?', '매출원가 또는 판관비를 줄이는 것', '이자비용을 늘리는 것', '법인세율을 높이는 것', '자본금을 늘리는 것', 0, '영업이익률 = 영업이익/매출액이므로 동일 매출에서 매출원가와 판관비를 절감하면 영업이익이 늘어 이익률이 개선된다.');
 
 -- =====================================================================
--- Day 7: docs/07.md — 현금흐름표, FCF, DCF, WACC, EVA
+-- Part 7: docs/07.md — 현금흐름표, FCF, DCF, WACC, EVA
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (7, 1, '07', '현금흐름표', '현금흐름표의 3가지 활동 구분이 올바른 것은?', '영업·투자·재무', '생산·판매·관리', '유입·유출·순변동', '단기·중기·장기', 0, '현금흐름표는 영업활동(CFO), 투자활동(CFI), 재무활동(CFF)의 3가지 섹션으로 구성된다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (7, 2, '07', '현금흐름표', '영업활동 현금흐름(CFO)이 높다는 것의 의미는?', '부채가 많다는 뜻이다', '본업에서 현금을 잘 창출하고 있다는 신호이다', '투자를 많이 한다는 뜻이다', '배당금을 많이 준다는 뜻이다', 1, 'CFO가 높으면 주된 영업활동에서 현금이 충분히 창출되어 자금 조달 없이도 사업을 운영할 수 있음을 나타낸다.');
@@ -256,7 +256,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (7, 30, '07', 'DCF', 'DCF와 상대가치 평가(PER, EV/EBITDA)의 가장 큰 차이점은?', 'DCF는 기업의 절대 내재가치를 추정하고, 상대가치는 시장 비교 기준이다', 'DCF가 더 간단하다', '상대가치만 미래를 반영한다', 'DCF는 소형주에만 사용된다', 0, 'DCF는 기업 고유의 현금흐름과 할인율로 절대 내재가치를 산출하고, 상대가치법은 유사 기업과 비교한 상대적 가치를 평가한다.');
 
 -- =====================================================================
--- Day 8: docs/08.md — 밸류에이션 멀티플 (PER, PBR, EV/EBITDA, PSR, 티커)
+-- Part 8: docs/08.md — 밸류에이션 멀티플 (PER, PBR, EV/EBITDA, PSR, 티커)
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (8, 1, '08', '티커', '한국 상장주식의 종목코드 형식은?', '알파벳 1~4자리', '6자리 숫자', '알파벳과 숫자의 혼합', '3자리 숫자', 1, '한국 주식 종목코드는 6자리 숫자로 구성된다. 예: 삼성전자 005930, 카카오 035720.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (8, 2, '08', '티커', '미국 상장주식의 티커(ticker) 형식은?', '6자리 숫자', '1~4자리 알파벳', '국가코드 + 숫자', '숫자 + 알파벳 혼합', 1, '미국 주식 티커는 거래소별로 1~4자리 알파벳으로 구성된다. 예: AAPL(애플), TSLA(테슬라), AMZN(아마존).');
@@ -290,7 +290,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (8, 30, '08', '멀티플 평가', 'PER, PBR, EV/EBITDA, PSR을 활용한 복합 밸류에이션의 장점은?', '단일 지표로도 충분하다', '각 지표의 단점을 보완하고 다각도 분석으로 가치 판단의 신뢰성을 높인다', '계산이 간단해진다', '미래 예측이 필요 없다', 1, '단일 멀티플은 각자의 한계(PER: 이익 변동, PBR: 무형자산 미반영 등)가 있어 여러 지표를 종합하면 더 균형 잡힌 평가가 가능하다.');
 
 -- =====================================================================
--- Day 9: docs/09.md — 기술적 분석 (추세, 이동평균, RSI, MACD, 볼린저밴드, 피보나치)
+-- Part 9: docs/09.md — 기술적 분석 (추세, 이동평균, RSI, MACD, 볼린저밴드, 피보나치)
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (9, 1, '09', '추세분석', '상승 추세선을 올바르게 설명한 것은?', '연속적인 고점을 연결한 선', '연속적인 저점(higher lows)을 연결한 선', '이동평균선 위에 그은 선', '52주 고점들을 연결한 선', 1, '상승 추세선은 차트에서 연속적으로 높아지는 저점(higher lows)들을 연결하여 그리며 지지선 역할을 한다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (9, 2, '09', '지지/저항', '지지선(Support)이란?', '주가가 상승할 때 저항을 받는 가격대', '주가가 하락하다가 매수세가 유입되어 반등하는 가격대', '52주 신고가 수준', '이동평균선', 1, '지지선은 과거에 주가가 여러 번 하락을 멈추고 반등한 가격대로, 매수세가 집중되는 영역이다.');
@@ -324,7 +324,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (9, 30, '09', 'RSI', '스토캐스틱(Stochastics) 지표와 RSI의 공통점은?', '계산 기간이 동일하다', '모두 0~100 사이 값을 가지는 오실레이터로 과매수/과매도 판단에 사용된다', '이동평균의 일종이다', '볼린저밴드에서 파생된 지표이다', 1, '스토캐스틱과 RSI는 모두 0~100 범위의 모멘텀 오실레이터로 시장의 과열 또는 침체 여부를 판단하는 데 활용된다.');
 
 -- =====================================================================
--- Day 10: docs/10.md — 캔들패턴, 차트패턴, 엘리어트파동
+-- Part 10: docs/10.md — 캔들패턴, 차트패턴, 엘리어트파동
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (10, 1, '10', '캔들', '캔들차트에서 몸통(Body)은 무엇을 나타내는가?', '당일의 최고가와 최저가 범위', '당일 시가와 종가 사이의 범위', '거래량', '다음날 예상 가격', 1, '캔들 몸통은 시가(Open)와 종가(Close) 사이의 범위를 나타낸다. 종가 > 시가이면 양봉(상승), 종가 < 시가이면 음봉(하락)이다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (10, 2, '10', '캔들', '캔들의 꼬리(Wick/Shadow)가 나타내는 것은?', '시가와 종가 사이의 범위', '당일 고가-저가 중 몸통 밖의 가격 범위', '다음날 예상 고가·저가', '이동평균과의 차이', 1, '위꼬리(upper shadow)는 고가에서 몸통(시가·종가 중 높은 쪽)까지, 아래꼬리(lower shadow)는 저가에서 몸통(낮은 쪽)까지의 범위이다.');
@@ -358,7 +358,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (10, 30, '10', '캔들패턴', '갭 상승 후 작은 몸통, 이후 갭 하락 음봉이 나타나는 저녁별(Evening Star)에서 중간 캔들의 역할은?', '추세를 확정하는 역할', '매수·매도 균형이 무너지고 있음을 나타내는 전환 준비 단계', '보조 신호 없음', '거래량 지표 역할', 1, '석별형 중간 캔들은 매수세와 매도세가 팽팽하게 대립하는 단계로 다음날 큰 음봉이 나타나면 하락 반전이 확인된다.');
 
 -- =====================================================================
--- Day 11: docs/11.md — 주식 권리, IPO, 주문유형, 거래비용
+-- Part 11: docs/11.md — 주식 권리, IPO, 주문유형, 거래비용
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (11, 1, '11', '주주 권리', '주주의 3대 권리가 올바르게 묶인 것은?', '경제적 권리, 경영 참여 권리, 정보 접근 권리', '배당권, 의결권, 환불권', '양도권, 분할권, 소각권', '설립권, 해산권, 청산권', 0, '주주의 3대 권리는 경제적 권리(배당, 잔여재산 분배), 경영 참여 권리(의결권, 주주제안권), 정보 접근 권리(재무제표 열람 등)이다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (11, 2, '11', '자사주', '자사주 소각의 주주가치 제고 효과는?', '총 자산 증가', '유통 주식수 감소 → EPS 증가 → 주당 가치 상승', '부채 감소', '매출 증가', 1, '자사주 소각은 발행 주식수를 영구적으로 줄여 EPS(주당순이익)를 높이고 주주 1인당 가치를 증가시키는 효과가 있다.');
@@ -392,7 +392,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (11, 30, '11', '주식 권리', '주주가 신주인수권(Preemptive Right)을 갖는 이유는?', '배당을 더 받기 위해', '유상증자 시 기존 주주의 지분율이 희석되는 것을 방지하기 위해', '의결권을 강화하기 위해', '배당기준일을 정하기 위해', 1, '신주인수권은 유상증자 시 기존 주주가 지분 비율에 따라 신주를 우선 청약할 수 있는 권리로 지분 희석을 방지한다.');
 
 -- =====================================================================
--- Day 12: docs/12.md — 금융상품 분류, ETF/펀드 구조, 펀드클래스
+-- Part 12: docs/12.md — 금융상품 분류, ETF/펀드 구조, 펀드클래스
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (12, 1, '12', '금융투자상품', '자본시장법상 금융투자상품의 핵심 정의 요소는?', '원금이 보장된다', '원금 손실 가능성이 있는 투자 계약', '이자가 발생한다', '정부가 보증한다', 1, '자본시장법은 투자원금 손실 가능성이 있는 금융상품을 금융투자상품으로 정의한다. 원금 보장 상품은 금융투자상품에 해당하지 않는다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (12, 2, '12', '금융투자상품', '자본시장법상 증권과 파생상품의 주요 차이는?', '동일하다', '증권은 원금 초과 손실이 없으나 파생상품은 원금 초과 손실이 가능하다', '파생상품은 주식만 포함', '증권은 손실이 없다', 1, '자본시장법은 증권(지분증권, 채무증권 등)과 파생상품(선물, 옵션, 스왑)을 구분하며 파생상품은 원금 초과 손실 가능성이 있다.');
@@ -426,7 +426,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (12, 30, '12', '금융투자상품', '투자자 적합성(suitability) 원칙이란?', '투자자가 원하는 상품을 무조건 판매하는 원칙', '금융회사가 투자자의 위험 성향과 투자 목적에 맞는 상품만을 권유해야 하는 원칙', '원금 보장을 의미함', '수수료가 없어야 한다는 원칙', 1, '자본시장법상 적합성 원칙은 금융투자업자가 투자자의 투자 목적, 재산 상황, 투자 경험 등에 비추어 적합하지 않은 금융투자상품을 권유해서는 안 된다는 규정이다.');
 
 -- =====================================================================
--- Day 13: docs/13.md — ETF vs 일반펀드 비교, 괴리율, 추적오차
+-- Part 13: docs/13.md — ETF vs 일반펀드 비교, 괴리율, 추적오차
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (13, 1, '13', 'ETF vs 펀드', 'ETF와 일반 펀드의 가장 큰 거래 방식의 차이는?', '동일하다', 'ETF는 거래소에서 실시간 매매, 일반 펀드는 운용사·판매사 경유 기준가로 매매', 'ETF는 기관만 거래 가능', '일반 펀드가 더 낮은 비용', 1, 'ETF는 주식처럼 거래소에서 실시간으로 매매되고, 일반 펀드는 판매사를 통해 기준가(NAV)로 다음날 처리된다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (13, 2, '13', 'ETF vs 펀드', '일반 공모펀드 대비 ETF의 비용 측면 장점은?', 'ETF는 항상 무료', '보통 ETF의 총보수(TER)가 동일 유형의 일반 펀드보다 낮다', 'ETF는 세금이 없다', 'ETF는 판매사 수수료만 있다', 1, 'ETF는 패시브 운용이 많고 구조적으로 비용이 낮아 일반 공모펀드 대비 총보수가 낮은 경향이 있다.');
@@ -460,7 +460,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (13, 30, '13', 'ETF vs 펀드', 'ETF의 분배금(배당)이 일반 펀드 분배금과 다른 점은?', '동일하다', 'ETF 분배금은 보유 종목의 배당·이자 수취 후 투자자에게 분배되며 연 1~4회 지급이 일반적', 'ETF는 분배금이 없다', 'ETF 분배금은 원금에서 지급된다', 1, 'ETF는 보유 종목에서 수취한 배당·이자를 투자자에게 분배금으로 지급하며 국내 ETF는 보통 연 1~4회 분배한다.');
 
 -- =====================================================================
--- Day 14: docs/14.md — MPT, 효율적투자선, CAGR, MDD, 샤프비율, 소르티노비율
+-- Part 14: docs/14.md — MPT, 효율적투자선, CAGR, MDD, 샤프비율, 소르티노비율
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (14, 1, '14', 'MPT', '현대 포트폴리오 이론(MPT)에서 해리 마코위츠의 핵심 통찰은?', '수익을 최대화하면 위험도 최대가 된다', '분산투자를 통해 총 위험을 줄이면서 동일 기대수익을 달성할 수 있다', '모든 자산에 동일한 비중으로 투자해야 한다', '위험이 없는 포트폴리오를 만들 수 있다', 1, 'MPT의 핵심은 상관관계가 낮은 자산을 결합하면 개별 자산의 위험 합산보다 포트폴리오 전체 위험을 줄일 수 있다는 분산투자 원리이다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (14, 2, '14', 'MPT', '효율적 투자선(Efficient Frontier)에 있는 포트폴리오의 특징은?', '수익이 최대인 포트폴리오들', '동일한 위험 수준에서 최대 기대수익, 또는 동일한 기대수익에서 최소 위험인 포트폴리오들', '모든 자산을 포함한 포트폴리오', '무위험 자산만 포함한 포트폴리오', 1, '효율적 투자선은 주어진 위험 수준에서 달성 가능한 최대 기대수익을 제공하는 포트폴리오들의 집합이다.');
@@ -494,7 +494,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (14, 30, '14', 'MPT', '포트폴리오 최적화에서 입력 변수(기대수익률, 분산, 공분산)의 추정 오차가 중요한 이유는?', '계산이 복잡해지기 때문', '작은 입력 오차도 최적 포트폴리오 비중을 크게 변화시킬 수 있어 결과의 안정성에 영향을 준다', '비용이 증가하기 때문', '세금이 달라지기 때문', 1, 'MPT 최적화는 입력 변수에 매우 민감하여 기대수익률·공분산 추정 오류가 작아도 최적 비중이 극단적으로 달라질 수 있어 실무적 한계가 있다.');
 
 -- =====================================================================
--- Day 15: docs/15.md — 자산배분모델 (MVO, 블랙-리터만, Risk-Parity, 60/40, 올웨더)
+-- Part 15: docs/15.md — 자산배분모델 (MVO, 블랙-리터만, Risk-Parity, 60/40, 올웨더)
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (15, 1, '15', '자산배분', '자산배분이 포트폴리오 성과의 몇 %를 결정한다고 알려져 있는가?', '약 40%', '약 60%', '약 90% 이상', '약 30%', 2, 'Brinson et al.(1986)의 연구에 따르면 포트폴리오 성과의 90% 이상이 자산배분(주식/채권/현금 비중 결정)에 의해 결정된다고 알려져 있다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (15, 2, '15', '자산배분', '마코위츠가 말한 "유일한 공짜 점심(free lunch)"이란?', '무위험 수익을 얻는 것', '분산투자를 통해 수익 포기 없이 위험을 줄일 수 있다는 것', '고수익 자산에 집중 투자', '레버리지 사용', 1, '마코위츠는 상관관계가 낮은 자산들을 결합하면 개별 자산 합산보다 위험을 줄이면서 수익을 유지할 수 있는 분산투자를 "투자에서 유일한 공짜 점심"이라고 했다.');
@@ -530,7 +530,7 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 -- =====================================================================
 -- 검증 쿼리 (참고용 주석)
 -- =====================================================================
--- Day 16: docs/16.md — KOSPI/KOSDAQ 거래량 상위 종목, HBM3E/HBM4/LPDDR5, pykrx
+-- Part 16: docs/16.md — KOSPI/KOSDAQ 거래량 상위 종목, HBM3E/HBM4/LPDDR5, pykrx
 -- =====================================================================
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (16, 1, '16', 'KOSPI 상위 종목', 'docs/16.md 기준 KOSPI 거래량 1위 종목으로 옳은 것은?', '삼성전자', 'SK하이닉스', '현대차', '카카오', 1, '2026-05-27 기준 KOSPI 거래량 상위 1위는 삼성전자(005930)로, 반도체/전자 업종에 해당한다.');
 INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choice_1, choice_2, choice_3, choice_4, answer, explanation) VALUES (16, 2, '16', '종목코드', 'SK하이닉스의 KRX 종목코드로 옳은 것은?', '005930', '000660', '005490', '035720', 2, 'SK하이닉스의 종목코드는 000660이며, KOSPI 거래량 상위 2위 반도체 업종이다.');
@@ -567,4 +567,4 @@ INSERT INTO quiz_questions (day, question_no, source_doc, topic, question, choic
 -- SELECT day, COUNT(*) AS cnt FROM quiz_questions GROUP BY day ORDER BY day;
 -- 각 day별 30건 확인
 -- SELECT COUNT(*) FROM quiz_questions;
--- 총 480건 확인 (Day 1~16, 각 30문항)
+-- 총 480건 확인 (Part 1~16, 각 30문항)
