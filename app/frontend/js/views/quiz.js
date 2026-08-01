@@ -1,5 +1,5 @@
 /**
- * quiz.js — 투자자산운용사 시험 퀴즈 뷰
+ * quiz.js — 주식상식 시험 퀴즈 뷰
  * 주식 모듈별 20문항, 정오답 표기, 해설, 문항 편집 기능
  */
 
@@ -170,7 +170,7 @@ function renderQuiz(app, day, questions, navigate) {
             <i class="fa-solid fa-circle-question" style="color:var(--primary);margin-right:7px;"></i>
             주식 ${day} · ${topic}
           </h2>
-          <div style="font-size:.78rem;color:var(--text-muted)">${QUESTIONS_PER_DAY}문항 · 투자자산운용사 대비</div>
+          <div style="font-size:.78rem;color:var(--text-muted)">${QUESTIONS_PER_DAY}문항 · 주식상식 대비</div>
         </div>
         <div class="quiz-score-bar">
           <span><i class="fa-solid fa-check" style="color:var(--green)"></i> <span class="score-correct">${correctCount}</span></span>

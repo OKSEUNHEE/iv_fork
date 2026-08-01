@@ -5,7 +5,6 @@ import io
 import json
 import os
 import re
-import sqlite3
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -18,14 +17,12 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
 
-from bson import ObjectId
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from pymongo.errors import DuplicateKeyError
 
 try:
     from .db import get_db
