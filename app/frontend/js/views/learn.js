@@ -146,6 +146,129 @@ function buildToc(container) {
   </aside>`;
 }
 
+function installMacroNewsSimulator(root, docId) {
+  const trigger = root.querySelector('[data-macro-news-simulator]');
+  if (docId !== '03' || !trigger) return;
+
+  const modal = document.createElement('div');
+  modal.className = 'macro-news-modal-backdrop';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'macro-news-modal-title');
+  modal.innerHTML = `
+    <section class="macro-news-modal">
+      <header class="macro-news-modal-header">
+        <div><span class="macro-news-modal-icon"><i class="fa-solid fa-chart-line"></i></span><div><h2 id="macro-news-modal-title">경제 뉴스 미니 시뮬레이션</h2><p>숫자를 움직여 업종별 영향을 비교해 보세요.</p></div></div>
+        <button type="button" class="macro-news-modal-close" aria-label="시뮬레이션 닫기"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+      <div class="macro-news-controls">
+        <label>금리 <output data-output="rate">0</output><input type="range" data-factor="rate" min="-2" max="2" step="1" value="0" aria-label="금리 변화"></label>
+        <label>물가 <output data-output="inflation">0</output><input type="range" data-factor="inflation" min="-2" max="2" step="1" value="0" aria-label="물가 변화"></label>
+        <label>환율 <output data-output="fx">0</output><input type="range" data-factor="fx" min="-2" max="2" step="1" value="0" aria-label="환율 변화"></label>
+        <label>수출 <output data-output="exports">0</output><input type="range" data-factor="exports" min="-2" max="2" step="1" value="0" aria-label="수출 변화"></label>
+      </div>
+      <div class="macro-news-canvas-wrap"><canvas class="macro-news-canvas" height="270" aria-label="업종별 예상 영향 그래프"></canvas></div>
+      <p class="macro-news-insight" aria-live="polite"></p>
+      <p class="macro-news-disclaimer">학습용 단순 모델입니다. 실제 주가·수익률을 예측하거나 투자 판단을 제시하지 않습니다.</p>
+    </section>`;
+  document.body.appendChild(modal);
+
+  const canvas = modal.querySelector('.macro-news-canvas');
+  const insight = modal.querySelector('.macro-news-insight');
+  const closeButton = modal.querySelector('.macro-news-modal-close');
+  const state = { rate: 0, inflation: 0, fx: 0, exports: 0 };
+  let lastFocused = null;
+
+  const impacts = () => [
+    { label: '수출 제조', value: -0.35 * state.rate - 0.25 * state.inflation + 0.85 * state.fx + 1.05 * state.exports },
+    { label: '금융', value: 0.9 * state.rate - 0.35 * state.inflation - 0.1 * state.fx + 0.15 * state.exports },
+    { label: '내수 소비', value: -0.75 * state.rate - 0.9 * state.inflation - 0.1 * state.fx + 0.35 * state.exports },
+    { label: '수입 원가', value: -0.2 * state.rate - 0.95 * state.inflation - 1.0 * state.fx + 0.15 * state.exports },
+  ];
+
+  const draw = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(300, canvas.parentElement.clientWidth - 2);
+    const height = 270;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, width, height);
+    const pad = { left: 76, right: 26, top: 35, bottom: 26 };
+    const chartWidth = width - pad.left - pad.right;
+    const rows = impacts();
+    const zeroX = pad.left + chartWidth / 2;
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(zeroX, pad.top - 10); ctx.lineTo(zeroX, height - pad.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 11px Pretendard, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('부정적 영향', pad.left + chartWidth * .24, 18);
+    ctx.fillText('긍정적 영향', pad.left + chartWidth * .76, 18);
+    rows.forEach((row, index) => {
+      const y = pad.top + index * 52;
+      const amount = Math.max(-2.8, Math.min(2.8, row.value));
+      const barWidth = Math.abs(amount) / 2.8 * (chartWidth / 2 - 8);
+      const positive = amount >= 0;
+      ctx.fillStyle = positive ? '#ef476f' : '#3979dc';
+      ctx.fillRect(positive ? zeroX : zeroX - barWidth, y, barWidth, 28);
+      ctx.fillStyle = '#334155';
+      ctx.textAlign = 'right';
+      ctx.font = '700 12px Pretendard, sans-serif';
+      ctx.fillText(row.label, pad.left - 12, y + 19);
+      ctx.fillStyle = positive ? '#be123c' : '#1d4ed8';
+      ctx.textAlign = positive ? 'left' : 'right';
+      ctx.font = '700 11px Pretendard, sans-serif';
+      const score = `${positive ? '+' : ''}${amount.toFixed(1)}`;
+      ctx.fillText(score, positive ? zeroX + barWidth + 7 : zeroX - barWidth - 7, y + 19);
+    });
+    const best = [...rows].sort((a, b) => b.value - a.value)[0];
+    const worst = [...rows].sort((a, b) => a.value - b.value)[0];
+    insight.innerHTML = `<strong>${best.label}</strong>이(가) 상대적으로 유리하고, <strong>${worst.label}</strong>은(는) 부담이 큰 시나리오입니다. 영향 점수는 ${best.value.toFixed(1)} ~ ${worst.value.toFixed(1)}입니다.`;
+  };
+
+  const closeModal = () => {
+    modal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    lastFocused?.focus();
+  };
+  const onKeydown = (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('show')) closeModal();
+  };
+  trigger.addEventListener('click', () => {
+    lastFocused = trigger;
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    draw();
+    closeButton.focus();
+  });
+  closeButton.addEventListener('click', closeModal);
+  modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+  modal.querySelectorAll('input[data-factor]').forEach((input) => {
+    input.addEventListener('input', () => {
+      state[input.dataset.factor] = Number(input.value);
+      modal.querySelector(`[data-output="${input.dataset.factor}"]`).value = input.value > 0 ? `+${input.value}` : input.value;
+      draw();
+    });
+  });
+  window.addEventListener('resize', draw);
+  document.addEventListener('keydown', onKeydown);
+  const previousCleanup = window._viewCleanup;
+  window._viewCleanup = () => {
+    previousCleanup?.();
+    window.removeEventListener('resize', draw);
+    document.removeEventListener('keydown', onKeydown);
+    modal.remove();
+  };
+}
+
 export function learnView(app, docId) {
   app.innerHTML = `
     <div class="loading-wrap">
@@ -182,6 +305,7 @@ export function learnView(app, docId) {
 
     // Mermaid 소스는 VIEW 배지로 표시하고 클릭 시 모달에서 렌더링한다.
     renderMermaidBlocks(mdContent).catch((err) => console.error('Mermaid 로드 실패:', err));
+    installMacroNewsSimulator(mdContent, docId);
 
     // docs/*.md의 외부 홈페이지 링크는 학습 화면을 유지한 채 별도 창에서 연다.
     mdContent.querySelectorAll('a[href^="http://"], a[href^="https://"]').forEach((a) => {
