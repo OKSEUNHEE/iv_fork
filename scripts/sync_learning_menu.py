@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the learning-menu metadata from docs/*.md.
+"""Generate the five stock-learning menu entries from docs/03.md to docs/07.md.
 
 The generated module is used by the SPA routes, the learning sidebar, and the
 NotebookLM guide. Run this after changing docs; Dockerfile runs it too so a
@@ -16,10 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS_DIR = ROOT / "docs"
 INDEX_HTML = ROOT / "app" / "frontend" / "index.html"
 OUT_MODULE = ROOT / "app" / "frontend" / "js" / "data" / "learnDocs.js"
-
-
-def sort_key(path: Path) -> tuple[int, int | str]:
-    return (0, int(path.stem)) if path.stem.isdigit() else (1, path.stem.casefold())
+STOCK_DOC_IDS = ("03", "04", "05", "06", "07")
 
 
 def title_for(path: Path) -> str:
@@ -42,12 +39,12 @@ def menu_html(docs: list[dict[str, str]]) -> str:
 
 
 def main() -> None:
-    files = sorted(DOCS_DIR.glob("*.md"), key=sort_key)
+    files = [DOCS_DIR / f"{doc_id}.md" for doc_id in STOCK_DOC_IDS]
     docs = []
     for path in files:
         doc_id = path.stem
         title = title_for(path)
-        label = "핵심 용어집" if doc_id == "voca" else f"Day {int(doc_id)} · {title}"
+        label = f"주식 {int(doc_id) - 2}"
         docs.append({"id": doc_id, "file": path.name, "title": title, "label": label})
 
     OUT_MODULE.write_text(

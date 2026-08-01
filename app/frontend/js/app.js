@@ -51,9 +51,9 @@ const learnRoutes = Object.fromEntries(
 );
 
 const quizDayRoutes = Object.fromEntries(
-  Array.from({ length: 15 }, (_, i) => i + 1).map(d => [
+  Array.from({ length: 5 }, (_, i) => i + 1).map(d => [
     `quiz-day-${d}`,
-    { label: `통합 모의고사 응시 Day ${d}`, render: () => quizDayView(app, d, navigate) },
+    { label: `주식 ${d} 퀴즈`, render: () => quizDayView(app, d, navigate) },
   ])
 );
 

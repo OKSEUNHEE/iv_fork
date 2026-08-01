@@ -4,7 +4,7 @@
  */
 const DESKTOP_BREAKPOINT = 1024;
 let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;
-const MENU_SECTION_ORDER = ['learn', 'quiz', 'external', 'aitools', 'practice'];
+const MENU_SECTION_ORDER = ['learn', 'quiz', 'external'];
 
 // SPA와 정적 외부 자료 페이지가 같은 메뉴 순서를 유지하도록 실제 DOM 순서를 맞춘다.
 function orderSidebarSections() {
@@ -63,7 +63,7 @@ function ensureSidebarChatbot() {
 }
 window._ensureSidebarChatbot = ensureSidebarChatbot;
 
-// ── Enterprise 안내 모달 (회원가입/로그인, 에이전트, 증시뉴스 클릭 시) ──
+// ── Enterprise 안내 모달 (회원가입/로그인 클릭 시) ──
 function openEnterpriseModal() {
   const overlay = document.getElementById('enterprise-modal-overlay');
   if (!overlay) return;
