@@ -14,7 +14,7 @@
     slot.outerHTML = await res.text();
   } catch (err) {
     slot.innerHTML = `<p style="padding:16px;color:var(--text-muted);font-size:.82rem;">
-      메뉴를 불러오지 못했습니다. <a href="../index.html">홈으로 이동</a>
+      메뉴를 불러오지 못했습니다. <a href="../index.html">대시보드로 이동</a>
     </p>`;
     console.error('사이드바 로드 실패:', err);
     return;

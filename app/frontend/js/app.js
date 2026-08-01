@@ -57,7 +57,7 @@ const quizDayRoutes = Object.fromEntries(
 );
 
 const routes = {
-  'home':              { label: '홈',                     render: () => homeView(app, navigate) },
+  'home':              { label: '대시보드',               render: () => homeView(app, navigate) },
   'cross-validation':  { label: 'Cross Validation',       render: () => crossValidationView(app) },
   'decision-boundary': { label: 'Decision Boundary',      render: () => decisionBoundaryView(app) },
   'random-forest':     { label: 'Random Forest',          render: () => randomForestView(app) },

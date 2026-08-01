@@ -9,6 +9,11 @@
 | ESG | Environment, Social, Governance | 환경·사회·지배구조예요. 회사가 오래 건강하게 운영될 수 있는지 살피는 관점이에요. |
 | GDP | Gross Domestic Product | 국내총생산이에요. 한 나라 안에서 만든 물건과 서비스의 값어치를 더한 숫자예요. |
 | ETF | Exchange Traded Fund | 거래소에서 사고파는 펀드예요. 여러 주식이나 채권 등을 한 바구니에 담을 수 있어요. |
+| 운용보수 | Management Fee | 펀드나 ETF를 운영하는 대가로 보유 기간에 드는 비용이에요. 보통 연간 비율로 표시되고, 오래 보유할수록 차이가 쌓일 수 있어요. |
+| 총보수 | Total Expense Ratio | 운용·판매 등 펀드를 보유하면서 드는 비용을 합친 비율이에요. 상품별 포함 항목은 설명서를 확인해야 해요. |
+| 순자산가치 | Net Asset Value, NAV | ETF가 실제로 담은 자산을 현재 가격으로 계산한 값이에요. 거래소 가격과 조금 다를 수 있어요. |
+| 괴리율 | Premium/Discount | ETF의 거래소 가격이 순자산가치와 얼마나 차이 나는지 나타내는 비율이에요. |
+| 추적오차 | Tracking Error | ETF의 수익률이 따라가려는 지수의 수익률과 얼마나 달랐는지 나타내는 정도예요. |
 | IPO | Initial Public Offering | 기업공개예요. 회사가 처음으로 많은 사람에게 주식을 팔고 시장에서 거래되기 시작하는 과정이에요. |
 | PER | Price Earnings Ratio | 주가수익비율이에요. 회사가 버는 이익에 비해 주가가 어느 정도인지 살필 때 써요. |
 | PBR | Price to Book Ratio | 주가순자산비율이에요. 회사의 순재산에 비해 주가가 어느 정도인지 살필 때 써요. |
