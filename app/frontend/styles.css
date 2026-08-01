@@ -668,6 +668,27 @@ img { max-width: 100%; }
 .macro-news-insight { margin: 12px 20px 0; padding: 10px 12px; color: #475569; background: #f0f9ff; border-left: 3px solid #0ea5e9; border-radius: 0 7px 7px 0; font-size: .77rem; line-height: 1.55; }
 .macro-news-insight strong { color: #0f172a; }
 .macro-news-disclaimer { margin: 10px 20px 19px; color: #94a3b8; font-size: .68rem; line-height: 1.45; }
+.financial-statement-samples-button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9px; font-size: .82rem; font-weight: 800; box-shadow: 0 2px 5px rgba(37,99,235,.08); }
+.financial-statement-samples-button:hover { color: #fff; background: #2563eb; border-color: #2563eb; }
+.financial-statement-modal-backdrop { position: fixed; z-index: 1200; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(15,23,42,.58); backdrop-filter: blur(2px); }
+.financial-statement-modal-backdrop.show { display: flex; }
+.financial-statement-modal { width: min(980px, 100%); max-height: calc(100vh - 40px); overflow: auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 15px; box-shadow: 0 24px 70px rgba(15,23,42,.32); }
+.financial-statement-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 19px 20px 16px; border-bottom: 1px solid #e2e8f0; }
+.financial-statement-modal-header > div { display: flex; align-items: center; gap: 11px; }
+.financial-statement-modal-icon { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; color: #fff; background: linear-gradient(135deg, #1d4ed8, #0f766e); border-radius: 10px; }
+.financial-statement-modal h2 { margin: 0; color: #0f172a; font-size: 1rem; }
+.financial-statement-modal-header p { margin: 3px 0 0; color: #64748b; font-size: .73rem; }
+.financial-statement-modal-close { width: 32px; height: 32px; flex: 0 0 auto; color: #64748b; border-radius: 8px; }
+.financial-statement-modal-close:hover { color: #0f172a; background: #f1f5f9; }
+.financial-statement-tabs { display: flex; gap: 8px; padding: 14px 20px 0; border-bottom: 1px solid #e2e8f0; overflow-x: auto; }
+.financial-statement-tabs button { flex: 0 0 auto; padding: 9px 12px; color: #64748b; background: transparent; border: 0; border-bottom: 3px solid transparent; font-size: .8rem; font-weight: 800; }
+.financial-statement-tabs button[aria-selected="true"] { color: #1d4ed8; border-bottom-color: #2563eb; }
+.financial-statement-sample { margin: 0; padding: 18px 20px 10px; }
+.financial-statement-image-wrap { display: flex; justify-content: center; max-height: min(59vh, 650px); overflow: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; }
+.financial-statement-image-wrap img { display: block; width: auto; min-width: min(100%, 620px); max-width: 100%; height: auto; object-fit: contain; }
+.financial-statement-sample figcaption { margin-top: 10px; color: #475569; font-size: .79rem; line-height: 1.55; }
+.financial-statement-modal-note { margin: 4px 20px 20px; padding: 10px 12px; color: #64748b; background: #f8fafc; border-radius: 8px; font-size: .73rem; line-height: 1.55; }
+.financial-statement-modal-note i { margin-right: 5px; color: #2563eb; }
 @media (max-width: 640px) {
   .mermaid-modal-chart { padding: 18px; align-items: flex-start; }
   .mermaid-modal-chart svg { width: 1200px; }
@@ -676,6 +697,11 @@ img { max-width: 100%; }
   .macro-news-modal-header { padding: 15px; }
   .macro-news-canvas-wrap { padding-inline: 12px; }
   .macro-news-insight, .macro-news-disclaimer { margin-inline: 12px; }
+  .financial-statement-modal-backdrop { padding: 10px; }
+  .financial-statement-modal-header { padding: 15px; }
+  .financial-statement-tabs { padding-inline: 12px; }
+  .financial-statement-sample { padding-inline: 12px; }
+  .financial-statement-modal-note { margin-inline: 12px; }
 }
 .md-body blockquote { border-left: 4px solid var(--primary); margin: 14px 0; padding: 10px 16px; background: var(--primary-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: #444444; }
 .md-body strong { font-weight: 700; color: var(--text); }

@@ -146,6 +146,83 @@ function buildToc(container) {
   </aside>`;
 }
 
+function installFinancialStatementSamplesModal(root, docId) {
+  const trigger = root.querySelector('[data-financial-statement-samples]');
+  if (docId !== '04' || !trigger) return;
+
+  const samples = [
+    { id: 'income', label: '손익계산서', src: 'images/income-statement.png', alt: '가상 예시 손익계산서. 매출액, 매출총이익, 영업이익, 당기순이익을 보여준다.', caption: '손익계산서: 매출에서 비용을 빼고 이익이 남는 흐름을 봅니다.' },
+    { id: 'balance', label: '재무상태표', src: 'images/balance-sheet.png', alt: '가상 예시 재무상태표. 자산, 부채, 자본의 구성을 보여준다.', caption: '재무상태표: 기준일에 회사가 가진 자산과 갚아야 할 부채, 주주의 몫인 자본을 함께 봅니다.' },
+    { id: 'cashflow', label: '현금흐름표', src: 'images/cash-flow.png', alt: '가상 예시 현금흐름표. 영업, 투자, 재무 활동의 현금 흐름을 보여준다.', caption: '현금흐름표: 실제 현금이 영업·투자·재무 활동에서 어떻게 들어오고 나갔는지 봅니다.' },
+  ];
+
+  const modal = document.createElement('div');
+  modal.className = 'financial-statement-modal-backdrop';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'financial-statement-modal-title');
+  modal.innerHTML = `
+    <section class="financial-statement-modal">
+      <header class="financial-statement-modal-header">
+        <div><span class="financial-statement-modal-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span><div><h2 id="financial-statement-modal-title">표본 재무제표</h2><p>가상의 단순 예시로 항목의 위치와 흐름을 살펴보세요.</p></div></div>
+        <button type="button" class="financial-statement-modal-close" aria-label="표본 재무제표 닫기"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+      <div class="financial-statement-tabs" role="tablist" aria-label="재무제표 종류">
+        ${samples.map((sample, index) => `<button type="button" role="tab" id="statement-tab-${sample.id}" aria-selected="${index === 0}" aria-controls="statement-sample-panel" data-statement-sample="${sample.id}">${sample.label}</button>`).join('')}
+      </div>
+      <figure class="financial-statement-sample" id="statement-sample-panel" role="tabpanel" aria-labelledby="statement-tab-income">
+        <div class="financial-statement-image-wrap"><img src="${samples[0].src}" alt="${samples[0].alt}"></div>
+        <figcaption>${samples[0].caption}</figcaption>
+      </figure>
+      <p class="financial-statement-modal-note"><i class="fa-solid fa-circle-info"></i> 항목의 뜻을 익힌 뒤 실제 공시에서는 기간·단위·연결/별도 기준을 함께 확인하세요.</p>
+    </section>`;
+  document.body.appendChild(modal);
+
+  const closeButton = modal.querySelector('.financial-statement-modal-close');
+  const image = modal.querySelector('.financial-statement-sample img');
+  const caption = modal.querySelector('.financial-statement-sample figcaption');
+  const panel = modal.querySelector('#statement-sample-panel');
+  let lastFocused = null;
+
+  const closeModal = () => {
+    modal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    lastFocused?.focus();
+  };
+  const selectSample = (sample) => {
+    image.src = sample.src;
+    image.alt = sample.alt;
+    caption.textContent = sample.caption;
+    modal.querySelectorAll('[data-statement-sample]').forEach((tab) => {
+      const selected = tab.dataset.statementSample === sample.id;
+      tab.setAttribute('aria-selected', String(selected));
+      if (selected) panel.setAttribute('aria-labelledby', tab.id);
+    });
+  };
+  const onKeydown = (event) => {
+    if (event.key === 'Escape' && modal.classList.contains('show')) closeModal();
+  };
+
+  trigger.addEventListener('click', () => {
+    lastFocused = trigger;
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    closeButton.focus();
+  });
+  closeButton.addEventListener('click', closeModal);
+  modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+  modal.querySelectorAll('[data-statement-sample]').forEach((tab) => {
+    tab.addEventListener('click', () => selectSample(samples.find((sample) => sample.id === tab.dataset.statementSample)));
+  });
+  document.addEventListener('keydown', onKeydown);
+  const previousCleanup = window._viewCleanup;
+  window._viewCleanup = () => {
+    previousCleanup?.();
+    document.removeEventListener('keydown', onKeydown);
+    modal.remove();
+  };
+}
+
 function installMacroNewsSimulator(root, docId) {
   const trigger = root.querySelector('[data-macro-news-simulator]');
   if (docId !== '03' || !trigger) return;
@@ -306,6 +383,7 @@ export function learnView(app, docId) {
     // Mermaid 소스는 VIEW 배지로 표시하고 클릭 시 모달에서 렌더링한다.
     renderMermaidBlocks(mdContent).catch((err) => console.error('Mermaid 로드 실패:', err));
     installMacroNewsSimulator(mdContent, docId);
+    installFinancialStatementSamplesModal(mdContent, docId);
 
     // docs/*.md의 외부 홈페이지 링크는 학습 화면을 유지한 채 별도 창에서 연다.
     mdContent.querySelectorAll('a[href^="http://"], a[href^="https://"]').forEach((a) => {
