@@ -239,7 +239,7 @@ export function financialStatementView(container) {
             </div>
             ${card.sourceUrl ? `
             <div class="stmt-img-credit">
-              <a href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer">
+              <a href="${card.sourceUrl}" target="_new" rel="noopener noreferrer">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> ${card.sourceLabel}
               </a>
             </div>` : ''}

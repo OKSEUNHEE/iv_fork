@@ -183,18 +183,9 @@ export function learnView(app, docId) {
     // Mermaid 소스는 VIEW 배지로 표시하고 클릭 시 모달에서 렌더링한다.
     renderMermaidBlocks(mdContent).catch((err) => console.error('Mermaid 로드 실패:', err));
 
-    // 문서 안의 youtube.com 링크는 외부로 바로 나가지 않고, 자체 뷰어가 있는
-    // "외부 자료 > 유튜브 학습 영상" 페이지로 연결한다.
-    mdContent.querySelectorAll('a[href*="youtube.com"], a[href*="youtu.be"]').forEach((a) => {
-      a.href = 'pages/youtube.html';
-      a.removeAttribute('target');
-      a.title = '유튜브 학습 영상 목록으로 이동';
-    });
-
-    // docs/*.md의 외부 홈페이지 링크는 학습 화면을 유지한 채 새 탭에서 연다.
-    // YouTube 링크는 위에서 자체 자료 페이지로 바뀌므로 이 대상에 포함되지 않는다.
+    // docs/*.md의 외부 홈페이지 링크는 학습 화면을 유지한 채 별도 창에서 연다.
     mdContent.querySelectorAll('a[href^="http://"], a[href^="https://"]').forEach((a) => {
-      a.target = '_blank';
+      a.target = '_new';
       a.rel = 'noopener noreferrer';
     });
 

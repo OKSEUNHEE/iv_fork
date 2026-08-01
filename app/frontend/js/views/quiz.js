@@ -1,6 +1,6 @@
 /**
  * quiz.js — 주식상식 시험 퀴즈 뷰
- * 주식 모듈별 20문항, 정오답 표기, 해설, 문항 편집 기능
+ * 주식 1~5별 4문항(총 20문항), 정오답 표기, 해설, 문항 편집 기능
  */
 
 const DAY_TOPICS = {
@@ -10,8 +10,25 @@ const DAY_TOPICS = {
   4: '주식 4',
   5: '주식 5',
 };
-const QUESTIONS_PER_DAY = 20;
+const QUESTIONS_PER_DAY = 4;
 const TOTAL_DAYS = Object.keys(DAY_TOPICS).length;
+const QUIZ_CONTENT_VERSION = 'stock-learning-2026-08-01-v1';
+
+// 문항 개편 뒤 처음 접속한 사용자는 이전 문항 ID로 저장된 답안을 제거한다.
+// 같은 버전에서는 다시 지우지 않아 학습 중인 답안은 유지된다.
+function resetProgressForNewQuizVersion() {
+  try {
+    if (localStorage.getItem('quiz_content_version') === QUIZ_CONTENT_VERSION) return;
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith('quiz_progress_day'))
+      .forEach((key) => localStorage.removeItem(key));
+    localStorage.setItem('quiz_content_version', QUIZ_CONTENT_VERSION);
+  } catch {
+    // 저장소를 사용할 수 없는 환경에서는 기존처럼 현재 세션에서만 동작한다.
+  }
+}
+
+resetProgressForNewQuizVersion();
 
 // progress stored per-day in localStorage
 function loadProgress(day) {
@@ -62,10 +79,10 @@ export function quizHomeView(app, navigate) {
     <div style="margin-bottom:24px;">
       <h2 style="margin:0 0 4px;font-size:1.25rem;font-weight:800">
         <i class="fa-solid fa-calendar-check" style="color:var(--primary);margin-right:8px;"></i>
-        주식 모듈별 통합 모의고사
+        주식 기초 통합 퀴즈
       </h2>
       <p style="font-size:.85rem;color:var(--text-muted);margin:0">
-        모듈별 20문항 시험 · 정오답 즉시 확인 · 해설 보기 · 수험자 문항 수정 모드
+        주식 1~5별 4문항, 총 20문항 · 정오답 즉시 확인 · 해설 보기
       </p>
     </div>
 

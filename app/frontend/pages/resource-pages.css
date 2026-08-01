@@ -1,4 +1,4 @@
-/* resource-pages.css — 유튜브/위키백과/NotebookLM 정적 페이지 전용 스타일.
+/* resource-pages.css — 유튜브 정적 페이지 전용 스타일.
    공통 카드/그리드는 ../styles.css의 .card, .grid-3을 그대로 사용한다. */
 
 .resource-hero {
@@ -107,27 +107,6 @@
   text-decoration: none;
 }
 .resource-cta:hover { opacity: .92; }
-
-/* ── NotebookLM 주식 리서치 ── */
-.notebook-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
-.notebook-quick-steps { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-.notebook-quick-steps div { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid #bfdbfe; border-radius: 9px; background: #f0f7ff; color: #0f3f6d; font-size: 1.02rem; font-weight: 800; }
-.notebook-quick-steps b { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: .8rem; }
-.notebook-quick-steps > i { color: var(--primary); font-size: .92rem; }
-.notebook-quick-tip { margin: 12px 0 0 !important; color: #1e3a5f !important; font-size: .98rem !important; line-height: 1.65 !important; }
-.notebook-search-guide {
-  display: flex; align-items: flex-start; gap: 9px;
-  margin: 0 0 18px; padding: 12px 14px;
-  border: 1px solid #bfdbfe; border-left: 3px solid var(--primary); border-radius: 7px;
-  background: #f0f7ff; color: #334155; font-size: .84rem; line-height: 1.5;
-}
-.notebook-search-guide i { margin-top: 3px; color: var(--primary); }
-.notebook-topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.notebook-search-card { display: flex; flex-direction: column; min-width: 0; }
-.notebook-search-card h3 { margin: 0 0 8px; font-size: 1rem; }
-.notebook-search-card p { margin: 0; color: var(--text-muted); font-size: .84rem; line-height: 1.55; }
-.notebook-card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 16px; }
-.notebook-card-actions .resource-cta { padding: 8px 11px; font-size: .78rem; }
 
 .ghost-btn {
   display: inline-flex;

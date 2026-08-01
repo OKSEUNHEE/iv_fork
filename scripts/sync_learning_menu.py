@@ -2,7 +2,7 @@
 """Generate the five stock-learning menu entries from docs/03.md to docs/07.md.
 
 The generated module is used by the SPA routes, the learning sidebar, and the
-NotebookLM guide. Run this after changing docs; Dockerfile runs it too so a
+learning sidebar. Run this after changing docs; Dockerfile runs it too so a
 push always deploys the exact document set bundled in the image.
 """
 from __future__ import annotations

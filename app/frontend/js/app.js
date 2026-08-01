@@ -371,7 +371,7 @@ refreshTopbarMarkets();
 setInterval(refreshTopbarMarkets, TOPBAR_REFRESH_MS);
 
 // Boot
-// pages/*.html(외부 자료 정적 페이지)의 사이드바 링크가 index.html?view=xxx 형태로
+// pages/*.html 정적 페이지의 사이드바 링크가 index.html?view=xxx 형태로
 // 돌아오므로, 쿼리스트링에 유효한 view가 있으면 그 화면으로 바로 진입한다.
 const requestedView = new URLSearchParams(window.location.search).get('view');
 navigate(requestedView && routes[requestedView] ? requestedView : 'home');
