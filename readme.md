@@ -131,7 +131,6 @@
 | **DART** | `POST /api/dart/company-search` | 기업 공시 검색 (DART API) | dartCompanySearch.js |
 | **퀀트** | `POST /api/quant/backtest` | 이동평균 크로스오버 백테스트 | backtest.js |
 | **퀀트** | `POST /api/quant/portfolio` | MPT 포트폴리오 최적화 | portfolio.js |
-| **퀀트** | `POST /api/quant/risk` | VaR·CVaR·MDD 리스크 분석 | risk.js |
 | **퀀트** | `POST /api/quant/pipeline` | 멀티팩터 퀀트 파이프라인 | pipeline.js |
 | **재무** | — | 재무제표 시각화 (yfinance) | financialStatement.js · valuation.js |
 | **ML** | `POST /api/ml/cross-validation` | 교차검증 | crossValidation.js |
@@ -958,10 +957,7 @@ OLLAMA_MODEL=llama3:latest             # 기본 분석 모델
 2. **정제 및 피처 엔지니어링 (Processing & Feature Engineering)**
    * 가공되지 않은 데이터를 AI가 이해할 수 있는 형태(숫자)로 변환합니다.
    * 이동평균선(SMA), RSI 등 기술적 지표를 계산하거나 뉴스 텍스트를 긍정/부정 점수(Sentiment Score)로 수치화합니다.
-3. **모델 학습 및 백테스팅 (Training & Backtesting)**
-   * Scikit-learn, 딥러닝 프레임워크 등을 활용해 모델을 훈련합니다.
-   * 과거 10~20년 치 데이터를 바탕으로 전략의 수익률과 최대 낙폭(MDD)을 시뮬레이션하여 검증합니다.
-4. **실전 매매 및 모니터링 (Deployment & Execution)**
+3. **실전 매매 및 모니터링 (Deployment & Execution)**
    * 검증된 모델을 증권사 API와 연결하여 실시간 데이터를 입력받고 자동으로 매수/매도 주문을 집행합니다.
 
 ---
