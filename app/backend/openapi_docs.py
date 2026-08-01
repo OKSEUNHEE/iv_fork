@@ -21,6 +21,55 @@ TAG_DESCRIPTIONS = [
     {"name": "파일", "description": "서버가 생성한 실습 산출물을 내려받습니다."},
 ]
 
+# Swagger UI는 외부 개발자용 전체 서버 기능 목록이 아니라, 이 웹앱 화면이
+# 실제 호출하는 API만 안내합니다. 운영·관리 스크립트용 또는 아직 화면에 연결되지
+# 않은 엔드포인트는 서버에 유지하되 OpenAPI 문서에서는 노출하지 않습니다.
+FRONTEND_API_PATHS = frozenset({
+    "/api/health",
+    "/api/system/resources",
+    "/api/visitors/heartbeat",
+    "/api/learn/doc/{doc_id}",
+    "/api/dart/company-search",
+    "/api/dart/group-network",
+    "/api/dart/company-list",
+    "/api/dart/financial-analysis",
+    "/api/finance/company-financials",
+    "/api/industry/porter",
+    "/api/industry/sector",
+    "/api/industry/peer",
+    "/api/industry/lifecycle",
+    "/api/market/snapshot",
+    "/api/market/volume-cloud",
+    "/api/macro/realtime",
+    "/api/macro/kospi-ex",
+    "/api/macro/kospi-ex/meta",
+    "/api/macro/simulation",
+    "/api/home/market-candle",
+    "/api/quant/backtest",
+    "/api/quant/portfolio",
+    "/api/quant/risk",
+    "/api/quant/pipeline",
+    "/api/ml/cross-validation",
+    "/api/ml/decision-boundary",
+    "/api/ml/random-forest",
+    "/api/cv/circle-animation",
+    "/api/ml/kmeans",
+    "/api/ml/svm",
+    "/api/ml/mlp",
+    "/api/ml/linear-regression",
+    "/api/nlp/text-classify",
+    "/api/genai/text-to-image",
+    "/api/dl/cnn-timeseries",
+    "/api/dl/lstm-predictor",
+    "/api/dl/transformer-timeseries",
+    "/files/{file_name}",
+    "/api/quiz/day/{day}",
+    "/api/quiz/questions/{question_id}",
+    "/api/tax/upload",
+    "/api/tax/sample",
+    "/api/tax/simulate",
+})
+
 
 # (tag, Korean title, implementation/response contract).  Request models already
 # expose type, defaults and validation limits; these notes explain why to call
@@ -104,6 +153,11 @@ def install_openapi(app) -> None:
             routes=app.routes,
             tags=TAG_DESCRIPTIONS,
         )
+        schema["paths"] = {
+            path: operations
+            for path, operations in schema.get("paths", {}).items()
+            if path in FRONTEND_API_PATHS
+        }
         for path, operations in schema.get("paths", {}).items():
             metadata = OPERATION_DOCS.get(path)
             if not metadata:
@@ -118,6 +172,13 @@ def install_openapi(app) -> None:
                 operation.setdefault("responses", {}).setdefault(
                     "503", {"description": "필요한 외부 서비스 또는 서버 설정을 사용할 수 없습니다."}
                 )
+        used_tags = {
+            tag
+            for operations in schema["paths"].values()
+            for operation in operations.values()
+            for tag in operation.get("tags", [])
+        }
+        schema["tags"] = [tag for tag in TAG_DESCRIPTIONS if tag["name"] in used_tags]
         app.openapi_schema = schema
         return app.openapi_schema
 
