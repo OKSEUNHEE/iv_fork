@@ -38,7 +38,7 @@ jobs:
             --exclude=node_modules \
             --exclude=__pycache__ \
             -czf - . | ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" \
-            'mkdir -p /opt/stock-coin-trade && tar -xzf - -C /opt/stock-coin-trade'
+            'sudo install -d -o "$(id -u)" -g "$(id -g)" /opt/stock-coin-trade && tar -xzf - -C /opt/stock-coin-trade'
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
