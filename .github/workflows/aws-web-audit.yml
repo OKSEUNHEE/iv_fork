@@ -40,6 +40,13 @@ jobs:
             sudo nginx -T 2>&1 | grep -E "^[[:space:]]*(listen|server_name|proxy_pass|root)[[:space:]]" || true
             echo "== Host Uvicorn processes =="
             sudo ps -eo pid,user,args | grep "[u]vicorn" || true
+            echo "== new-biz2 process owner =="
+            sudo cat /proc/4983/cgroup 2>/dev/null || true
+            echo "== new-biz2 system services =="
+            sudo systemctl list-unit-files --no-legend | grep -Ei "new[-_]?biz|landing" || true
+            sudo systemctl list-units --all --no-legend | grep -Ei "new[-_]?biz|landing" || true
+            echo "== Nginx files serving port 8081 =="
+            sudo grep -rlE "listen[[:space:]]+(\[::\]:)?8081|new-biz-landing" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true
           '
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
