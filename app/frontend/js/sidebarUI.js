@@ -4,7 +4,7 @@
  */
 const DESKTOP_BREAKPOINT = 1024;
 let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;
-const MENU_SECTION_ORDER = ['learn', 'quiz'];
+const MENU_SECTION_ORDER = ['learn', 'review', 'quiz'];
 
 // SPA와 정적 페이지가 같은 메뉴 순서를 유지하도록 실제 DOM 순서를 맞춘다.
 function orderSidebarSections() {

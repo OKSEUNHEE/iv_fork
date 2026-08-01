@@ -259,7 +259,8 @@ function navigate(view) {
     'kmeans','svm','mlp','linear-regression','lstm','transformer','market-snapshot','financial-knowledge'];
   const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting'];
   const activeSections = [];
-  if (view?.startsWith('learn-')) activeSections.push('learn');
+  if (['learn-10', 'learn-11'].includes(view)) activeSections.push('review');
+  else if (view?.startsWith('learn-')) activeSections.push('learn');
   if (view?.startsWith('quiz-')) activeSections.push('quiz');
   if (_practiceViews.includes(view)) activeSections.push('practice');
   if (_aiViews.includes(view)) activeSections.push('aitools');

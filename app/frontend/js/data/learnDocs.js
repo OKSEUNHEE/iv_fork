@@ -29,5 +29,17 @@ export const LEARN_DOCS = [
     "file": "07.md",
     "title": "주식 5",
     "label": "주식 5"
+  },
+  {
+    "id": "10",
+    "file": "10.md",
+    "title": "법인과 회사 구조 이해하기",
+    "label": "법인과 회사 구조"
+  },
+  {
+    "id": "11",
+    "file": "11.md",
+    "title": "거시경제와 주식시장 읽기",
+    "label": "거시경제와 주식시장"
   }
 ];
