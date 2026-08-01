@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 
-const MARKET_LABELS = { us: '미국', kr: '한국' };
+const MARKET_LABELS = { us: '미국', kr: '한국 KOSPI 20' };
 
 function formatNumber(value) {
   return Number(value).toLocaleString('ko-KR');
@@ -76,7 +76,7 @@ export function volumeCloudView(container) {
       </header>
       <div class="volume-cloud-tabs" role="tablist" aria-label="시장 선택">
         <button type="button" role="tab" data-market="us" class="active" aria-selected="true">미국 · Magnificent Seven</button>
-        <button type="button" role="tab" data-market="kr" aria-selected="false">한국 · 대표 KOSPI 5</button>
+        <button type="button" role="tab" data-market="kr" aria-selected="false">한국 · KOSPI 20</button>
       </div>
       <section class="volume-cloud-stage">
         <div class="volume-cloud-stage-head"><strong id="volume-cloud-title">미국 거래량 클라우드</strong><span><i class="fa-solid fa-circle is-up"></i> 상승 <i class="fa-solid fa-circle is-down"></i> 하락</span></div>

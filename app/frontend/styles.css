@@ -401,13 +401,13 @@ img { max-width: 100%; }
 ═══════════════════════════════════════════════════════ */
 .site-footer {
   flex-shrink: 0;
-  border-top: 1px solid var(--border);
-  background: var(--surface-soft);
+  border-top: 1px solid #1f2937;
+  background: #0b0f19;
   padding: 14px 28px;
   display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px;
 }
-.footer-logo { font-size: .95rem; font-weight: 800; letter-spacing: .07em; color: #1a1a1a; }
-.footer-line { font-size: .8rem; color: var(--text-subtle); }
+.footer-logo { font-size: .95rem; font-weight: 800; letter-spacing: .07em; color: #ffffff; }
+.footer-line { font-size: .8rem; color: #94a3b8; }
 
 /* ═══════════════════════════════════════════════════════
    CARDS / GRID UTILITIES
