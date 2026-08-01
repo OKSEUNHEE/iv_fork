@@ -82,7 +82,6 @@
 | 필수 | GitHub | 코드 협업, Fork/PR, Actions 확인 | 가입 필수 |
 | 필수 | DART Open API | 기업 공시/재무 데이터 조회 | API 키 발급 필요 (`DART_API_KEY`) |
 | 필수 | 한국은행 ECOS | 금리/거시 지표 조회 | API 키 발급 필요 (`BOK_API_KEY`) |
-| 권장 | FRED | 미국 거시지표 조회 | API 키 권장 (`FRED_API_KEY`) |
 | 권장 | KRX Data Marketplace | 국내 시장 데이터 | API 키 권장 (`KRX_API_KEY`) |
 | 권장 | TradingView / Investing.com | 차트/지표 검증 | 가입 권장 |
 | 배포 시 필수 | AWS (ECR/EC2) | 컨테이너 배포, 운영 | 결제수단 등록 필요 |
@@ -221,22 +220,6 @@
 
 ---
 
-### <i class="fa-solid fa-flag"></i> US 해외 금융 데이터 API
-
-| 서비스 | URL | API 키 | `.env` 변수명 | 제공 데이터 |
-|--------|-----|--------|--------------|-------------|
-| **FRED (St. Louis Fed)** | <https://fred.stlouisfed.org> | <i class="fa-solid fa-key"></i> 권장 | `FRED_API_KEY` | 금리, CPI, GDP, 실업률, M2 |
-| **U.S. Treasury Fiscal Data** | <https://fiscaldata.treasury.gov> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 미국 국채 금리, 재정 데이터 |
-| **BLS (미국 노동통계국)** | <https://www.bls.gov/developers> | <i class="fa-solid fa-key"></i> 권장 | `BLS_API_KEY` | CPI, PPI, 실업률, 고용 원시 데이터 |
-| **BEA (미국 경제분석국)** | <https://apps.bea.gov/api> | <i class="fa-solid fa-key"></i> 필요 | `BEA_API_KEY` | GDP, PCE, 국민소득 데이터 |
-| **EIA (미국 에너지정보청)** | <https://www.eia.gov/opendata> | <i class="fa-solid fa-key"></i> 필요 | `EIA_API_KEY` | WTI·브렌트 유가, 천연가스, 재고 |
-| **SEC EDGAR** | <https://www.sec.gov/developer> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 미국 기업 10-K/10-Q 재무제표 |
-| **Alpha Vantage** | <https://www.alphavantage.co> | <i class="fa-solid fa-key"></i> 필요 | `ALPHA_VANTAGE_KEY` | 주가, 기술 지표, 펀더멘털 |
-| **OECD Data** | <https://data.oecd.org> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 국가별 금리·GDP·물가 비교 |
-| **World Bank Open Data** | <https://data.worldbank.org> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 글로벌 거시 지표 장기 시계열 |
-| **IMF Data** | <https://www.imf.org/en/Data> | <i class="fa-solid fa-circle-check"></i> 불필요 | — | 세계경제전망(WEO), IFS 국제금융통계 |
-
----
 
 ### <i class="fa-solid fa-building-columns"></i> 국내 자본시장 인프라
 
@@ -427,18 +410,6 @@
 
 ---
 
-### <i class="fa-solid fa-key"></i> API 키 발급 우선순위 안내
-
-| 우선순위 | 서비스 | 이유 |
-|---------|--------|------|
-| ⭐⭐⭐ 필수 | DART (opendart.fss.or.kr) | 재무제표·공시 데이터 — 대부분의 기본적 분석에 필요 |
-| ⭐⭐⭐ 필수 | 한국은행 ECOS (ecos.bok.or.kr) | 국내 금리·환율·통화량 — 매크로 분석 핵심 |
-| ⭐⭐⭐ 필수 | FRED (fred.stlouisfed.org) | 글로벌 거시 지표 — 무료이고 데이터 품질 최고 |
-| ⭐⭐ 권장 | EIA (eia.gov) | 유가 데이터 — 에너지 섹터 분석 시 필요 |
-| ⭐⭐ 권장 | KRX Data Marketplace | 공식 국내 시장 데이터 |
-| ⭐ 선택 | BLS, BEA, Alpha Vantage | yfinance/FRED로 대부분 대체 가능 |
-
----
 
 # <i class="fa-solid fa-thumbtack"></i> DART API Key 발급 방법
 

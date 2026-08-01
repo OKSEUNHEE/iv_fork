@@ -3441,14 +3441,7 @@ QUIZ_SEED_01_02: list[dict[str, object]] = [
         "explanation": "문서에서는 국내 금리 데이터의 1차 신뢰 원천으로 한국은행 ECOS를 강조합니다.",
     },
     {
-        "day": 1, "question_no": 29, "source_doc": "02", "topic": "FRED 시리즈",
-        "question": "문서에서 금리 실습 시 자주 사용하는 FRED 시리즈로 언급된 것은?",
-        "choices": ["FEDFUNDS, DGS2, DGS10", "BTCUSD, ETHUSD, DOGEUSD", "KOSPI, KOSDAQ, KRX300", "GDPDEF, CPIAUCSL만 단독 사용"],
-        "answer": 0,
-        "explanation": "문서에 FEDFUNDS, DGS2, DGS10, DGS30, T10Y2Y 등이 대표 시리즈로 제시됩니다.",
-    },
-    {
-        "day": 1, "question_no": 30, "source_doc": "02", "topic": "스프레드 해석",
+        "day": 1, "question_no": 29, "source_doc": "02", "topic": "스프레드 해석",
         "question": "장단기 금리 스프레드를 볼 때 주의할 점으로 가장 적절한 것은?",
         "choices": ["장단기 금리 차이는 의미가 없다", "정책금리와 시장금리를 항상 동일 지표로 취급한다", "국가·통화·지표 정의 차이를 확인하고 방향성과 함께 해석한다", "스프레드가 0이면 무조건 강세장이다"],
         "answer": 2,

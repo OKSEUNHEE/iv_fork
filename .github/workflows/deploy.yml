@@ -92,7 +92,6 @@ jobs:
           DART_API_KEY=$DART_API_KEY
           KOSIS_API_KEY=$KOSIS_API_KEY
           BOK_API_KEY=$BOK_API_KEY
-          FRED_API_KEY=$FRED_API_KEY
           OLLAMA_HOST=$OLLAMA_HOST
           OLLAMA_MODEL=$OLLAMA_MODEL
           EOF
@@ -100,7 +99,6 @@ jobs:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
           BOK_API_KEY: ${{ secrets.BOK_API_KEY }}
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           OLLAMA_HOST: ${{ secrets.OLLAMA_HOST }}
           OLLAMA_MODEL: ${{ secrets.OLLAMA_MODEL }}
 
