@@ -36,6 +36,10 @@ jobs:
             sudo systemctl is-active nginx || true
             sudo systemctl is-active apache2 || true
             sudo systemctl is-active caddy || true
+            echo "== Nginx virtual hosts (domain and upstream only) =="
+            sudo nginx -T 2>&1 | grep -E "^[[:space:]]*(listen|server_name|proxy_pass|root)[[:space:]]" || true
+            echo "== Host Uvicorn processes =="
+            sudo ps -eo pid,user,args | grep "[u]vicorn" || true
           '
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
