@@ -36,6 +36,7 @@ export async function apiFetch(path, options = {}) {
 
 export const api = {
   health:           ()      => apiFetch('/api/health'),
+  systemResources:  ()      => apiFetch('/api/system/resources'),
   visitorHeartbeat: (body)  => apiFetch('/api/visitors/heartbeat',         { method: 'POST', body: JSON.stringify(body) }),
   crossValidation:  (body)  => apiFetch('/api/ml/cross-validation',        { method: 'POST', body: JSON.stringify(body) }),
   decisionBoundary: ()      => apiFetch('/api/ml/decision-boundary'),
@@ -56,6 +57,7 @@ export const api = {
   pipeline:         (body)  => apiFetch('/api/quant/pipeline',             { method: 'POST', body: JSON.stringify(body) }),
   financialKnowledge:(body) => apiFetch('/api/quant/financial-knowledge',   { method: 'POST', body: JSON.stringify(body) }),
   marketSnapshot:   (body)  => apiFetch('/api/market/snapshot',             { method: 'POST', body: JSON.stringify(body) }),
+  marketVolumeCloud:(market) => apiFetch(`/api/market/volume-cloud?market=${encodeURIComponent(market)}`),
   macroRealtime:    (body)  => apiFetch('/api/macro/realtime',              { method: 'POST', body: JSON.stringify(body) }),
   macroSimulation:  (body)  => apiFetch('/api/macro/simulation',            { method: 'POST', body: JSON.stringify(body) }),
   dartCompanySearch:(body)  => apiFetch('/api/dart/company-search',         { method: 'POST', body: JSON.stringify(body) }),

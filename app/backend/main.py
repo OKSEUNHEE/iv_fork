@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import base64
+from datetime import datetime, timezone
 import io
 import json
 import os
 import re
+import time
 from threading import Lock
 from time import monotonic
 import urllib.error
@@ -169,6 +171,70 @@ class DartCompanyListRequest(BaseModel):
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+def _read_cpu_times() -> tuple[int, int]:
+    """Return total and idle CPU ticks from Linux procfs."""
+    with open("/proc/stat", encoding="utf-8") as proc_stat:
+        first_line = proc_stat.readline().split()
+    values = [int(value) for value in first_line[1:]]
+    total = sum(values)
+    # Linux reports idle and iowait separately; both mean the CPU was not
+    # executing application work for this interval.
+    idle = values[3] + (values[4] if len(values) > 4 else 0)
+    return total, idle
+
+
+def _memory_usage() -> tuple[int, int]:
+    """Return total and used memory bytes, preferring MemAvailable on Linux."""
+    meminfo: dict[str, int] = {}
+    try:
+        with open("/proc/meminfo", encoding="utf-8") as proc_meminfo:
+            for line in proc_meminfo:
+                key, raw_value, *_ = line.split()
+                meminfo[key.rstrip(":")] = int(raw_value) * 1024
+        total = meminfo["MemTotal"]
+        available = meminfo.get("MemAvailable", meminfo.get("MemFree", 0))
+        return total, max(total - available, 0)
+    except (FileNotFoundError, KeyError, ValueError):
+        page_size = os.sysconf("SC_PAGE_SIZE")
+        total = os.sysconf("SC_PHYS_PAGES") * page_size
+        available = os.sysconf("SC_AVPHYS_PAGES") * page_size
+        return total, max(total - available, 0)
+
+
+@app.get("/api/system/resources")
+def system_resources() -> dict[str, object]:
+    """Return host CPU, memory and root-disk utilization for the admin view."""
+    try:
+        total_before, idle_before = _read_cpu_times()
+        time.sleep(0.1)
+        total_after, idle_after = _read_cpu_times()
+        total_delta = total_after - total_before
+        idle_delta = idle_after - idle_before
+        cpu_used = 0.0 if total_delta <= 0 else (1 - idle_delta / total_delta) * 100
+
+        memory_total, memory_used = _memory_usage()
+        disk = os.statvfs("/")
+        disk_total = disk.f_frsize * disk.f_blocks
+        disk_free = disk.f_frsize * disk.f_bavail
+        disk_used = max(disk_total - disk_free, 0)
+
+        def usage(total: int, used: int) -> dict[str, int | float]:
+            percent = (used / total * 100) if total else 0.0
+            return {"total_bytes": total, "used_bytes": used,
+                    "free_bytes": max(total - used, 0), "used_percent": round(percent, 1)}
+
+        return {
+            "cpu": {"used_percent": round(max(0.0, min(cpu_used, 100.0)), 1),
+                    "logical_cores": os.cpu_count() or 1},
+            "memory": usage(memory_total, memory_used),
+            "disk": usage(disk_total, disk_used),
+            "disk_mount": "/",
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+        }
+    except OSError as exc:
+        raise HTTPException(status_code=503, detail=f"서버 리소스 정보를 읽을 수 없습니다: {exc}") from exc
 
 
 class VisitorHeartbeatRequest(BaseModel):
@@ -1073,6 +1139,20 @@ TICKER_LABELS = {
     "DX-Y.NYB": "달러 인덱스",
 }
 
+VOLUME_CLOUD_MARKETS = {
+    "us": [
+        {"ticker": "AAPL", "name": "Apple"}, {"ticker": "MSFT", "name": "Microsoft"},
+        {"ticker": "GOOGL", "name": "Alphabet"}, {"ticker": "AMZN", "name": "Amazon"},
+        {"ticker": "NVDA", "name": "NVIDIA"}, {"ticker": "META", "name": "Meta"},
+        {"ticker": "TSLA", "name": "Tesla"},
+    ],
+    "kr": [
+        {"ticker": "005930.KS", "name": "삼성전자"}, {"ticker": "000660.KS", "name": "SK하이닉스"},
+        {"ticker": "373220.KS", "name": "LG에너지솔루션"}, {"ticker": "207940.KS", "name": "삼성바이오로직스"},
+        {"ticker": "005380.KS", "name": "현대차"},
+    ],
+}
+
 
 def _extract_close_series(frame):
     close = frame["Close"]
@@ -1134,6 +1214,67 @@ def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
     return {
         "items": items,
         "fetched_at": fetched_at.isoformat(),
+    }
+
+
+@app.get("/api/market/volume-cloud")
+def market_volume_cloud(market: str = "us") -> dict[str, object]:
+    """Return recent volume and price changes for a compact market bubble cloud."""
+    import pandas as pd
+    import yfinance as yf
+
+    market_key = market.lower()
+    companies = VOLUME_CLOUD_MARKETS.get(market_key)
+    if not companies:
+        raise HTTPException(status_code=400, detail="market은 us 또는 kr만 선택할 수 있습니다.")
+
+    tickers = [company["ticker"] for company in companies]
+    try:
+        data = yf.download(tickers, period="2mo", interval="1d", group_by="ticker",
+                           progress=False, auto_adjust=False, threads=True)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"거래량 데이터를 가져오지 못했습니다: {exc}") from exc
+
+    items: list[dict[str, object]] = []
+    latest_dates: list[pd.Timestamp] = []
+    for company in companies:
+        ticker = company["ticker"]
+        try:
+            frame = data[ticker] if len(tickers) > 1 else data
+            close = _extract_close_series(frame)
+            volume = frame["Volume"]
+            if hasattr(volume, "columns"):
+                volume = volume.iloc[:, 0]
+            volume = volume.dropna()
+            if len(close) < 2 or volume.empty:
+                raise ValueError("가격 또는 거래량 이력이 부족합니다.")
+
+            last_close = float(close.iloc[-1])
+            previous_close = float(close.iloc[-2])
+            last_volume = float(volume.iloc[-1])
+            prior_volume = volume.iloc[-21:-1] if len(volume) > 1 else volume
+            average_volume = float(prior_volume.mean()) if not prior_volume.empty else last_volume
+            items.append({
+                "ticker": ticker,
+                "name": company["name"],
+                "price": round(last_close, 4),
+                "change_pct": round((last_close / previous_close - 1) * 100, 2),
+                "volume": int(last_volume),
+                "average_volume_20d": int(average_volume),
+                "volume_ratio": round(last_volume / average_volume, 2) if average_volume else 0.0,
+                "latest_data_at": pd.Timestamp(close.index[-1]).isoformat(),
+                "status": "ok",
+            })
+            latest_dates.append(pd.Timestamp(close.index[-1]))
+        except Exception as exc:
+            items.append({"ticker": ticker, "name": company["name"], "status": "error", "error": str(exc)})
+
+    return {
+        "market": market_key,
+        "items": items,
+        "fetched_at": pd.Timestamp.utcnow().isoformat(),
+        "latest_data_at": max(latest_dates).isoformat() if latest_dates else None,
+        "source": "Yahoo Finance",
     }
 
 @app.post("/api/macro/realtime")
