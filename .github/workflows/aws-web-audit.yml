@@ -1,0 +1,42 @@
+name: AWS Web Service Audit
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/audit_key
+          chmod 600 ~/.ssh/audit_key
+          ssh-keyscan -T 10 -H "$SSH_HOST" >> ~/.ssh/known_hosts
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+
+      - name: Inspect published web services
+        run: |
+          ssh -i ~/.ssh/audit_key "$SSH_USER@$SSH_HOST" '
+            set -eu
+            echo "== Host =="
+            hostname
+            echo "== Docker containers with published ports =="
+            sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}"
+            echo "== Docker Compose projects =="
+            sudo docker compose ls || true
+            echo "== TCP listeners =="
+            sudo ss -ltnp
+            echo "== Web proxy services =="
+            sudo systemctl is-active nginx || true
+            sudo systemctl is-active apache2 || true
+            sudo systemctl is-active caddy || true
+          '
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
