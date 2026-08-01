@@ -1,6 +1,7 @@
 import { homeView }            from './views/home.js';
 import { serverResourcesView } from './views/serverResources.js';
 import { volumeCloudView }    from './views/volumeCloud.js';
+import { worldMarketsView }   from './views/worldMarkets.js';
 import { crossValidationView } from './views/crossValidation.js';
 import { decisionBoundaryView } from './views/decisionBoundary.js';
 import { randomForestView }    from './views/randomForest.js';
@@ -64,6 +65,7 @@ const routes = {
   'home':              { label: '대시보드',               render: () => homeView(app, navigate) },
   'server-resources':  { label: '서버 리소스',             render: () => serverResourcesView(app) },
   'volume-cloud':     { label: '거래량 클라우드',          render: () => volumeCloudView(app) },
+  'world-markets':    { label: '세계증시현황',              render: () => worldMarketsView(app) },
   'cross-validation':  { label: 'Cross Validation',       render: () => crossValidationView(app) },
   'decision-boundary': { label: 'Decision Boundary',      render: () => decisionBoundaryView(app) },
   'random-forest':     { label: 'Random Forest',          render: () => randomForestView(app) },
