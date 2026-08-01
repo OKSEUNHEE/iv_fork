@@ -41,8 +41,6 @@ QDRANT_GRPC_PORT=6336
 
 # 선택 사항: 공시·통계 API 기능
 DART_API_KEY=
-KOSIS_API_KEY=
-BOK_API_KEY=
 ```
 
 `APP_PORT`를 바꿨다면 접속 주소도 예를 들어 <http://localhost:8080>으로 바뀝니다.
@@ -92,24 +90,80 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`app/backend/.env` 파일에 로컬 설정을 작성합니다.
+### 로컬 환경변수 설정
+
+백엔드는 실행할 때 `app/backend/.env`를 읽습니다. 먼저 저장소에 포함된 예시 파일을
+복사해 개인별 설정 파일을 만드세요. `.env`는 API 키처럼 민감한 값을 담을 수 있으므로
+Git에 추가하지 않습니다.
+
+macOS·Linux에서는 다음을 실행합니다.
+
+```bash
+cp app/backend/.env.example app/backend/.env
+```
+
+Windows PowerShell에서는 다음 명령을 사용합니다.
+
+```powershell
+Copy-Item app/backend/.env.example app/backend/.env
+```
+
+복사한 `app/backend/.env`를 열어 필요한 값만 수정합니다.
 
 ```dotenv
+# 퀴즈 기능용 MongoDB. 로컬 기본 설치를 사용하면 그대로 둡니다.
 MONGODB_URL=mongodb://localhost:27017
 MONGODB_DB=investment_db
 
-# 선택 사항
-DART_API_KEY=
-KOSIS_API_KEY=
-BOK_API_KEY=
+# 문서 검색(RAG)용 Qdrant. 검색 기능을 쓰지 않으면 Qdrant가 없어도 앱의 다른 기능은 실행됩니다.
 QDRANT_URL=http://localhost:6333
 QDRANT_COLLECTION=investment_docs
+
+# OpenDART 기업 검색·재무 분석 기능을 사용할 때만 발급받은 인증키를 입력합니다.
+# 비워 두면 DART 관련 API는 503 응답을 반환합니다.
+DART_API_KEY=
+
+# 선택 사항: GPU 환경에서 텍스트-이미지 생성에 다른 Diffusers 모델을 쓸 때만 설정합니다.
+# DIFFUSERS_MODEL_ID=runwayml/stable-diffusion-v1-5
+```
+
+설정 항목은 다음과 같습니다.
+
+| 변수 | 필요한 기능 | 설명 |
+| --- | --- | --- |
+| `MONGODB_URL` | 퀴즈 | MongoDB 접속 주소입니다. MongoDB를 쓰지 않는 화면은 이 값 없이도 열 수 있지만, 퀴즈 조회·저장은 동작하지 않습니다. |
+| `MONGODB_DB` | 퀴즈 | 사용할 데이터베이스 이름입니다. 로컬 기본값은 `investment_db`입니다. |
+| `QDRANT_URL` | 문서 검색 | Qdrant HTTP 주소입니다. Qdrant가 실행되지 않으면 RAG 검색 API는 `503`을 반환합니다. |
+| `QDRANT_COLLECTION` | 문서 검색 | 색인할 Qdrant 컬렉션 이름입니다. 색인 명령과 같은 값으로 유지하세요. |
+| `DART_API_KEY` | 기업·공시 분석 | OpenDART 인증키입니다. 키를 공개 저장소나 화면 캡처에 포함하지 마세요. |
+| `DIFFUSERS_MODEL_ID` | 텍스트-이미지 생성 | 선택 설정입니다. 기본 모델을 바꾸려는 GPU 환경에서만 사용합니다. |
+
+MongoDB와 Qdrant를 모두 로컬에 설치하지 않았다면, Docker Compose로 두 서비스만 실행한 뒤
+Python 백엔드를 직접 실행할 수도 있습니다.
+
+```bash
+docker compose up -d mongo qdrant
+```
+
+문서 검색을 처음 사용하거나 `docs/`의 Markdown을 변경한 뒤에는 Qdrant에 문서를 색인합니다.
+
+```bash
+QDRANT_URL=http://localhost:6333 \
+QDRANT_COLLECTION=investment_docs \
+./scripts/upload_docs_to_qdrant.sh
 ```
 
 앱을 시작합니다.
 
 ```bash
 uvicorn app.backend.main:app --host 0.0.0.0 --port 8000
+```
+
+브라우저에서 <http://localhost:8000>을 열고, API 명세와 요청 예시는
+<http://localhost:8000/docs>에서 확인할 수 있습니다. 다음 명령으로도 서버 상태를 확인합니다.
+
+```bash
+curl http://localhost:8000/api/health
 ```
 
 퀴즈 데이터를 MongoDB에 넣으려면 별도 터미널에서 실행합니다.

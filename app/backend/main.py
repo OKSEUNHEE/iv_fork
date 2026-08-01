@@ -27,6 +27,11 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 try:
+    from .openapi_docs import install_openapi
+except ImportError:
+    from openapi_docs import install_openapi
+
+try:
     from .db import get_db
 except ImportError:
     from db import get_db
@@ -121,6 +126,8 @@ except ImportError:  # Allows `uvicorn main:app` from app/backend.
     from routers.rag import router as rag_router  # type: ignore
 app.include_router(ml_router)
 app.include_router(quant_router)
+# Routers registered below are also included before the schema is first requested;
+# the OpenAPI factory is installed at the bottom of this module.
 
 @app.middleware("http")
 async def no_cache_static_assets(request, call_next):
@@ -2453,6 +2460,7 @@ def dart_financial_analysis(req: DartFinancialAnalysisRequest) -> dict:
 
 app.include_router(tax_router)
 app.include_router(rag_router)
+install_openapi(app)
 
 # ─────────────────────────────────────────────────────────────────────────────
 
