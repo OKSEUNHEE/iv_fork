@@ -1,10 +1,5 @@
 import { api } from '../api.js';
 
-const POSITIONS = {
-  us: [[2, 13], [5, 15], [8, 13], [3, 7], [6, 8], [9, 7], [5, 2]],
-  kr: [[2.3, 12], [6.8, 13], [4.7, 7], [8.5, 6], [1.7, 3]],
-};
-
 const MARKET_LABELS = { us: '미국', kr: '한국' };
 
 function formatNumber(value) {
@@ -26,36 +21,42 @@ function bubbleColor(changePct) {
 }
 
 function chartOptions(items, market) {
-  const positions = POSITIONS[market];
   const validItems = items.filter((item) => item.status === 'ok');
-  const series = validItems.map((item, index) => {
-    const [x, y] = positions[index] || [5, 9];
-    const ratio = Math.max(0.2, Number(item.volume_ratio) || 0.2);
-    return {
-      name: item.name,
-      data: [{ x, y, z: Math.min(58, 18 + Math.sqrt(ratio) * 17), item }],
-    };
-  });
   return {
-    chart: { type: 'bubble', height: 430, toolbar: { show: false }, animations: { enabled: false }, background: 'transparent', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
-    series,
-    colors: validItems.map((item) => bubbleColor(Number(item.change_pct))),
-    fill: { opacity: 0.92 },
-    stroke: { width: 2, colors: ['#0f172a'] },
+    chart: { type: 'treemap', height: 450, toolbar: { show: false }, animations: { enabled: false }, background: 'transparent', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
+    series: [{
+      name: '거래량 비중',
+      data: validItems.map((item) => ({
+        x: item.name,
+        y: Math.max(0.15, Number(item.volume_ratio) || 0.15),
+        fillColor: bubbleColor(Number(item.change_pct)),
+        item,
+      })),
+    }],
+    plotOptions: {
+      treemap: {
+        distributed: false,
+        enableShades: true,
+        shadeIntensity: 0.22,
+        useFillColorAsStroke: true,
+      },
+    },
+    stroke: { width: 2, colors: ['#111827'] },
     dataLabels: {
       enabled: true,
-      formatter: (_value, options) => options.w.globals.seriesNames[options.seriesIndex],
-      style: { colors: ['#ffffff'], fontSize: '12px', fontWeight: 700 },
+      formatter: (value, options) => {
+        const item = options.w.config.series[options.seriesIndex].data[options.dataPointIndex].item;
+        return [value, `${Number(item.volume_ratio).toFixed(2)}×`];
+      },
+      style: { colors: ['#ffffff'], fontSize: '12px', fontWeight: 750 },
       background: { enabled: false },
     },
-    xaxis: { min: 0, max: 11, tickAmount: 1, labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false }, tooltip: { enabled: false } },
-    yaxis: { min: 0, max: 18, tickAmount: 1, labels: { show: false } },
-    grid: { show: false, padding: { top: 0, bottom: 0, left: 0, right: 0 } },
     legend: { show: false },
+    grid: { show: false, padding: { top: 0, bottom: 0, left: 0, right: 0 } },
     tooltip: {
       theme: 'dark',
-      custom: ({ seriesIndex, w }) => {
-        const item = w.config.series[seriesIndex].data[0].item;
+      custom: ({ seriesIndex, dataPointIndex, w }) => {
+        const item = w.config.series[seriesIndex].data[dataPointIndex].item;
         const change = Number(item.change_pct) || 0;
         return `<div class="volume-cloud-tooltip"><strong>${item.name} <span>${item.ticker}</span></strong><b>${formatPrice(item.price, market)}</b><em class="${change >= 0 ? 'is-up' : 'is-down'}">${change >= 0 ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</em><p>거래량 ${formatNumber(item.volume)}주</p><p>20일 평균 대비 ${Number(item.volume_ratio).toFixed(2)}배</p></div>`;
       },
@@ -69,7 +70,7 @@ export function volumeCloudView(container) {
       <header class="volume-cloud-head">
         <div>
           <h1><i class="fa-solid fa-cloud"></i> 거래량 클라우드</h1>
-          <p>버블이 클수록 최근 거래량이 20거래일 평균보다 많이 늘어난 종목입니다. 빨강은 상승, 파랑은 하락을 뜻합니다.</p>
+          <p>타일이 클수록 최근 거래량이 20거래일 평균보다 많이 늘어난 종목입니다. 빨강은 상승, 파랑은 하락을 뜻합니다.</p>
         </div>
         <div class="volume-cloud-actions"><span id="volume-cloud-stamp">조회 전</span><button type="button" id="volume-cloud-refresh"><i class="fa-solid fa-rotate-right"></i> 새로고침</button></div>
       </header>
@@ -82,7 +83,7 @@ export function volumeCloudView(container) {
         <div id="volume-cloud-chart"></div>
       </section>
       <div class="volume-cloud-summary" id="volume-cloud-summary">거래량을 불러오는 중…</div>
-      <p class="volume-cloud-note">한국과 미국은 거래량 단위와 가격 통화가 다르므로 서로 비교하지 않습니다. 버블 크기는 각 시장 안에서의 최근 거래량 ÷ 직전 20거래일 평균 거래량입니다.</p>
+      <p class="volume-cloud-note">한국과 미국은 거래량 단위와 가격 통화가 다르므로 서로 비교하지 않습니다. 타일 면적은 각 시장 안에서의 최근 거래량 ÷ 직전 20거래일 평균 거래량입니다.</p>
     </section>`;
 
   let market = 'us';
