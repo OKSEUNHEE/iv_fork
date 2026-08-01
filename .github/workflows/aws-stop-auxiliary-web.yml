@@ -29,9 +29,9 @@ jobs:
             # Stop the unrelated Compose project without deleting its database volume.
             sudo docker compose -f /opt/new-biz2/docker-compose.yml down --remove-orphans
             # Disable only the Nginx site that listens on 8081; retain iv.edumgt.co.kr on port 80.
-            sudo unlink /etc/nginx/sites-enabled/new-biz-landing
+            sudo rm -f /etc/nginx/sites-enabled/new-biz-landing
             sudo nginx -t
-            sudo systemctl reload nginx
+            sudo systemctl restart nginx
             echo "== Remaining published containers =="
             sudo docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Status}}"
             echo "== Remaining web listeners =="
