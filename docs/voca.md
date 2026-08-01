@@ -17,8 +17,8 @@
 | 괴리율 | Premium/Discount | ETF의 거래소 가격이 순자산가치와 얼마나 차이 나는지 나타내는 비율이에요. |
 | 추적오차 | Tracking Error | ETF의 수익률이 따라가려는 지수의 수익률과 얼마나 달랐는지 나타내는 정도예요. |
 | IPO | Initial Public Offering | 기업공개예요. 회사가 처음으로 많은 사람에게 주식을 팔고 시장에서 거래되기 시작하는 과정이에요. |
-| PER | Price Earnings Ratio | 주가수익비율이에요. 회사가 버는 이익에 비해 주가가 어느 정도인지 살필 때 써요. |
-| PBR | Price to Book Ratio | 주가순자산비율이에요. 회사의 순재산에 비해 주가가 어느 정도인지 살필 때 써요. |
+| PER | Price Earnings Ratio | **PER(Price Earnings Ratio, 주가수익비율)**: 회사 이익과 주가를 비교합니다. |
+| PBR | Price to Book Ratio | **PBR(Price to Book Ratio, 주가순자산비율)**: 회사가 가진 순재산과 주가를 비교합니다. |
 | EPS | Earnings Per Share | 주당순이익이에요. 회사 이익을 주식 한 장당으로 나눈 값이에요. |
 | DPS | Dividend Per Share | 주당배당금이에요. 주식 한 장당 나눠 주는 배당금이에요. |
 | DCF | Discounted Cash Flow | 현금흐름 할인법이에요. 미래에 벌 돈을 오늘의 값으로 조심스럽게 바꾸어 보는 방법이에요. |
