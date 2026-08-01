@@ -33,7 +33,6 @@ import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
 import { taxAccountingView }         from './views/taxAccounting.js';
 import { dartFinancialAnalysisView } from './views/dartFinancialAnalysis.js';
-import { ollamaView }               from './views/ollama.js';
 import { api }                 from './api.js';
 import { LEARN_DOCS }          from './data/learnDocs.js';
 import { restoreFormState, saveFormState } from './utils/localState.js';
@@ -91,7 +90,6 @@ const routes = {
   'investment-tree':     { label: '투자 성향 분석',              render: () => investmentTreeView(app) },
   'tax-accounting':              { label: '세무·회계 시뮬레이션',         render: () => taxAccountingView(app) },
   'dart-financial-analysis':    { label: 'DART 재무 AI 분석',             render: () => dartFinancialAnalysisView(app) },
-  'ollama':                     { label: 'Ollama AI 엔진 관리',           render: () => ollamaView(app) },
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
   ...quizDayRoutes,
   ...learnRoutes,
@@ -251,7 +249,7 @@ function navigate(view) {
     'dart-region-search','group-network','company-financial','financial-statement','valuation',
     'portfolio','risk','technical-chart','backtest','pipeline','cross-validation','random-forest',
     'kmeans','svm','mlp','linear-regression','lstm','transformer','market-snapshot','financial-knowledge'];
-  const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting','ollama'];
+  const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting'];
   const activeSections = [];
   if (view?.startsWith('learn-')) activeSections.push('learn');
   if (view?.startsWith('quiz-')) activeSections.push('quiz');

@@ -71,6 +71,7 @@ MONGODB_DB=investment_db \
 - 위키백과: 모르는 기본 용어를 쉬운 뜻으로 확인
 - YouTube: 과정별 주제 영상 탐색·시청
 - NotebookLM: 과정별 학습 자료를 찾기 위한 검색어 제공
+- 시장 방송·정보 사이트: 국내 IPTV 경제 채널, Bloomberg 등 해외 시장 방송, 공시·차트 사이트를 목적별로 안내
 
 외부 자료는 배경지식용입니다. 회사의 실적, 계약, 증자, 감사 의견처럼 투자 판단에 중요한 사실은 반드시 공시 원문으로 다시 확인해야 합니다.
 
@@ -148,9 +149,6 @@ DART_API_KEY=
 
 # 선택 사항: 문서 검색 기능
 QDRANT_URL=http://localhost:6333
-OLLAMA_HOST=
-OLLAMA_MODEL=
-OLLAMA_EMBED_MODEL=nomic-embed-text
 ```
 
 비밀 키와 서버 주소는 Git에 올리지 않습니다.
@@ -197,13 +195,9 @@ DART_API_KEY=
 KOSIS_API_KEY=
 BOK_API_KEY=
 
-# 선택 사항: PC에 설치한 Ollama
-OLLAMA_HOST=http://host.docker.internal:11434
-OLLAMA_MODEL=llama3:latest
-OLLAMA_EMBED_MODEL=nomic-embed-text
 ```
 
-Ollama를 설치하지 않아도 웹앱은 실행됩니다. 문서 검색 색인은 Ollama가 없으면 간단한 폴백 임베딩을 사용합니다. Ollama 모델을 쓴 검색을 원하면 PC에서 Ollama를 실행하고 `nomic-embed-text` 모델을 준비한 뒤 아래 명령으로 문서를 색인합니다.
+문서 검색 색인은 외부 생성형 AI 없이 384차원 해시 임베딩을 사용합니다. 아래 명령으로 문서를 색인합니다.
 
 ```bash
 docker compose --profile tools run --rm docs-index
@@ -233,11 +227,9 @@ SSH_KEY
 DART_API_KEY
 KOSIS_API_KEY
 BOK_API_KEY
-OLLAMA_HOST
-OLLAMA_MODEL
 ```
 
-문서가 바뀌면 배포 과정에서 문서 검색 인덱스를 다시 만들 수 있습니다. Qdrant 또는 Ollama를 쓰지 않는 환경에서는 해당 기능을 별도로 구성하거나 비활성화하세요.
+문서가 바뀌면 배포 과정에서 Qdrant 문서 검색 인덱스를 다시 만들 수 있습니다. Qdrant를 쓰지 않는 환경에서는 해당 기능을 별도로 구성하거나 비활성화하세요.
 
 ## 문서 수정 규칙
 

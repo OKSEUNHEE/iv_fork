@@ -18,17 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
 
-try:
-    from .services.ollama import (
-        OLLAMA_HOST, OLLAMA_MODEL, _ollama_available, _ollama_chat,
-        _ollama_models, _ollama_request, _build_financial_analysis_prompt,
-    )
-except ImportError:  # Allows `uvicorn main:app` from app/backend.
-    from services.ollama import (  # type: ignore
-        OLLAMA_HOST, OLLAMA_MODEL, _ollama_available, _ollama_chat,
-        _ollama_models, _ollama_request, _build_financial_analysis_prompt,
-    )
-
 from bson import ObjectId
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -2030,7 +2019,6 @@ class DartFinancialAnalysisRequest(BaseModel):
     bsns_year:    str       = Field(default="2023", pattern=r"^\d{4}$")
     reprt_code:   str       = Field(default="11011", pattern=r"^1101[1-4]$",
                                     description="11011=사업보고서 11012=반기 11013=1분기 11014=3분기")
-    ollama_model: str | None = Field(default=None, description="Ollama 모델명 (미지정 시 환경변수 기본값 사용)")
 
 
 def _parse_dart_amounts(items: list[dict]) -> dict[str, dict[str, float]]:
@@ -2406,23 +2394,6 @@ def dart_financial_analysis(req: DartFinancialAnalysisRequest) -> dict:
         "unit":                 "억원",
     }
 
-    # ── 5. AI narrative (Ollama → rule-based fallback) ────────────────────────
-    ollama_text: str | None = None
-    ollama_model_used: str | None = None
-    ollama_ok = _ollama_available()
-
-    if ollama_ok:
-        try:
-            model_to_use = req.ollama_model or OLLAMA_MODEL
-            sys_p, usr_p = _build_financial_analysis_prompt(
-                company.get("corp_name", ""),
-                market, req.bsns_year, snap, ratios, score, grade,
-            )
-            ollama_text       = _ollama_chat(model_to_use, sys_p, usr_p)
-            ollama_model_used = model_to_use
-        except Exception:
-            ollama_ok = False
-
     analysis = _generate_dart_analysis(company, market, ratios, score, grade, req.bsns_year)
 
     return {
@@ -2445,85 +2416,8 @@ def dart_financial_analysis(req: DartFinancialAnalysisRequest) -> dict:
             "breakdown": breakdown,
         },
         "analysis":       analysis,
-        "ollama": {
-            "available":    ollama_ok,
-            "host":         OLLAMA_HOST,
-            "model_used":   ollama_model_used,
-            "text":         ollama_text,
-        },
         "bsns_year":  req.bsns_year,
     }
-
-
-# ─── Ollama Endpoints ────────────────────────────────────────────────────────
-
-class OllamaChatRequest(BaseModel):
-    model:   str        = Field(default="")
-    prompt:  str        = Field(min_length=1, max_length=8000)
-    system:  str        = Field(default="당신은 한국 금융·투자 전문가입니다. 한국어로 답변하세요.")
-    temperature: float  = Field(default=0.4, ge=0.0, le=2.0)
-    num_predict: int    = Field(default=600, ge=50, le=2000)
-
-
-class OllamaPullRequest(BaseModel):
-    model: str = Field(min_length=1, max_length=100)
-
-
-@app.get("/api/ollama/status")
-def ollama_status() -> dict:
-    """Return Ollama connection status and available models."""
-    available = _ollama_available()
-    models: list[dict] = []
-    if available:
-        raw = _ollama_models()
-        for m in raw:
-            details = m.get("details", {})
-            models.append({
-                "name":       m.get("name", ""),
-                "size_gb":    round(m.get("size", 0) / 1e9, 2),
-                "param_size": details.get("parameter_size", ""),
-                "quantize":   details.get("quantization_level", ""),
-                "modified":   (m.get("modified_at") or "")[:10],
-                "is_default": m.get("name", "") == OLLAMA_MODEL,
-            })
-    return {
-        "available":     available,
-        "host":          OLLAMA_HOST,
-        "default_model": OLLAMA_MODEL,
-        "models":        models,
-        "model_count":   len(models),
-        "recommended": {
-            "financial_analysis": "llama3:latest",
-            "korean_text":        "ko-llama:latest",
-            "embedding":          "nomic-embed-text:latest",
-            "fast_coding":        "qwen2.5-coder:1.5b-base",
-        },
-        "suggested_pull": [
-            {"name": "llama3.1:8b",    "desc": "한국어 지원 강화 버전 (추천)", "size": "~4.7GB"},
-            {"name": "qwen2.5:7b",     "desc": "한국어·영어 다국어 최적화",   "size": "~4.4GB"},
-            {"name": "exaone3.5:7.8b", "desc": "LG AI Research 한국어 전용", "size": "~4.9GB"},
-        ],
-    }
-
-
-@app.post("/api/ollama/chat")
-def ollama_chat(req: OllamaChatRequest) -> dict:
-    """Send a prompt to Ollama and return the generated text."""
-    model = req.model or OLLAMA_MODEL
-    text  = _ollama_chat(model, req.system, req.prompt, req.temperature, req.num_predict)
-    return {"model": model, "response": text, "host": OLLAMA_HOST}
-
-
-@app.post("/api/ollama/pull")
-def ollama_pull(req: OllamaPullRequest) -> dict:
-    """Start pulling an Ollama model (non-streaming, may take several minutes)."""
-    result = _ollama_request(
-        "/api/pull",
-        {"name": req.model, "stream": False},
-        timeout=600,  # 10-min max for large models
-    )
-    status = result.get("status", "unknown")
-    return {"model": req.model, "status": status, "detail": result}
 
 
 app.include_router(tax_router)

@@ -70,7 +70,4 @@ export const api = {
   dartFinancialAnalysis: (body) => apiFetch('/api/dart/financial-analysis', { method: 'POST', body: JSON.stringify(body) }),
   taxSample:        ()      => apiFetch('/api/tax/sample'),
   taxSimulate:      (body)  => apiFetch('/api/tax/simulate',               { method: 'POST', body: JSON.stringify(body) }),
-  ollamaStatus:     ()      => apiFetch('/api/ollama/status'),
-  ollamaChat:       (body)  => apiFetch('/api/ollama/chat',                { method: 'POST', body: JSON.stringify(body) }),
-  ollamaPull:       (body)  => apiFetch('/api/ollama/pull',                { method: 'POST', body: JSON.stringify(body) }),
 };
