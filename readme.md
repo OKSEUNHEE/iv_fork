@@ -29,6 +29,27 @@ docker compose up -d
 http://localhost:8000/api/health
 ```
 
+## 삼성전자 LEAN 백테스트 (별도 Compose 구성)
+
+웹앱과 독립적으로 QuantConnect LEAN 기반 삼성전자(`005930.KS`) 일봉 예제를
+실행할 수 있습니다. 실행 이미지에는 전략 모듈이 포함되며, 컨테이너가 시작할 때
+공개 가격 데이터를 받은 뒤 한 번의 백테스트를 수행합니다.
+
+```bash
+docker compose -f docker-compose.lean.yml run --rm samsung-backtest
+```
+
+결과 파일과 `orders.csv`는 `lean-results/`에 생성됩니다. 기본 기간은 2024년이며,
+다른 기간을 지정하려면 다음처럼 실행합니다.
+
+```bash
+SAMSUNG_START_DATE=2023-01-01 SAMSUNG_END_DATE=2024-01-01 \
+  docker compose -f docker-compose.lean.yml run --rm samsung-backtest
+```
+
+전략과 Dockerfile은 [lean-samsung/](lean-samsung/)에 있습니다. 이 구성은 Custom
+Data 기반의 동작 예제이므로 KRX 수수료·배당·거래일·환율 모델을 포함하지 않습니다.
+
 ### 포트 또는 API 키 설정
 
 이미 같은 포트를 사용 중이면 저장소 루트에 `.env` 파일을 만들고 값을 바꿉니다.
