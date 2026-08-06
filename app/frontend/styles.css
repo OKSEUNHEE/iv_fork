@@ -885,6 +885,7 @@ img { max-width: 100%; }
   transition: all .15s;
 }
 .choice-btn:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); }
+.choice-btn.selected  { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
 .choice-btn.correct   { border-color: var(--green); background: var(--green-bg); color: #065f46; }
 .choice-btn.wrong     { border-color: var(--red);   background: var(--red-bg);   color: #991b1b; }
 .choice-btn:disabled  { cursor: default; }

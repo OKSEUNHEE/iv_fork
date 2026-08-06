@@ -118,16 +118,19 @@ try:
     from .routers.ml import router as ml_router
     from .routers.quant import router as quant_router
     from .routers.quiz import router as quiz_router
+    from .routers.vocabulary_exam import EXAM_OPEN_AT, router as vocabulary_exam_router
     from .routers.tax import router as tax_router
     from .routers.rag import router as rag_router
 except ImportError:  # Allows `uvicorn main:app` from app/backend.
     from routers.ml import router as ml_router  # type: ignore
     from routers.quant import router as quant_router  # type: ignore
     from routers.quiz import router as quiz_router  # type: ignore
+    from routers.vocabulary_exam import EXAM_OPEN_AT, router as vocabulary_exam_router  # type: ignore
     from routers.tax import router as tax_router  # type: ignore
     from routers.rag import router as rag_router  # type: ignore
 app.include_router(ml_router)
 app.include_router(quant_router)
+app.include_router(vocabulary_exam_router)
 # Routers registered below are also included before the schema is first requested;
 # the OpenAPI factory is installed at the bottom of this module.
 
@@ -265,6 +268,10 @@ def visitor_heartbeat(payload: VisitorHeartbeatRequest) -> dict[str, int]:
 
 @app.get("/api/learn/doc/{doc_id}")
 def get_learn_doc(doc_id: str) -> dict[str, str]:
+    # 시험지는 /api/vocabulary-exam에서 개시 시각을 통과한 뒤에만 제공한다.
+    # 문서 API로 직접 접근해도 문제를 미리 볼 수 없게 한다.
+    if doc_id == "voca-exam" and datetime.now(EXAM_OPEN_AT.tzinfo) < EXAM_OPEN_AT:
+        raise HTTPException(status_code=403, detail="단어장 시험은 2026년 8월 10일 14:00(한국시간)에 공개됩니다.")
     target = _learn_document_map().get(doc_id)
     if not target:
         raise HTTPException(status_code=404, detail="지원하지 않는 학습 문서입니다.")

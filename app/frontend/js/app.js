@@ -35,6 +35,8 @@ import { technicalChartView }  from './views/technicalChart.js';
 import { financialKnowledgeView } from './views/financialKnowledge.js';
 import { investmentTreeView }   from './views/investmentTree.js';
 import { quizHomeView, quizDayView } from './views/quiz.js';
+import { vocabularyExamView } from './views/vocabularyExam.js';
+import { ragChatView } from './views/ragChat.js';
 import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
 import { taxAccountingView }         from './views/taxAccounting.js';
@@ -105,6 +107,8 @@ const routes = {
   'tax-accounting':              { label: '세무·회계 시뮬레이션',         render: () => taxAccountingView(app) },
   'dart-financial-analysis':    { label: 'DART 재무 AI 분석',             render: () => dartFinancialAnalysisView(app) },
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
+  'vocabulary-exam':     { label: '퀴즈 · 단어장 30문제 시험',   render: () => vocabularyExamView(app, navigate) },
+  'rag-chat':            { label: '문서 검색 채팅',              render: () => ragChatView(app) },
   ...quizDayRoutes,
   ...learnRoutes,
 };
@@ -271,13 +275,13 @@ function navigate(view) {
   const activeSections = [];
   if (['learn-10', 'learn-11'].includes(view)) activeSections.push('review');
   else if (view?.startsWith('learn-')) activeSections.push('learn');
-  if (view?.startsWith('quiz-')) activeSections.push('quiz');
+  if (view?.startsWith('quiz-') || view === 'vocabulary-exam') activeSections.push('quiz');
   if (['server-resources', 'world-markets', 'volume-cloud'].includes(view)) activeSections.push('visualization');
   if (_practiceViews.includes(view)) activeSections.push('practice');
   if (_aiViews.includes(view)) activeSections.push('aitools');
   if (typeof window._setActiveNavSections === 'function') window._setActiveNavSections(activeSections);
 
-  if (view?.startsWith('quiz-')) updateQuizSidebarLock();
+  if (view?.startsWith('quiz-') || view === 'vocabulary-exam') updateQuizSidebarLock();
 
   route.render();
   // MongoDB를 사용하지 않는 화면의 사용자 입력은 화면별로 브라우저에 보관한다.
