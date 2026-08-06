@@ -22,7 +22,8 @@ jobs:
 
       - name: Commit directory when newly created
         run: |
-          if git diff --quiet -- abcdef/.gitkeep; then
+          # git diff는 새 미추적 파일을 표시하지 않으므로 Git 추적 여부를 확인한다.
+          if git ls-files --error-unmatch abcdef/.gitkeep >/dev/null 2>&1; then
             echo "abcdef directory already exists."
             exit 0
           fi
