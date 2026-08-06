@@ -64,7 +64,31 @@ export function portfolioGuideView(container) {
   container.innerHTML = `
     <section class="portfolio-guide-page">
       <div class="page-heading"><div><h1><i class="fa-solid fa-compass"></i> 포트폴리오 추천</h1><p>몇 가지 질문으로 나에게 맞는 자산 구성의 출발점을 찾아보세요.</p></div></div>
-      <aside class="portfolio-guide-explainer"><i class="fa-solid fa-map"></i><div><strong>추천은 ‘정답’보다 ‘출발점’입니다</strong><p>투자 목적, 필요한 시점, 감당할 수 있는 흔들림은 사람마다 다릅니다. 이 메뉴는 그 차이를 반영해 자산을 어떻게 나누어 볼지 쉽게 보여주는 학습용 가이드입니다.</p></div></aside>
+      <aside class="portfolio-guide-explainer"><i class="fa-solid fa-map"></i><div><strong>추천은 ‘정답’보다 ‘출발점’입니다</strong><p>투자 목적, 필요한 시점, 감당할 수 있는 흔들림은 사람마다 다릅니다. 이 메뉴는 그 차이를 반영해 자산을 어떻게 나누어 볼지 쉽게 보여주는 학습용 가이드입니다.</p><button type="button" class="sharpe-help-button" id="sharpe-help" aria-haspopup="dialog" aria-expanded="false"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> 샤프지수(Sharpe Ratio) 알아보기</button></div></aside>
+      <div class="sharpe-modal-backdrop" id="sharpe-modal" hidden>
+        <section class="sharpe-modal" role="dialog" aria-modal="true" aria-labelledby="sharpe-modal-title" tabindex="-1">
+          <header class="sharpe-modal-header"><div><span class="sharpe-modal-icon"><i class="fa-solid fa-scale-balanced"></i></span><div><p class="sharpe-kicker">Sharpe Ratio <span aria-label="샤프 레이시오">(샤프 레이시오)</span></p><h2 id="sharpe-modal-title">샤프지수, 위험 대비 수익의 효율</h2><p>얼마나 많이 벌었는지뿐 아니라, 그 수익을 얻기 위해 얼마나 흔들렸는지도 함께 봅니다.</p></div></div><button type="button" class="sharpe-modal-close" aria-label="샤프지수 설명 닫기"><i class="fa-solid fa-xmark"></i></button></header>
+          <div class="sharpe-modal-body">
+            <div class="sharpe-plain-language"><span><i class="fa-solid fa-language"></i> 쉽게 말하면</span><p><b>샤프지수</b>는 영어로 <b>Sharpe Ratio</b>, 한국어식으로 <b>샤프 레이시오</b>라고 읽습니다. 위험을 감수하고 얻은 <b>초과수익의 효율</b>을 숫자로 나타낸 지표입니다. 같은 수익이라면 덜 흔들린 투자의 샤프지수가 더 높습니다.</p></div>
+            <div class="sharpe-formula" aria-label="샤프지수 수식"><span>Sharpe Ratio</span> = <span>(포트폴리오 수익률 − 무위험수익률)</span> / <span>포트폴리오 변동성</span></div>
+            <div class="sharpe-parts"><div><b>초과수익</b><span>예금·국채처럼 위험이 낮은 투자보다 얼마나 더 벌었는지</span></div><div><b>변동성</b><span>수익률이 위아래로 흔들린 정도, 즉 감수한 위험</span></div><div><b>결과</b><span>값이 높을수록 같은 위험 대비 수익의 효율이 높은 편</span></div></div>
+            <div class="sharpe-example"><h3><i class="fa-solid fa-calculator"></i> 짧은 예시</h3><p>연 수익률이 10%, 무위험수익률이 3%, 변동성이 14%라면 <b>(10% − 3%) ÷ 14% = 0.50</b>입니다. 수익률이 같아도 변동성이 7%라면 샤프지수는 <b>1.00</b>이 됩니다. 그래서 수익률만 비교할 때 놓치기 쉬운 ‘흔들림’을 함께 고려할 수 있습니다.</p></div>
+            <div class="sharpe-caution"><i class="fa-solid fa-triangle-exclamation"></i><p><b>이 추천 화면은 샤프지수를 계산하지 않습니다.</b> 투자 기간·목적·위험 성향에 따라 정해진 학습용 자산배분 예시를 보여줍니다. 샤프지수는 별도의 포트폴리오 최적화 화면에서 여러 조합을 비교할 때 사용합니다.</p></div>
+            <div class="sharpe-code-head"><h3><i class="fa-brands fa-python"></i> 이 프로젝트의 최적화 코드</h3><span>app/backend/routers/quant.py 일부</span></div>
+            <pre class="sharpe-code"><code># r: 포트폴리오 기대수익률
+# v: 공분산을 반영한 포트폴리오 변동성
+r = float(w @ mu_ann)
+v = float(np.sqrt(w @ cov @ w))
+
+# rf: 무위험수익률 (기본값 3%)
+sharpe = (r - rf) / v
+
+# 여러 비중 조합 중 샤프지수가 가장 높은 조합을 선택
+best_i = int(np.argmax(port_sharpes))</code></pre>
+            <p class="sharpe-note"><i class="fa-solid fa-circle-info"></i> 샤프지수는 과거 데이터와 가정한 수익률·변동성에 따라 달라집니다. 미래 성과나 손실 가능성을 보장하지 않습니다.</p>
+          </div>
+        </section>
+      </div>
       <div class="portfolio-guide-layout">
         <section class="portfolio-guide-form">
           <h2>내 상황에 가까운 선택</h2>
@@ -80,6 +104,28 @@ export function portfolioGuideView(container) {
     </section>`;
 
   const result = container.querySelector('#guide-result');
+  const sharpeHelp = container.querySelector('#sharpe-help');
+  const sharpeModal = container.querySelector('#sharpe-modal');
+  const sharpePanel = sharpeModal.querySelector('.sharpe-modal');
+
+  const closeSharpeModal = () => {
+    sharpeModal.hidden = true;
+    sharpeHelp.setAttribute('aria-expanded', 'false');
+    sharpeHelp.focus();
+  };
+  sharpeHelp.addEventListener('click', () => {
+    sharpeModal.hidden = false;
+    sharpeHelp.setAttribute('aria-expanded', 'true');
+    sharpePanel.focus();
+  });
+  sharpeModal.querySelector('.sharpe-modal-close').addEventListener('click', closeSharpeModal);
+  sharpeModal.addEventListener('click', (event) => {
+    if (event.target === sharpeModal) closeSharpeModal();
+  });
+  sharpePanel.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeSharpeModal();
+  });
+
   container.querySelector('#guide-run').addEventListener('click', () => {
     const risk = container.querySelector('#guide-risk').value;
     const horizon = container.querySelector('#guide-horizon').value;

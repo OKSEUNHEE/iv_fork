@@ -140,6 +140,12 @@ MONGODB_DB=investment_db
 QDRANT_URL=http://localhost:6333
 QDRANT_COLLECTION=investment_docs
 
+# 선택 사항: 문서 검색 결과만 외부 AI로 문장 정리할 때 사용합니다.
+# 세 값이 모두 있어야 문서 검색 채팅의 외부 AI 선택 항목이 활성화됩니다.
+# RAG_LLM_BASE_URL=https://api.openai.com/v1
+# RAG_LLM_API_KEY=
+# RAG_LLM_MODEL=
+
 # OpenDART 기업 검색·재무 분석 기능을 사용할 때만 발급받은 인증키를 입력합니다.
 # 비워 두면 DART 관련 API는 503 응답을 반환합니다.
 DART_API_KEY=
@@ -156,6 +162,9 @@ DART_API_KEY=
 | `MONGODB_DB` | 퀴즈 | 사용할 데이터베이스 이름입니다. 로컬 기본값은 `investment_db`입니다. |
 | `QDRANT_URL` | 문서 검색 | Qdrant HTTP 주소입니다. Qdrant가 실행되지 않으면 RAG 검색 API는 `503`을 반환합니다. |
 | `QDRANT_COLLECTION` | 문서 검색 | 색인할 Qdrant 컬렉션 이름입니다. 색인 명령과 같은 값으로 유지하세요. |
+| `RAG_LLM_BASE_URL` | 문서 검색 답변 다듬기 | 선택 설정입니다. OpenAI Chat Completions 호환 API의 기본 주소입니다. |
+| `RAG_LLM_API_KEY` | 문서 검색 답변 다듬기 | 선택 설정입니다. 외부 AI 인증키이며 공개 저장소나 화면 캡처에 포함하지 마세요. |
+| `RAG_LLM_MODEL` | 문서 검색 답변 다듬기 | 선택 설정입니다. 사용할 외부 AI 모델 이름입니다. 세 값이 모두 설정될 때만 선택 UI가 활성화됩니다. |
 | `DART_API_KEY` | 기업·공시 분석 | OpenDART 인증키입니다. 키를 공개 저장소나 화면 캡처에 포함하지 마세요. |
 | `DIFFUSERS_MODEL_ID` | 텍스트-이미지 생성 | 선택 설정입니다. 기본 모델을 바꾸려는 GPU 환경에서만 사용합니다. |
 
