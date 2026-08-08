@@ -4,7 +4,7 @@
  */
 const DESKTOP_BREAKPOINT = 1024;
 let _sidebarOpen = window.innerWidth > DESKTOP_BREAKPOINT;
-const MENU_SECTION_ORDER = ['learn', 'review', 'quiz', 'visualization', 'portfolio'];
+const MENU_SECTION_ORDER = ['review', 'learn', 'quiz', 'visualization', 'portfolio'];
 
 // SPA와 정적 페이지가 같은 메뉴 순서를 유지하도록 실제 DOM 순서를 맞춘다.
 function orderSidebarSections() {
@@ -21,6 +21,10 @@ function orderSidebarSections() {
     const section = sections.get(id);
     if (section) nav.append(section);
   });
+
+  // RAG는 보조 기능이므로 모든 학습·분석 메뉴 다음, 메뉴의 마지막에 둔다.
+  const rag = nav.querySelector(':scope > .nav-item[data-view="rag-chat"]');
+  if (rag) nav.append(rag);
 }
 window._orderSidebarSections = orderSidebarSections;
 

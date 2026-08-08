@@ -100,6 +100,18 @@
         <a class="nav-item nav-home" data-view="home">
           <i class="fa-solid fa-house"></i><span>대시보드</span>
         </a>
+        <!-- ─────── 기초학습 ─────── -->
+        <div class="nav-section">
+          <button class="nav-section-hdr" onclick="toggleNav('review')">
+            <span><i class="fa-solid fa-book-bookmark"></i>기초학습</span>
+            <i class="fa-solid fa-chevron-down nav-chev" id="chev-review"></i>
+          </button>
+          <div class="nav-children" id="nav-review">
+            <a class="nav-item" data-view="learn-10"><i class="fa-solid fa-circle-dot"></i>법인과 회사 구조</a>
+            <a class="nav-item" data-view="learn-11"><i class="fa-solid fa-circle-dot"></i>거시경제와 주식시장</a>
+          </div>
+        </div>
+
         <!-- ─────── 학습 ─────── -->
         <div class="nav-section">
           <button class="nav-section-hdr" onclick="toggleNav('learn')">
@@ -112,18 +124,6 @@
             <a class="nav-item" data-view="learn-05"><i class="fa-solid fa-circle-dot"></i>주식 3</a>
             <a class="nav-item" data-view="learn-06"><i class="fa-solid fa-circle-dot"></i>주식 4</a>
             <a class="nav-item" data-view="learn-07"><i class="fa-solid fa-circle-dot"></i>주식 5</a>
-          </div>
-        </div>
-
-        <!-- ─────── 기초학습 ─────── -->
-        <div class="nav-section">
-          <button class="nav-section-hdr" onclick="toggleNav('review')">
-            <span><i class="fa-solid fa-book-bookmark"></i>기초학습</span>
-            <i class="fa-solid fa-chevron-down nav-chev" id="chev-review"></i>
-          </button>
-          <div class="nav-children" id="nav-review">
-            <a class="nav-item" data-view="learn-10"><i class="fa-solid fa-circle-dot"></i>법인과 회사 구조</a>
-            <a class="nav-item" data-view="learn-11"><i class="fa-solid fa-circle-dot"></i>거시경제와 주식시장</a>
           </div>
         </div>
 
