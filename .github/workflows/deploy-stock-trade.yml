@@ -2,6 +2,8 @@ name: Deploy stock-coin-trade
 
 on:
   workflow_dispatch: {}
+  repository_dispatch:
+    types: [stock-coin-trade-main-updated]
 
 permissions:
   contents: read
