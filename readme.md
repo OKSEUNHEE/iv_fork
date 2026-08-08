@@ -255,9 +255,9 @@ python3 scripts/sync_learning_menu.py
 ### 결과물은 모두에게 공유되어 공정하게 확인 되도록 각자 작업 내용을 json 포맷으로 남겨 디스코드에 공유 합니다.
 ![alt text](image.png)
 
-### 위와 같이 전체적으로 클릭, 입력 이벤트의 작업에 대해 80%가 넘으면 Applicaion - localstorage 에 데이타가 생성되며
+### 위와 같이 전체적으로 클릭, 입력 이벤트의 작업에 대해 Applicaion - localstorage 에 데이타가 생성되며 80%가 넘은
 ### 해당 데이타 셋을 copy object 로 메모장에 복사. 압축하여 디스코드에 성명1.zip 으로 업로드 합니다.
 
 ## 개발환경 구축 테스트 - 50% 반영
 ### https://github.com/edumgt/investment-analysis repo 에 대해 각 수강생별 본인 PC 환경의 Docker 에서
-### 실행 및 시험 20문항에 대해 시험 본 후 해당 결과를 mongodb 에서 데이타 추출( 이 모든 과정은 AI 의 도움을 받아 처리합니다.) 후 위와 같은 방법으로 성명2.zip 으로 업로드 합니다.
+### 실행 퀴즈 - 단어장 30문제에 대해 퀴즈 본 후 해당 결과를 mongodb 에서 데이타 추출( 이 모든 과정은 AI 의 도움을 받아 처리합니다.) 후 위와 같은 방법으로 성명2.zip 으로 업로드 합니다.
