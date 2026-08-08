@@ -96,7 +96,7 @@ jobs:
               umask 077
               printf "SECRET_KEY=%s\n" "$(openssl rand -hex 32)" > /opt/stock-coin-trade/.env
             fi
-            sudo sed -i '/^COMPOSE_PROFILES=/d; /^DB_HOST=/d; /^DB_PORT=/d; /^DB_NAME=/d; /^DB_USER=/d; /^DB_PASSWORD=/d' /opt/stock-coin-trade/.env
+            sudo sed -i -e "/^COMPOSE_PROFILES=/d" -e "/^DB_HOST=/d" -e "/^DB_PORT=/d" -e "/^DB_NAME=/d" -e "/^DB_USER=/d" -e "/^DB_PASSWORD=/d" /opt/stock-coin-trade/.env
             sudo cat /tmp/stock-trade-db.env | sudo tee -a /opt/stock-coin-trade/.env >/dev/null
             sudo rm -f /tmp/stock-trade-db.env
             sudo docker network inspect shared-net >/dev/null 2>&1 || sudo docker network create shared-net
