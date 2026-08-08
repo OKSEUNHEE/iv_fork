@@ -79,7 +79,8 @@ jobs:
 
           umask 077
           cat > /tmp/stock-trade-db.env <<EOF
-          DB_HOST=43.201.14.160
+          # 동일 VPC 내부 연결에는 대상 서버(43.201.14.160)의 사설 IP를 사용한다.
+          DB_HOST=172.31.0.55
           DB_PORT=3306
           DB_NAME=mockinv
           DB_USER=mockinv
@@ -102,6 +103,7 @@ jobs:
             sudo docker network inspect shared-net >/dev/null 2>&1 || sudo docker network create shared-net
             cd /opt/stock-coin-trade
             sudo docker compose -p stock-coin-trade -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans
+            sudo docker rm -f crypto-mock-mariadb >/dev/null 2>&1 || true
             sudo install -m 644 /tmp/st.edumgt.co.kr /etc/nginx/sites-available/st.edumgt.co.kr
             sudo ln -sfn /etc/nginx/sites-available/st.edumgt.co.kr /etc/nginx/sites-enabled/st.edumgt.co.kr
             sudo nginx -t
