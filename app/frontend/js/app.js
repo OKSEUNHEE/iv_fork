@@ -269,14 +269,16 @@ function navigate(view) {
   // 현재 화면이 속한 사이드바 섹션만 펼치고 나머지는 닫는다 (사용 중인 메뉴만 열림)
   const _practiceViews = ['macro-realtime','macro-simulation','kospi-excluded','industry-analysis',
     'dart-region-search','group-network','company-financial','financial-statement','valuation',
-    'portfolio','portfolio-combination','portfolio-guide','portfolio-simulation','risk','technical-chart','backtest','pipeline','cross-validation','random-forest',
+    'risk','technical-chart','backtest','pipeline','cross-validation','random-forest',
     'kmeans','svm','mlp','linear-regression','lstm','transformer','market-snapshot','financial-knowledge'];
+  const _portfolioViews = ['portfolio', 'portfolio-combination', 'portfolio-guide', 'portfolio-simulation'];
   const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting'];
   const activeSections = [];
   if (['learn-10', 'learn-11'].includes(view)) activeSections.push('review');
   else if (view?.startsWith('learn-')) activeSections.push('learn');
   if (view?.startsWith('quiz-') || view === 'vocabulary-exam') activeSections.push('quiz');
   if (['server-resources', 'world-markets', 'volume-cloud'].includes(view)) activeSections.push('visualization');
+  if (_portfolioViews.includes(view)) activeSections.push('portfolio');
   if (_practiceViews.includes(view)) activeSections.push('practice');
   if (_aiViews.includes(view)) activeSections.push('aitools');
   if (typeof window._setActiveNavSections === 'function') window._setActiveNavSections(activeSections);

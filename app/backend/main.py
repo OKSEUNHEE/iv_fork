@@ -121,6 +121,7 @@ try:
     from .routers.vocabulary_exam import EXAM_OPEN_AT, router as vocabulary_exam_router
     from .routers.tax import router as tax_router
     from .routers.rag import router as rag_router
+    from .routers.lex import router as lex_router
 except ImportError:  # Allows `uvicorn main:app` from app/backend.
     from routers.ml import router as ml_router  # type: ignore
     from routers.quant import router as quant_router  # type: ignore
@@ -128,9 +129,11 @@ except ImportError:  # Allows `uvicorn main:app` from app/backend.
     from routers.vocabulary_exam import EXAM_OPEN_AT, router as vocabulary_exam_router  # type: ignore
     from routers.tax import router as tax_router  # type: ignore
     from routers.rag import router as rag_router  # type: ignore
+    from routers.lex import router as lex_router  # type: ignore
 app.include_router(ml_router)
 app.include_router(quant_router)
 app.include_router(vocabulary_exam_router)
+app.include_router(lex_router)
 # Routers registered below are also included before the schema is first requested;
 # the OpenAPI factory is installed at the bottom of this module.
 

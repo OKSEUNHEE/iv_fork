@@ -171,6 +171,13 @@ QDRANT_COLLECTION=investment_docs
 # RAG_LLM_API_KEY=
 # RAG_LLM_MODEL=
 
+# 선택 사항: 우측 AI 투자 도우미를 Amazon Lex V2에 연결합니다.
+# 장기 자격 증명 대신 EC2/ECS 등의 IAM 역할 사용을 권장합니다.
+# AWS_REGION=ap-northeast-2
+# LEX_BOT_ID=
+# LEX_BOT_ALIAS_ID=
+# LEX_LOCALE_ID=ko_KR
+
 # OpenDART 기업 검색·재무 분석 기능을 사용할 때만 발급받은 인증키를 입력합니다.
 # 비워 두면 DART 관련 API는 503 응답을 반환합니다.
 DART_API_KEY=
@@ -178,6 +185,8 @@ DART_API_KEY=
 # 선택 사항: GPU 환경에서 텍스트-이미지 생성에 다른 Diffusers 모델을 쓸 때만 설정합니다.
 # DIFFUSERS_MODEL_ID=runwayml/stable-diffusion-v1-5
 ```
+
+Lex 봇은 배포한 버전의 별칭을 사용하세요. 애플리케이션을 실행하는 EC2/ECS 역할에는 해당 별칭 ARN(`arn:aws:lex:<리전>:<계정>:bot-alias/<봇ID>/<별칭ID>`)에 대한 `lex:RecognizeText` 권한만 부여하면 됩니다. 브라우저나 저장소에 AWS 액세스 키를 넣지 마세요.
 
 설정 항목은 다음과 같습니다.
 
@@ -190,6 +199,10 @@ DART_API_KEY=
 | `RAG_LLM_BASE_URL` | 문서 검색 답변 다듬기 | 선택 설정입니다. OpenAI Chat Completions 호환 API의 기본 주소입니다. |
 | `RAG_LLM_API_KEY` | 문서 검색 답변 다듬기 | 선택 설정입니다. 외부 AI 인증키이며 공개 저장소나 화면 캡처에 포함하지 마세요. |
 | `RAG_LLM_MODEL` | 문서 검색 답변 다듬기 | 선택 설정입니다. 사용할 외부 AI 모델 이름입니다. 세 값이 모두 설정될 때만 선택 UI가 활성화됩니다. |
+| `AWS_REGION` | AI 투자 도우미 | Amazon Lex V2 봇이 배포된 AWS 리전입니다. |
+| `LEX_BOT_ID` | AI 투자 도우미 | Amazon Lex V2 봇 ID입니다. |
+| `LEX_BOT_ALIAS_ID` | AI 투자 도우미 | 배포한 Amazon Lex V2 별칭 ID입니다. |
+| `LEX_LOCALE_ID` | AI 투자 도우미 | Lex 로캘입니다. 기본값은 `ko_KR`입니다. |
 | `DART_API_KEY` | 기업·공시 분석 | OpenDART 인증키입니다. 키를 공개 저장소나 화면 캡처에 포함하지 마세요. |
 | `DIFFUSERS_MODEL_ID` | 텍스트-이미지 생성 | 선택 설정입니다. 기본 모델을 바꾸려는 GPU 환경에서만 사용합니다. |
 

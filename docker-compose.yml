@@ -22,8 +22,15 @@ services:
       DART_API_KEY: ${DART_API_KEY:-}
       KOSIS_API_KEY: ${KOSIS_API_KEY:-}
       BOK_API_KEY: ${BOK_API_KEY:-}
+      AWS_REGION: ${AWS_REGION:-}
+      LEX_BOT_ID: ${LEX_BOT_ID:-}
+      LEX_BOT_ALIAS_ID: ${LEX_BOT_ALIAS_ID:-}
+      LEX_LOCALE_ID: ${LEX_LOCALE_ID:-ko_KR}
+      AWS_PROFILE: ${AWS_PROFILE:-investment-analysis-lex}
     volumes:
       - ./docs:/app/docs:ro
+      # Lex 전용 최소권한 프로필을 읽기 전용으로 제공합니다.
+      - ${AWS_SHARED_CREDENTIALS_DIR:-/root/.aws}:/root/.aws:ro
     depends_on:
       mongo:
         condition: service_healthy

@@ -18,6 +18,7 @@ TAG_DESCRIPTIONS = [
     {"name": "퀴즈", "description": "MongoDB에 저장된 학습 퀴즈를 조회·수정·초기화합니다."},
     {"name": "세무", "description": "거래내역 파일을 읽고 교육용 세금·회계 시뮬레이션을 수행합니다. 실제 신고 금액으로 사용하면 안 됩니다."},
     {"name": "RAG", "description": "Qdrant에 색인된 학습 문서의 유사도 검색 API입니다. 기본 답변은 검색 문서만 정리하며, 선택적으로 외부 AI가 같은 검색 원문만 문장 다듬기에 사용합니다."},
+    {"name": "Amazon Lex", "description": "우측 AI 투자 도우미가 Amazon Lex V2 봇과 대화하는 API입니다. AWS 자격 증명은 서버에만 둡니다."},
     {"name": "파일", "description": "서버가 생성한 실습 산출물을 내려받습니다."},
 ]
 
@@ -29,6 +30,8 @@ FRONTEND_API_PATHS = frozenset({
     "/api/system/resources",
     "/api/visitors/heartbeat",
     "/api/learn/doc/{doc_id}",
+    "/api/lex/status",
+    "/api/lex/chat",
     "/api/dart/company-search",
     "/api/dart/group-network",
     "/api/dart/company-list",
@@ -79,6 +82,8 @@ OPERATION_DOCS: dict[str, tuple[str, str, str]] = {
     "/api/system/resources": ("시스템", "서버 리소스 사용량", "서버의 CPU, 메모리, 루트 디스크 사용률과 바이트 단위 사용량을 반환합니다. 운영 상태를 살피는 용도이며 컨테이너·호스트 환경에 따라 관측 범위가 달라질 수 있습니다."),
     "/api/visitors/heartbeat": ("시스템", "활성 브라우저 하트비트", "익명 브라우저 식별자를 갱신하고 최근 90초 안에 신호를 보낸 활성 브라우저 수를 반환합니다. 분석용 방문 이력을 저장하지 않습니다."),
     "/api/learn/doc/{doc_id}": ("시스템", "학습 문서 본문 조회", "문서 ID(파일 확장자 제외)에 해당하는 Markdown 원문을 반환합니다. 지원하지 않는 ID는 404입니다."),
+    "/api/lex/status": ("Amazon Lex", "Lex 연결 설정 상태", "민감한 AWS 자격 증명을 노출하지 않고, Amazon Lex 봇 연결에 필요한 공개 설정의 준비 여부만 반환합니다."),
+    "/api/lex/chat": ("Amazon Lex", "AI 투자 도우미 대화", "브라우저 메시지를 서버 경유로 Amazon Lex V2에 전달합니다. 세션 ID를 유지하면 Lex의 대화 상태를 이어갈 수 있습니다."),
     "/api/dart/company-search": ("DART·기업", "DART 기업명 검색", "회사명 일부를 기준으로 DART 기업코드 목록을 검색합니다. 결과의 `corp_code`는 재무분석 요청에 사용합니다."),
     "/api/dart/group-network": ("DART·기업", "그룹사 관계망 조회", "그룹명으로 DART 기업을 찾아 관계망 표현에 사용할 기업 목록과 연결 정보를 반환합니다."),
     "/api/dart/company-list": ("DART·기업", "지역·고용조건 기업 검색", "본사 지역, 임직원 수 범위, 사업연도 조건으로 DART 기업을 조회합니다. 외부 공시 데이터 상태에 따라 일부 정보가 비어 있을 수 있습니다."),
