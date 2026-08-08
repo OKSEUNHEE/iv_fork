@@ -44,7 +44,7 @@ jobs:
             set -e
             sudo docker run --rm --network host -e MYSQL_PWD="$STOCK_TRADE_DB_PASSWORD" mariadb:11.4 \
               mariadb -N -h 172.31.0.55 -P 3306 -u mockinv mockinv -e \
-              "SELECT '\''member'\'', COUNT(*) FROM member UNION ALL SELECT '\''stock_position'\'', COUNT(*) FROM stock_position UNION ALL SELECT '\''hold_crypto'\'', COUNT(*) FROM hold_crypto;"
+              "SELECT COUNT(*) AS members FROM member; SELECT COUNT(*) AS stock_positions FROM stock_position; SELECT COUNT(*) AS crypto_positions FROM hold_crypto;"
           REMOTE
         env:
           APP_SSH_USER: ${{ secrets.SSH_USER }}
