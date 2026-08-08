@@ -93,11 +93,19 @@ jobs:
           DART_API_KEY=$DART_API_KEY
           KOSIS_API_KEY=$KOSIS_API_KEY
           BOK_API_KEY=$BOK_API_KEY
+          AWS_ACCESS_KEY_ID=$LEX_AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY=$LEX_AWS_SECRET_ACCESS_KEY
+          AWS_REGION=us-east-1
+          LEX_BOT_ID=SE3NCP7NMP
+          LEX_BOT_ALIAS_ID=ZJFW9O3LZM
+          LEX_LOCALE_ID=ko_KR
           EOF
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
           BOK_API_KEY: ${{ secrets.BOK_API_KEY }}
+          LEX_AWS_ACCESS_KEY_ID: ${{ secrets.LEX_AWS_ACCESS_KEY_ID }}
+          LEX_AWS_SECRET_ACCESS_KEY: ${{ secrets.LEX_AWS_SECRET_ACCESS_KEY }}
 
       # Only the compose file + .env travel to the server — the web app
       # itself is pulled from GHCR, not copied over SSH.
