@@ -52,6 +52,11 @@ jobs:
             python-backend:
               environment:
                 SECRET_KEY: ${SECRET_KEY}
+                DB_HOST: ${DB_HOST}
+                DB_PORT: ${DB_PORT}
+                DB_NAME: ${DB_NAME}
+                DB_USER: ${DB_USER}
+                DB_PASSWORD: ${DB_PASSWORD}
           EOF
 
           cat > /tmp/st.edumgt.co.kr <<'EOF'
@@ -72,8 +77,18 @@ jobs:
           }
           EOF
 
+          umask 077
+          cat > /tmp/stock-trade-db.env <<EOF
+          DB_HOST=43.201.14.160
+          DB_PORT=3306
+          DB_NAME=mockinv
+          DB_USER=mockinv
+          DB_PASSWORD=${STOCK_TRADE_DB_PASSWORD}
+          EOF
+
           scp -i ~/.ssh/deploy_key /tmp/stock-trade.override.yml "$SSH_USER@$SSH_HOST:/tmp/stock-trade.override.yml"
           scp -i ~/.ssh/deploy_key /tmp/st.edumgt.co.kr "$SSH_USER@$SSH_HOST:/tmp/st.edumgt.co.kr"
+          scp -i ~/.ssh/deploy_key /tmp/stock-trade-db.env "$SSH_USER@$SSH_HOST:/tmp/stock-trade-db.env"
           ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" '
             set -e
             sudo install -m 644 /tmp/stock-trade.override.yml /opt/stock-coin-trade/docker-compose.prod.yml
@@ -81,9 +96,12 @@ jobs:
               umask 077
               printf "SECRET_KEY=%s\n" "$(openssl rand -hex 32)" > /opt/stock-coin-trade/.env
             fi
+            sudo sed -i '/^COMPOSE_PROFILES=/d; /^DB_HOST=/d; /^DB_PORT=/d; /^DB_NAME=/d; /^DB_USER=/d; /^DB_PASSWORD=/d' /opt/stock-coin-trade/.env
+            sudo cat /tmp/stock-trade-db.env | sudo tee -a /opt/stock-coin-trade/.env >/dev/null
+            sudo rm -f /tmp/stock-trade-db.env
             sudo docker network inspect shared-net >/dev/null 2>&1 || sudo docker network create shared-net
             cd /opt/stock-coin-trade
-            sudo docker compose -p stock-coin-trade -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            sudo docker compose -p stock-coin-trade -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans
             sudo install -m 644 /tmp/st.edumgt.co.kr /etc/nginx/sites-available/st.edumgt.co.kr
             sudo ln -sfn /etc/nginx/sites-available/st.edumgt.co.kr /etc/nginx/sites-enabled/st.edumgt.co.kr
             sudo nginx -t
@@ -92,6 +110,7 @@ jobs:
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
+          STOCK_TRADE_DB_PASSWORD: ${{ secrets.STOCK_TRADE_DB_PASSWORD }}
 
       - name: Issue or renew HTTPS certificate
         run: |
