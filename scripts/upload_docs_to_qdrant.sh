@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # docs/*.md 문서를 청크/벡터화하여 Qdrant 컬렉션에 업로드합니다.
-# 외부 생성형 AI 없이 해시 임베딩(384차원)을 사용합니다.
+# Ollama 임베딩 모델을 사용하므로, 질의 API와 동일한 모델로 색인해야 합니다.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,6 +11,9 @@ QDRANT_COLLECTION="${QDRANT_COLLECTION:-investment_docs}"
 CHUNK_SIZE="${CHUNK_SIZE:-1200}"
 CHUNK_OVERLAP="${CHUNK_OVERLAP:-200}"
 BATCH_SIZE="${BATCH_SIZE:-64}"
+RAG_EMBEDDING_URL="${RAG_EMBEDDING_URL:-http://localhost:11434/api/embed}"
+RAG_EMBEDDING_MODEL="${RAG_EMBEDDING_MODEL:-embeddinggemma}"
+RAG_EMBEDDING_PROVIDER="${RAG_EMBEDDING_PROVIDER:-ollama}"
 
 usage() {
   cat <<EOF
@@ -23,6 +26,9 @@ Usage: $(basename "$0")
   CHUNK_SIZE          문서 청크 크기(문자 수, 기본: 1200)
   CHUNK_OVERLAP       청크 오버랩(문자 수, 기본: 200)
   BATCH_SIZE          업로드 배치 크기(기본: 64)
+  RAG_EMBEDDING_URL   Ollama /api/embed 주소 (기본: http://localhost:11434/api/embed)
+  RAG_EMBEDDING_MODEL 문서와 질의에 공통으로 쓸 Ollama 임베딩 모델 (기본: embeddinggemma)
+  RAG_EMBEDDING_PROVIDER ollama(기본) 또는 hash. hash는 Ollama 없이 쓰는 호환 모드입니다.
 EOF
 }
 
@@ -52,7 +58,8 @@ echo "[OK] Vector DB 조회 성공"
 
 python3 - \
   "$DOCS_DIR" "$QDRANT_URL" "$QDRANT_COLLECTION" \
-  "$CHUNK_SIZE" "$CHUNK_OVERLAP" "$BATCH_SIZE" <<'PY'
+  "$CHUNK_SIZE" "$CHUNK_OVERLAP" "$BATCH_SIZE" \
+  "$RAG_EMBEDDING_URL" "$RAG_EMBEDDING_MODEL" "$RAG_EMBEDDING_PROVIDER" <<'PY'
 import hashlib
 import json
 import math
@@ -105,24 +112,35 @@ def chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
     return chunks
 
 
-TOKEN_PATTERN = re.compile(r"[0-9A-Za-z가-힣_]+")
+def ollama_embed(url: str, model: str, inputs: list[str]) -> list[list[float]]:
+    payload = {"model": model, "input": inputs, "truncate": True}
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=180) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        raise RuntimeError(f"Ollama 임베딩 오류({exc.code}): {detail[:300]}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Ollama 임베딩 연결 실패: {url} :: {exc.reason}") from exc
+    embeddings = result.get("embeddings", [])
+    if len(embeddings) != len(inputs) or not embeddings or not embeddings[0]:
+        raise RuntimeError("Ollama가 입력 수와 다른 빈 임베딩을 반환했습니다.")
+    return [[float(value) for value in vector] for vector in embeddings]
 
 
 def hash_embed(text: str, dim: int = 384) -> list[float]:
-    """의존성 없는 해시 기반 임베딩 (384차원)."""
-    vec = [0.0] * dim
-    tokens = TOKEN_PATTERN.findall(text.lower())
-    if not tokens:
-        return vec
-    for token in tokens:
+    vector = [0.0] * dim
+    for token in re.findall(r"[0-9A-Za-z가-힣_]+", text.lower()):
         digest = hashlib.sha256(token.encode("utf-8")).digest()
-        idx = int.from_bytes(digest[:4], "big") % dim
-        sign = 1.0 if (digest[4] & 1) == 0 else -1.0
-        vec[idx] += sign
-    norm = math.sqrt(sum(v * v for v in vec))
-    if norm > 0:
-        vec = [v / norm for v in vec]
-    return vec
+        vector[int.from_bytes(digest[:4], "big") % dim] += 1.0 if digest[4] & 1 == 0 else -1.0
+    norm = math.sqrt(sum(value * value for value in vector))
+    return [value / norm for value in vector] if norm else vector
 
 
 # ── 인수 파싱 ─────────────────────────────────────────────────────────────────
@@ -132,6 +150,9 @@ collection      = sys.argv[3]
 chunk_size      = int(sys.argv[4])
 chunk_overlap   = int(sys.argv[5])
 batch_size      = int(sys.argv[6])
+embedding_url   = sys.argv[7]
+embedding_model = sys.argv[8]
+embedding_provider = sys.argv[9]
 
 # ── 문서 청킹 ─────────────────────────────────────────────────────────────────
 files = sorted(docs_dir.glob("*.md"))
@@ -151,9 +172,20 @@ if not records:
 print(f"[INFO] docs={len(files)}, chunks={len(records)}")
 
 # ── 임베딩 ───────────────────────────────────────────────────────────────────
-print("[INFO] 해시 임베딩 생성 중 (dim=384)...")
-matrix = [hash_embed(r["text"]) for r in records]
-embed_type = "hash/384"
+if embedding_provider == "ollama":
+    print(f"[INFO] Ollama 임베딩 생성 중: model={embedding_model}")
+    matrix: list[list[float]] = []
+    for start in range(0, len(records), batch_size):
+        batch = records[start:start + batch_size]
+        matrix.extend(ollama_embed(embedding_url, embedding_model, [record["text"] for record in batch]))
+        print(f"[INFO] embedded {min(start + batch_size, len(records))}/{len(records)}")
+    embed_type = f"ollama/{embedding_model}"
+elif embedding_provider == "hash":
+    print("[INFO] 해시 임베딩 생성 중 (dim=384)...")
+    matrix = [hash_embed(record["text"]) for record in records]
+    embed_type = "hash/384"
+else:
+    raise SystemExit("[ERROR] RAG_EMBEDDING_PROVIDER는 ollama 또는 hash여야 합니다.")
 
 dim = len(matrix[0])
 print(f"[INFO] 임베딩 타입={embed_type}, dim={dim}")

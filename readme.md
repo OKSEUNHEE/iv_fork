@@ -14,8 +14,14 @@
 저장소 최상위 폴더에서 실행합니다.
 
 ```bash
-# 최초 실행: 앱·MongoDB·Qdrant를 시작하고 퀴즈 데이터를 적재합니다.
+# 최초 실행: 앱·MongoDB·Qdrant·Ollama를 시작하고 퀴즈 데이터를 적재합니다.
 docker compose --profile init up --build -d
+
+# 최초 한 번: 로컬 답변 모델과 임베딩 모델을 받습니다.
+docker compose --profile ollama-init run --rm ollama-init
+
+# 모델을 받은 뒤 문서를 Ollama 임베딩으로 색인합니다.
+docker compose --profile tools run --rm docs-index
 
 # 이후 실행
 docker compose up -d
@@ -99,7 +105,16 @@ DART_API_KEY=
 docker compose --profile tools run --rm docs-index
 ```
 
-문서 검색은 외부 생성형 AI 없이 해시 임베딩을 사용합니다.
+문서 검색은 Ollama의 `embeddinggemma`로 문서와 질문을 같은 벡터 공간에 임베딩하고,
+선택 시 로컬 Ollama 채팅 모델이 검색 원문만 근거로 답변을 생성합니다. 기본 모델은
+`embeddinggemma`(임베딩)와 `qwen3:8b`(답변)이며, 저장소 루트 `.env`에서
+`RAG_EMBEDDING_MODEL`, `RAG_LLM_MODEL`로 바꿀 수 있습니다. 모델을 바꿨다면 반드시
+문서 색인을 다시 만드세요.
+
+`docker-compose.prod.yml`은 AWS용 구성으로 Ollama를 포함하지 않습니다. 이 구성에서는
+`RAG_EMBEDDING_PROVIDER=hash`로 동작하므로, AWS에서 Ollama 이미지·모델·포트를 설치하거나
+노출하지 않습니다. AWS용 문서 색인은 `RAG_EMBEDDING_PROVIDER=hash`로 다시 만들어야 하며,
+화면의 로컬 AI 답변 생성 선택지는 비활성화됩니다.
 
 ### 상태 확인·종료
 
@@ -165,11 +180,14 @@ MONGODB_DB=investment_db
 QDRANT_URL=http://localhost:6333
 QDRANT_COLLECTION=investment_docs
 
-# 선택 사항: 문서 검색 결과만 외부 AI로 문장 정리할 때 사용합니다.
-# 세 값이 모두 있어야 문서 검색 채팅의 외부 AI 선택 항목이 활성화됩니다.
-# RAG_LLM_BASE_URL=https://api.openai.com/v1
-# RAG_LLM_API_KEY=
-# RAG_LLM_MODEL=
+# 로컬 Ollama 기반 전체 RAG. 색인과 질의에 같은 임베딩 모델을 사용합니다.
+RAG_EMBEDDING_PROVIDER=ollama
+RAG_EMBEDDING_URL=http://localhost:11434/api/embed
+RAG_EMBEDDING_MODEL=embeddinggemma
+RAG_LLM_BASE_URL=http://localhost:11434/v1
+RAG_LLM_API_KEY=ollama
+RAG_LLM_MODEL=qwen3:8b
+RAG_LLM_TIMEOUT_SECONDS=180
 
 # 선택 사항: 우측 AI 투자 도우미를 Amazon Lex V2에 연결합니다.
 # 장기 자격 증명 대신 EC2/ECS 등의 IAM 역할 사용을 권장합니다.
@@ -196,9 +214,13 @@ Lex 봇은 배포한 버전의 별칭을 사용하세요. 애플리케이션을 
 | `MONGODB_DB` | 퀴즈 | 사용할 데이터베이스 이름입니다. 로컬 기본값은 `investment_db`입니다. |
 | `QDRANT_URL` | 문서 검색 | Qdrant HTTP 주소입니다. Qdrant가 실행되지 않으면 RAG 검색 API는 `503`을 반환합니다. |
 | `QDRANT_COLLECTION` | 문서 검색 | 색인할 Qdrant 컬렉션 이름입니다. 색인 명령과 같은 값으로 유지하세요. |
-| `RAG_LLM_BASE_URL` | 문서 검색 답변 다듬기 | 선택 설정입니다. OpenAI Chat Completions 호환 API의 기본 주소입니다. |
-| `RAG_LLM_API_KEY` | 문서 검색 답변 다듬기 | 선택 설정입니다. 외부 AI 인증키이며 공개 저장소나 화면 캡처에 포함하지 마세요. |
-| `RAG_LLM_MODEL` | 문서 검색 답변 다듬기 | 선택 설정입니다. 사용할 외부 AI 모델 이름입니다. 세 값이 모두 설정될 때만 선택 UI가 활성화됩니다. |
+| `RAG_EMBEDDING_PROVIDER` | 문서 검색 | 로컬은 `ollama`, Ollama를 설치하지 않는 AWS 구성은 `hash`를 사용합니다. 두 방식의 색인은 서로 호환되지 않습니다. |
+| `RAG_EMBEDDING_URL` | 문서 검색 | Ollama의 `/api/embed` 주소입니다. 색인과 질의가 같은 주소·모델을 사용해야 합니다. |
+| `RAG_EMBEDDING_MODEL` | 문서 검색 | 문서·질문을 벡터화할 Ollama 임베딩 모델입니다. 모델을 바꾸면 색인을 다시 만듭니다. |
+| `RAG_LLM_BASE_URL` | 문서 검색 답변 생성 | Ollama OpenAI 호환 API의 기본 주소입니다. 기본값은 `http://localhost:11434/v1`입니다. |
+| `RAG_LLM_API_KEY` | 문서 검색 답변 생성 | Ollama 로컬 API에서는 무시되지만, 앱의 OpenAI 호환 호출을 위해 비어 있지 않은 값을 사용합니다. |
+| `RAG_LLM_MODEL` | 문서 검색 답변 생성 | 검색 원문만 바탕으로 답변을 만들 Ollama 채팅 모델입니다. |
+| `RAG_LLM_TIMEOUT_SECONDS` | 문서 검색 답변 생성 | 로컬 모델 응답을 기다리는 최대 시간(초)입니다. CPU 환경에서는 첫 요청이 느릴 수 있습니다. |
 | `AWS_REGION` | AI 투자 도우미 | Amazon Lex V2 봇이 배포된 AWS 리전입니다. |
 | `LEX_BOT_ID` | AI 투자 도우미 | Amazon Lex V2 봇 ID입니다. |
 | `LEX_BOT_ALIAS_ID` | AI 투자 도우미 | 배포한 Amazon Lex V2 별칭 ID입니다. |
@@ -206,11 +228,12 @@ Lex 봇은 배포한 버전의 별칭을 사용하세요. 애플리케이션을 
 | `DART_API_KEY` | 기업·공시 분석 | OpenDART 인증키입니다. 키를 공개 저장소나 화면 캡처에 포함하지 마세요. |
 | `DIFFUSERS_MODEL_ID` | 텍스트-이미지 생성 | 선택 설정입니다. 기본 모델을 바꾸려는 GPU 환경에서만 사용합니다. |
 
-MongoDB와 Qdrant를 모두 로컬에 설치하지 않았다면, Docker Compose로 두 서비스만 실행한 뒤
+MongoDB·Qdrant·Ollama를 모두 로컬에 설치하지 않았다면, Docker Compose로 세 서비스를 실행한 뒤
 Python 백엔드를 직접 실행할 수도 있습니다.
 
 ```bash
-docker compose up -d mongo qdrant
+docker compose up -d mongo qdrant ollama
+docker compose --profile ollama-init run --rm ollama-init
 ```
 
 문서 검색을 처음 사용하거나 `docs/`의 Markdown을 변경한 뒤에는 Qdrant에 문서를 색인합니다.
@@ -218,6 +241,9 @@ docker compose up -d mongo qdrant
 ```bash
 QDRANT_URL=http://localhost:6333 \
 QDRANT_COLLECTION=investment_docs \
+RAG_EMBEDDING_PROVIDER=ollama \
+RAG_EMBEDDING_URL=http://localhost:11434/api/embed \
+RAG_EMBEDDING_MODEL=embeddinggemma \
 ./scripts/upload_docs_to_qdrant.sh
 ```
 

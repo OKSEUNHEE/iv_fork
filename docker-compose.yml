@@ -16,9 +16,13 @@ services:
       MONGODB_DB: ${MONGODB_DB:-investment_db}
       QDRANT_URL: http://qdrant:6333
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-investment_docs}
-      RAG_LLM_BASE_URL: ${RAG_LLM_BASE_URL:-https://api.openai.com/v1}
-      RAG_LLM_API_KEY: ${RAG_LLM_API_KEY:-}
-      RAG_LLM_MODEL: ${RAG_LLM_MODEL:-}
+      RAG_EMBEDDING_PROVIDER: ${RAG_EMBEDDING_PROVIDER:-ollama}
+      RAG_EMBEDDING_URL: ${RAG_EMBEDDING_URL:-http://ollama:11434/api/embed}
+      RAG_EMBEDDING_MODEL: ${RAG_EMBEDDING_MODEL:-embeddinggemma}
+      RAG_LLM_BASE_URL: ${RAG_LLM_BASE_URL:-http://ollama:11434/v1}
+      RAG_LLM_API_KEY: ${RAG_LLM_API_KEY:-ollama}
+      RAG_LLM_MODEL: ${RAG_LLM_MODEL:-qwen3:8b}
+      RAG_LLM_TIMEOUT_SECONDS: ${RAG_LLM_TIMEOUT_SECONDS:-180}
       DART_API_KEY: ${DART_API_KEY:-}
       KOSIS_API_KEY: ${KOSIS_API_KEY:-}
       BOK_API_KEY: ${BOK_API_KEY:-}
@@ -36,6 +40,8 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_started
+      ollama:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8000/api/health"]
       interval: 15s
@@ -69,6 +75,33 @@ services:
     volumes:
       - investment_qdrant_data:/qdrant/storage
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: investment_ollama
+    restart: unless-stopped
+    volumes:
+      - investment_ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # 첫 실행 때 한 번만 모델을 내려받습니다.
+  # docker compose --profile ollama-init run --rm ollama-init
+  ollama-init:
+    profiles: ["ollama-init"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: []
+    command: ["/bin/sh", "-ec", "curl --fail --show-error http://ollama:11434/api/pull -d '{\"name\":\"${RAG_EMBEDDING_MODEL:-embeddinggemma}\",\"stream\":false}' && curl --fail --show-error http://ollama:11434/api/pull -d '{\"name\":\"${RAG_LLM_MODEL:-qwen3:8b}\",\"stream\":false}'"]
+
   # `docker compose --profile init up -d`로 첫 실행할 때 100문항을 적재합니다.
   quiz-init:
     profiles: ["init"]
@@ -91,6 +124,9 @@ services:
     environment:
       QDRANT_URL: http://qdrant:6333
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-investment_docs}
+      RAG_EMBEDDING_PROVIDER: ${RAG_EMBEDDING_PROVIDER:-ollama}
+      RAG_EMBEDDING_URL: ${RAG_EMBEDDING_URL:-http://ollama:11434/api/embed}
+      RAG_EMBEDDING_MODEL: ${RAG_EMBEDDING_MODEL:-embeddinggemma}
     volumes:
       - ./docs:/app/docs:ro
     depends_on:
@@ -101,3 +137,4 @@ services:
 volumes:
   investment_mongo_data:
   investment_qdrant_data:
+  investment_ollama_data:
