@@ -18,6 +18,8 @@ _QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "investment_docs")
 _RAG_EMBEDDING_PROVIDER = os.getenv("RAG_EMBEDDING_PROVIDER", "ollama").lower()
 _RAG_EMBEDDING_URL = os.getenv("RAG_EMBEDDING_URL", "").rstrip("/")
 _RAG_EMBEDDING_MODEL = os.getenv("RAG_EMBEDDING_MODEL", "")
+# CPU 환경에서는 임베딩 모델의 첫 로딩이 30초를 넘을 수 있다.
+_RAG_EMBEDDING_TIMEOUT_SECONDS = max(30, int(os.getenv("RAG_EMBEDDING_TIMEOUT_SECONDS", "180")))
 _RAG_LLM_TIMEOUT_SECONDS = max(30, int(os.getenv("RAG_LLM_TIMEOUT_SECONDS", "180")))
 
 
@@ -91,7 +93,7 @@ def _embed_query(text: str) -> list[float]:
             method="POST",
             headers={"Content-Type": "application/json"},
         )
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=_RAG_EMBEDDING_TIMEOUT_SECONDS) as response:
             result = json.loads(response.read().decode("utf-8"))
         embeddings = result.get("embeddings", [])
         vector = embeddings[0] if embeddings else []
@@ -101,7 +103,7 @@ def _embed_query(text: str) -> list[float]:
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="ignore")
         raise HTTPException(502, f"Ollama 임베딩 응답 오류({exc.code}): {detail[:200]}") from exc
-    except (urllib.error.URLError, ValueError, TypeError, IndexError) as exc:
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError, TypeError, IndexError) as exc:
         raise HTTPException(502, f"Ollama 임베딩 응답을 받지 못했습니다: {exc}") from exc
 
 

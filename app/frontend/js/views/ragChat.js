@@ -12,6 +12,7 @@ export function ragChatView(app) {
   const messages = [];
   let sources = [];
   let provider = 'rag';
+  let providerSelectedByUser = false;
   let externalAiAvailable = false;
 
   function renderSources() {
@@ -31,19 +32,19 @@ export function ragChatView(app) {
       <section class="card rag-chat-heading">
         <div class="rag-chat-heading-copy">
           <h2><i class="fa-solid fa-comments"></i>문서 검색 채팅</h2>
-          <p>RAG가 학습 문서에서 관련 조각을 찾습니다. 답변은 검색된 원문만 정리하며, 원문은 오른쪽에서 확인할 수 있습니다.</p>
+          <p>질문에 직접 답하는 요약을 먼저 보여드립니다. 검색 원문은 필요할 때만 아래에서 확인하세요.</p>
         </div>
         <div class="rag-chat-controls">
           <label for="rag-provider">답변 생성</label>
           <select id="rag-provider" class="param-input" aria-label="답변 생성 모듈 선택">
-            <option value="rag" ${provider === 'rag' ? 'selected' : ''}>사용 안 함 · RAG만</option>
-            <option value="openai_compatible" ${provider === 'openai_compatible' ? 'selected' : ''} ${externalAiAvailable ? '' : 'disabled'}>로컬 AI · Ollama</option>
+            <option value="openai_compatible" ${provider === 'openai_compatible' ? 'selected' : ''} ${externalAiAvailable ? '' : 'disabled'}>질문 맞춤 요약 · Ollama</option>
+            <option value="rag" ${provider === 'rag' ? 'selected' : ''}>원문 발췌</option>
           </select>
           <small id="rag-provider-note">${externalAiAvailable ? 'Ollama에는 검색 원문만 전달해 답변을 생성합니다.' : 'Ollama 모델을 준비하면 로컬 답변 생성을 사용할 수 있습니다.'}</small>
           <span id="rag-status" class="badge badge-gray">연결 확인 중</span>
         </div>
       </section>
-      <section class="rag-chat-layout">
+      <section class="rag-chat-layout rag-answer-layout">
         <section class="card rag-chat-panel">
           <div id="rag-messages" class="rag-messages" aria-live="polite">
             ${messages.length ? messages.map((message) => `<div class="rag-message is-${message.role}">${formatText(message.text)}</div>`).join('') : '<div class="rag-welcome"><strong>무엇이 궁금한가요?</strong><br>예: “ETF 괴리율은 왜 생기나요?”</div>'}
@@ -56,15 +57,18 @@ export function ragChatView(app) {
             </form>
           </div>
         </section>
-        <aside class="card rag-source-panel" aria-label="RAG 검색 원문">
-          <div class="rag-source-title"><div><h3><i class="fa-solid fa-book-open"></i>RAG 검색 원문</h3><p>채팅 답변의 근거가 된 문서 조각입니다.</p></div><span>${sources.length ? `${sources.length}개` : '대기 중'}</span></div>
+      </section>
+      <details class="card rag-source-panel" aria-label="RAG 검색 원문">
+          <summary class="rag-source-title"><div><h3><i class="fa-solid fa-book-open"></i>검색 근거 보기</h3><p>답변에 사용한 문서 조각을 확인합니다.</p></div><span>${sources.length ? `${sources.length}개` : '대기 중'}</span></summary>
           <div id="rag-sources" class="rag-sources">${renderSources()}</div>
-        </aside>
-      </section>`;
+      </details>`;
 
     const messagesEl = app.querySelector('#rag-messages');
     messagesEl.scrollTop = messagesEl.scrollHeight;
-    app.querySelector('#rag-provider').addEventListener('change', (event) => { provider = event.target.value; });
+    app.querySelector('#rag-provider').addEventListener('change', (event) => {
+      provider = event.target.value;
+      providerSelectedByUser = true;
+    });
     app.querySelectorAll('.rag-example').forEach((button) => button.addEventListener('click', () => ask(button.dataset.query)));
     app.querySelector('#rag-form').addEventListener('submit', (event) => {
       event.preventDefault();
@@ -85,6 +89,10 @@ export function ragChatView(app) {
       externalAiAvailable = Boolean(data.external_ai?.openai_compatible_available);
       const externalOption = providerSelect.querySelector('option[value="openai_compatible"]');
       externalOption.disabled = !externalAiAvailable;
+      if (externalAiAvailable && !providerSelectedByUser) {
+        provider = 'openai_compatible';
+        providerSelect.value = provider;
+      }
       if (!externalAiAvailable && provider === 'openai_compatible') {
         provider = 'rag';
         providerSelect.value = 'rag';
