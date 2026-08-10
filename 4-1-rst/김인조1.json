@@ -1,0 +1,183 @@
+{
+  "activeLesson": "fundamental-financials",
+  "clicks": [
+    {
+      "lesson": "macro-indicator",
+      "target": "button",
+      "text": "시뮬레이션 실행",
+      "at": "2026-08-10T01:12:13.354Z"
+    }
+  ],
+  "completed": {
+    "action:fundamental-financials:run:finance": true,
+    "action:fundamental-practice:run:company-practice": true,
+    "action:fundamental-practice:sector-select": true,
+    "action:fundamental-valuation:run:simulation": true,
+    "action:industry-practice:run:simulation": true,
+    "action:macro-indicator:run:simulation": true,
+    "action:macro-practice:run:simulation": true,
+    "action:technical-indicators:run:simulation": true,
+    "action:technical-pattern:run:simulation": true,
+    "action:technical-practice:run:technical-practice": true,
+    "action:technical-trend:run:simulation": true,
+    "click:a:https://kosis.kr/": true,
+    "click:button:0": true,
+    "click:button:1": true,
+    "click:button:3": true,
+    "click:button:5": true,
+    "click:button:6": true,
+    "click:button:9": true,
+    "click:button:12": true,
+    "click:button:17": true,
+    "click:button:25": true,
+    "click:button:JSON 정렬": true,
+    "click:button:defense": true,
+    "click:button:fundamental-financials": true,
+    "click:button:fundamental-practice": true,
+    "click:button:fundamental-valuation": true,
+    "click:button:industry-competitiveness": true,
+    "click:button:industry-practice": true,
+    "click:button:json-consistency": true,
+    "click:button:macro-indicator": true,
+    "click:button:macro-practice": true,
+    "click:button:power": true,
+    "click:button:shipbuilding": true,
+    "click:button:technical-indicators": true,
+    "click:button:technical-pattern": true,
+    "click:button:technical-practice": true,
+    "click:button:technical-trend": true,
+    "click:button:기술적 분석 메모 점검": true,
+    "click:button:닫기": true,
+    "click:button:손익계산서": true,
+    "click:button:시뮬레이션 실행": true,
+    "click:button:작성 내용 점검": true,
+    "click:button:재무상태표": true,
+    "click:button:재무제표 정합성 시뮬레이션": true,
+    "click:button:정합성 검사 실행": true,
+    "click:button:현금흐름표": true,
+    "click:button:확인했습니다": true,
+    "click:input:2": true,
+    "click:input:3": true,
+    "click:input:4": true,
+    "click:input:INPUT": true,
+    "click:input:LIG넥스원": true,
+    "click:input:LS ELECTRIC": true,
+    "click:input:유가 부담": true,
+    "click:input:유동성": true,
+    "click:input:한국항공우주": true,
+    "click:label:LIG넥스원": true,
+    "click:label:① 기업 선택 이유 산업 내 위치와 투자 가설": true,
+    "click:label:② 확인할 핵심 지표 매출·수주·마진·CAPEX 등": true,
+    "click:label:④ 위험 요인 가정이 틀릴 수 있는 조건": true,
+    "click:label:한국항공우주": true,
+    "click:textarea:TEXTAREA": true,
+    "click:textarea:장기간 축적된 세계적 기술력 보유": true,
+    "input:fundamental-financials:finance:cf_investing": true,
+    "input:fundamental-financials:finance:cf_operating": true,
+    "input:fundamental-financials:finance:current_assets": true,
+    "input:fundamental-financials:finance:current_liabilities": true,
+    "input:fundamental-financials:finance:equity": true,
+    "input:fundamental-financials:finance:noncurrent_assets": true,
+    "input:fundamental-financials:finance:noncurrent_liabilities": true,
+    "input:fundamental-practice:practice-stock": true,
+    "input:fundamental-practice:practice:conclusion": true,
+    "input:fundamental-practice:practice:metrics": true,
+    "input:fundamental-practice:practice:risk": true,
+    "input:fundamental-practice:practice:thesis": true,
+    "input:fundamental-practice:practice:valuation": true,
+    "input:fundamental-valuation:strength:1": true,
+    "input:fundamental-valuation:strength:2": true,
+    "input:macro-indicator:condition:2": true,
+    "input:macro-indicator:strength:0": true,
+    "input:macro-indicator:strength:2": true,
+    "input:macro-practice:condition:2": true,
+    "input:technical-practice:technical:company": true,
+    "input:technical-practice:technical:plan": true,
+    "input:technical-practice:technical:risk": true,
+    "input:technical-practice:technical:selection": true,
+    "input:technical-practice:technical:signal": true,
+    "input:technical-practice:technical:source": true,
+    "input:technical-practice:technical:trend": true
+  },
+  "lessons": {
+    "fundamental-financials": {
+      "fields": {},
+      "actions": {}
+    },
+    "fundamental-practice": {
+      "fields": {
+        "sector": "power",
+        "practice:metrics": "매출. 마진\n",
+        "practice-stock": true
+      },
+      "actions": {}
+    },
+    "fundamental-valuation": {
+      "fields": {
+        "strength:1": "2",
+        "strength:2": "2"
+      },
+      "actions": {
+        "run:simulation": true
+      }
+    },
+    "industry-competitiveness": {
+      "fields": {},
+      "actions": {}
+    },
+    "industry-practice": {
+      "fields": {},
+      "actions": {
+        "run:simulation": true
+      }
+    },
+    "json-consistency": {
+      "fields": {},
+      "actions": {}
+    },
+    "macro-indicator": {
+      "fields": {
+        "strength:0": "3",
+        "condition:2": true,
+        "strength:2": "4"
+      },
+      "actions": {
+        "run:simulation": true
+      }
+    },
+    "macro-practice": {
+      "fields": {
+        "condition:2": true
+      },
+      "actions": {
+        "run:simulation": true
+      }
+    },
+    "technical-indicators": {
+      "fields": {},
+      "actions": {
+        "run:simulation": true
+      }
+    },
+    "technical-pattern": {
+      "fields": {},
+      "actions": {
+        "run:simulation": true
+      }
+    },
+    "technical-practice": {
+      "fields": {
+        "technical:company": "108490"
+      },
+      "actions": {
+        "run:technical-practice": true
+      }
+    },
+    "technical-trend": {
+      "fields": {},
+      "actions": {
+        "run:simulation": true
+      }
+    }
+  }
+}
