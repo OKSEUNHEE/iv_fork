@@ -4,9 +4,11 @@
 
   0순위:   압축파일(zip/tar/tar.gz/tgz) 해제 (extract_archives.py) — 해제 후
            원본은 _archives_processed/ 로 이동, 안의 파일은 폴더 최상위로 flatten
-  0.5순위: 파일 확장자를 .json 으로 정규화 (확장자가 달라 분석 대상에서
+  0.5순위: Windows Zone.Identifier 다운로드 메타데이터 삭제
+  0.6순위: 파일 확장자를 .json 으로 정규화 (확장자가 달라 분석 대상에서
            누락되는 파일이 없도록, 정합성 검사보다 먼저 수행)
-  1순위:   JSON 정합성 검사 + 클릭간격/유사도 분석 (analyze_report.py, report.html 1번 섹션)
+  1순위:   단어장 30문제 시험 채점 (analyze_report.py) — report.html을 성적 레포트/
+           문항 컬렉션/예외 컬렉션 3개 섹션으로 갱신
   2순위:   변경분(추가/삭제/수정) 감지 시에만 위 분석을 재실행
 
 cron 등으로 주기적으로(예: 1분마다) 호출하도록 설계됨:
@@ -54,6 +56,36 @@ def normalize_extensions():
         os.rename(fp, target)
         renamed.append((name, base + ".json"))
     return renamed
+
+
+def remove_windows_zone_identifiers():
+    """Windows 다운로드 출처(Zone.Identifier) 메타데이터 파일을 삭제한다.
+
+    Windows에서 내려받은 파일은 ``파일명:Zone.Identifier``라는 대체 데이터
+    스트림 또는 일반 파일로 함께 전달될 수 있다. Linux에서는 일반 파일이므로
+    확장자 정규화 과정에서 ``:Zone.json``으로 바뀌어 분석 대상에 섞일 수 있다.
+    파일명뿐 아니라 내용의 ZoneTransfer 형식도 확인해 이미 정규화된 파일까지
+    정리한다.
+    """
+    removed = []
+    for fp in glob(os.path.join(DIR, "*")):
+        if os.path.isdir(fp):
+            continue
+        name = os.path.basename(fp)
+        if ":Zone.Identifier" in name:
+            os.remove(fp)
+            removed.append(name)
+            continue
+        try:
+            with open(fp, "rb") as f:
+                content = f.read(4096)
+        except OSError:
+            continue
+        if (content.startswith(b"[ZoneTransfer]")
+                and b"\nZoneId=" in content.replace(b"\r\n", b"\n")):
+            os.remove(fp)
+            removed.append(name)
+    return removed
 
 
 def current_state():
@@ -104,7 +136,12 @@ def main():
             print(f"[{ts}] 압축 해제: {r['archive']} -> 추출 {r['extracted']}"
                   + (f", 건너뜀(중복) {r['skipped']}" if r["skipped"] else ""))
 
-    # 0.5순위: 확장자 정규화 (정합성 검사보다 먼저)
+    # 0.5순위: Windows 다운로드 출처 메타데이터 제거
+    removed_zone_files = remove_windows_zone_identifiers()
+    if removed_zone_files:
+        print(f"[{ts}] Zone.Identifier 메타데이터 삭제: {removed_zone_files}")
+
+    # 0.6순위: 확장자 정규화 (정합성 검사보다 먼저)
     renamed = normalize_extensions()
     if renamed:
         print(f"[{ts}] 확장자 정규화: {renamed}")
