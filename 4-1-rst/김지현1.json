@@ -1,0 +1,129 @@
+{
+    "macro-indicator": {
+        "fields": {
+            "condition:2": true,
+            "strength:1": "5",
+            "strength:2": "1",
+            "strength:0": "1"
+        },
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "macro-practice": {
+        "fields": {
+            "strength:0": "5",
+            "strength:1": "1"
+        },
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "industry-competitiveness": {
+        "fields": {
+            "strength:0": "2",
+            "strength:1": "5",
+            "condition:1": false,
+            "strength:2": "1"
+        },
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "industry-practice": {
+        "fields": {
+            "strength:0": "5",
+            "condition:2": false
+        },
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "fundamental-financials": {
+        "fields": {
+            "finance:revenue": "1900",
+            "finance:operating": "190",
+            "finance:net": "152",
+            "finance:cashflow": "165",
+            "finance:current_assets": "880",
+            "finance:noncurrent_assets": "900",
+            "finance:current_liabilities": "520",
+            "finance:noncurrent_liabilities": "690",
+            "finance:equity": "570",
+            "finance:cf_operating": "165",
+            "finance:cf_investing": "-180",
+            "finance:cf_financing": "95",
+            "finance:cash_begin": "181",
+            "finance:cash_end": "261"
+        },
+        "actions": {
+            "run:finance": true
+        }
+    },
+    "fundamental-valuation": {
+        "fields": {},
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "fundamental-practice": {
+        "fields": {
+            "sector": "shipbuilding",
+            "practice-stock": true,
+            "practice:thesis": "조선업 호황 현황",
+            "practice:metrics": "수주",
+            "practice:valuation": "타 조선 기업과 매출 비교",
+            "practice:risk": "업황, 환율",
+            "practice:conclusion": "타국과의 경쟁"
+        },
+        "actions": {
+            "sector-select": true,
+            "run:company-practice": true
+        }
+    },
+    "technical-trend": {
+        "fields": {},
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "technical-pattern": {
+        "fields": {
+            "strength:0": "5",
+            "strength:1": "5",
+            "strength:2": "5"
+        },
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "technical-indicators": {
+        "fields": {
+            "strength:0": "5",
+            "strength:1": "4",
+            "condition:2": true,
+            "strength:2": "5"
+        },
+        "actions": {
+            "run:simulation": true
+        }
+    },
+    "technical-practice": {
+        "fields": {
+            "technical:company": "애플 / AAPL / 미국",
+            "technical:source": "일봉 / https://kr.tradingview.com/symbols/NASDAQ-AAPL/",
+            "technical:selection": "미국 시가총액 2위 기업",
+            "technical:trend": "상승 추세 / 지지 $300 / 저항 $330",
+            "technical:signal": "RSI 58로 중립에서 강세",
+            "technical:plan": "진입 $305 / 목표 $330 / 손절 $275",
+            "technical:risk": "7% 손실시 손절매"
+        },
+        "actions": {
+            "run:technical-practice": true
+        }
+    },
+    "json-consistency": {
+        "fields": {},
+        "actions": {}
+    }
+}

@@ -1421,7 +1421,16 @@ img { max-width: 100%; }
   color: var(--text-muted);
   line-height: 1.65;
 }
-.dart-result-summary {
+/* RAG는 답변을 우선 보여 주고, 검색 근거는 사용자가 필요할 때만 펼친다. */
+.rag-answer-layout { grid-template-columns: minmax(0, 1fr); }
+.rag-source-panel { min-height: 0; margin-top: 16px; }
+.rag-source-panel > summary { list-style: none; cursor: pointer; }
+.rag-source-panel > summary::-webkit-details-marker { display: none; }
+.rag-source-panel > summary::after { align-self: center; color: var(--text-muted); content: '⌄'; font-size: 1.1rem; }
+.rag-source-panel[open] > summary::after { transform: rotate(180deg); }
+.rag-source-panel:not([open]) > .rag-sources { display: none; }
+
+ .dart-result-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;

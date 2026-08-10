@@ -1,0 +1,1565 @@
+장석규1
+{
+    "lessons": {
+        "macro-indicator": {
+            "fields": {
+                "condition:2": true,
+                "condition:1": false,
+                "condition:0": false,
+                "strength:0": "5"
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "macro-practice": {
+            "fields": {
+                "condition:0": true,
+                "condition:1": true,
+                "condition:2": false,
+                "strength:2": "1",
+                "strength:1": "1"
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "industry-competitiveness": {
+            "fields": {
+                "condition:0": true,
+                "condition:1": true,
+                "condition:2": false
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "industry-practice": {
+            "fields": {
+                "condition:0": true,
+                "condition:1": true,
+                "condition:2": false,
+                "strength:2": "1"
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "fundamental-financials": {
+            "fields": {
+                "finance:revenue": "1200",
+                "finance:operating": "150",
+                "finance:net": "100",
+                "finance:cashflow": "150",
+                "finance:current_assets": "800",
+                "finance:noncurrent_assets": "1000",
+                "finance:current_liabilities": "400",
+                "finance:noncurrent_liabilities": "400",
+                "finance:equity": "1000",
+                "finance:cf_operating": "500",
+                "finance:cf_investing": "-200",
+                "finance:cf_financing": "-200",
+                "finance:cash_begin": "1800",
+                "finance:cash_end": "1900"
+            },
+            "actions": {
+                "run:finance": true
+            }
+        },
+        "fundamental-valuation": {
+            "fields": {
+                "condition:0": true,
+                "condition:1": true,
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "fundamental-practice": {
+            "fields": {
+                "practice-stock": true,
+                "sector": "defense",
+                "practice:thesis": "최근 전쟁국가 증가로 무기 수출 증가의 가능성을 보고 선택",
+                "practice:metrics": "수주",
+                "practice:valuation": "해외 방산기업과 멀티플 비교",
+                "practice:risk": "종전과 수주효과 선반영",
+                "practice:conclusion": "추적"
+            },
+            "actions": {
+                "sector-select": true,
+                "run:company-practice": true
+            }
+        },
+        "technical-trend": {
+            "fields": {},
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "technical-pattern": {
+            "fields": {
+                "condition:1": false,
+                "condition:0": false,
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "technical-indicators": {
+            "fields": {},
+            "actions": {}
+        },
+        "technical-practice": {
+            "fields": {
+                "technical:company": "카카오",
+                "technical:source": "일봉",
+                "technical:selection": "단기반등",
+                "technical:trend": "38000원 지지",
+                "technical:signal": "캔들",
+                "technical:plan": "38500원 매수\n45000원 매도",
+                "technical:risk": "36000원 이탈시 매도"
+            },
+            "actions": {
+                "run:technical-practice": true
+            }
+        },
+        "json-consistency": {
+            "fields": {},
+            "actions": {}
+        }
+    },
+    "clicks": [
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "Consumer Price Index (소비자물가지수)ⓘ",
+            "at": "2026-08-10T01:42:45.605Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:42:47.353Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "Personal Consumption Expenditures Price Index (개인소비지출 물가지수)ⓘ",
+            "at": "2026-08-10T01:42:48.583Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:42:49.804Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "Personal Consumption Expenditures Price Index (개인소비지출 물가지수)ⓘ",
+            "at": "2026-08-10T01:42:50.825Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "a",
+            "text": "금융감독원 DART 공시 확인",
+            "at": "2026-08-10T01:42:52.444Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:42:55.534Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "유가 부담",
+            "at": "2026-08-10T01:42:58.197Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "물가 압력",
+            "at": "2026-08-10T01:42:59.436Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "금리 수준",
+            "at": "2026-08-10T01:43:00.485Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "5",
+            "at": "2026-08-10T01:43:01.783Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:43:02.769Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "거시경제상황 분석 실습",
+            "at": "2026-08-10T01:43:06.828Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "성장(산업생산·고용)ⓘ",
+            "at": "2026-08-10T01:43:09.274Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:10.367Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "물가ⓘ",
+            "at": "2026-08-10T01:43:11.262Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:12.062Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "금리ⓘ",
+            "at": "2026-08-10T01:43:13.810Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:14.508Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "환율·원자재ⓘ",
+            "at": "2026-08-10T01:43:15.130Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:16.194Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "밸류에이션ⓘ",
+            "at": "2026-08-10T01:43:17.064Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:18.234Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "성장",
+            "at": "2026-08-10T01:43:19.164Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "성장",
+            "at": "2026-08-10T01:43:19.750Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "label",
+            "text": "물가 안정보수적중립적극적",
+            "at": "2026-08-10T01:43:20.335Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "물가 안정",
+            "at": "2026-08-10T01:43:20.336Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "물가 안정",
+            "at": "2026-08-10T01:43:20.709Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "label",
+            "text": "유동성보수적중립적극적",
+            "at": "2026-08-10T01:43:21.234Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "유동성",
+            "at": "2026-08-10T01:43:21.236Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "유동성",
+            "at": "2026-08-10T01:43:21.556Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "1",
+            "at": "2026-08-10T01:43:22.264Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "2",
+            "at": "2026-08-10T01:43:23.440Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "1",
+            "at": "2026-08-10T01:43:23.925Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:43:24.372Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "산업 경쟁력 분석",
+            "at": "2026-08-10T01:43:25.771Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "포터의 5 Forcesⓘ",
+            "at": "2026-08-10T01:43:28.083Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:29.678Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "Capital Expenditures (설비투자)ⓘ",
+            "at": "2026-08-10T01:43:30.737Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:32.108Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "Monthly Active Users (월간 활성 이용자 수)ⓘ",
+            "at": "2026-08-10T01:43:32.890Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:33.758Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "Average Revenue Per User (사용자당 평균 매출)ⓘ",
+            "at": "2026-08-10T01:43:34.630Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:35.491Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "진입장벽",
+            "at": "2026-08-10T01:43:36.286Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "진입장벽",
+            "at": "2026-08-10T01:43:36.634Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "label",
+            "text": "성장성보수적중립적극적",
+            "at": "2026-08-10T01:43:37.275Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "성장성",
+            "at": "2026-08-10T01:43:37.277Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "성장성",
+            "at": "2026-08-10T01:43:37.553Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "가격 결정력",
+            "at": "2026-08-10T01:43:38.070Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "가격 결정력",
+            "at": "2026-08-10T01:43:38.356Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:43:38.948Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "button",
+            "text": "산업 분석 실습",
+            "at": "2026-08-10T01:43:41.281Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "button",
+            "text": "Capital Expenditures (설비투자)ⓘ",
+            "at": "2026-08-10T01:43:42.902Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:43:44.528Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "label",
+            "text": "성장성보수적중립적극적",
+            "at": "2026-08-10T01:43:45.098Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "성장성",
+            "at": "2026-08-10T01:43:45.099Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "label",
+            "text": "성장성보수적중립적극적",
+            "at": "2026-08-10T01:43:45.450Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "성장성",
+            "at": "2026-08-10T01:43:45.451Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "label",
+            "text": "수익성보수적중립적극적",
+            "at": "2026-08-10T01:43:45.825Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "수익성",
+            "at": "2026-08-10T01:43:45.826Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "label",
+            "text": "수익성보수적중립적극적",
+            "at": "2026-08-10T01:43:46.073Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "수익성",
+            "at": "2026-08-10T01:43:46.075Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "label",
+            "text": "시장지위보수적중립적극적",
+            "at": "2026-08-10T01:43:46.433Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "시장지위",
+            "at": "2026-08-10T01:43:46.435Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "label",
+            "text": "시장지위보수적중립적극적",
+            "at": "2026-08-10T01:43:47.092Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "시장지위",
+            "at": "2026-08-10T01:43:47.094Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "1",
+            "at": "2026-08-10T01:43:47.319Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:43:48.026Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "a",
+            "text": "삼성전자 공식 사업보고서 ↗",
+            "at": "2026-08-10T01:43:50.902Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "a",
+            "text": "SK하이닉스 공식 실적자료 ↗",
+            "at": "2026-08-10T01:43:55.740Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 분석",
+            "at": "2026-08-10T01:44:00.894Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표ⓘ",
+            "at": "2026-08-10T01:44:03.840Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "이익ⓘ",
+            "at": "2026-08-10T01:44:05.669Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "손익계산서ⓘ",
+            "at": "2026-08-10T01:44:06.692Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "매출 성장ⓘ",
+            "at": "2026-08-10T01:44:07.733Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "마진ⓘ",
+            "at": "2026-08-10T01:44:08.865Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:09.817Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "유동비율ⓘ",
+            "at": "2026-08-10T01:44:10.800Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:11.406Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "부채비율ⓘ",
+            "at": "2026-08-10T01:44:12.133Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:12.960Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무상태표ⓘ",
+            "at": "2026-08-10T01:44:13.648Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:14.511Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "현금흐름표ⓘ",
+            "at": "2026-08-10T01:44:15.240Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:15.889Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "영업현금흐름ⓘ",
+            "at": "2026-08-10T01:44:16.416Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:17.204Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "순이익ⓘ",
+            "at": "2026-08-10T01:44:17.840Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:18.525Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "순이익ⓘ",
+            "at": "2026-08-10T01:44:19.348Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:44:20.054Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:20.661Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:25.700Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:27.583Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:29.623Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:44:31.648Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무상태표",
+            "at": "2026-08-10T01:44:34.348Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:35.135Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:39.259Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:42.132Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:44.045Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:44:46.640Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "확인했습니다",
+            "at": "2026-08-10T01:44:55.961Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "700",
+            "at": "2026-08-10T01:44:58.190Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "799",
+            "at": "2026-08-10T01:45:13.930Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:45:21.956Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "700",
+            "at": "2026-08-10T01:45:22.762Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "확인했습니다",
+            "at": "2026-08-10T01:45:28.909Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "500",
+            "at": "2026-08-10T01:45:41.333Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:45:43.275Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "현금흐름표",
+            "at": "2026-08-10T01:45:47.378Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:45:48.135Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:45:50.710Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:45:52.679Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:45:56.017Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T01:45:57.911Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:46:01.454Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "250",
+            "at": "2026-08-10T01:46:06.244Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "확인했습니다",
+            "at": "2026-08-10T01:46:12.532Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "190",
+            "at": "2026-08-10T01:46:21.417Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:46:26.900Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "90",
+            "at": "2026-08-10T01:46:27.853Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:46:38.789Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "1800",
+            "at": "2026-08-10T01:46:47.889Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:46:50.164Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:46:52.039Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "1500",
+            "at": "2026-08-10T01:46:52.944Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "200",
+            "at": "2026-08-10T01:46:53.666Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "200",
+            "at": "2026-08-10T01:46:54.372Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:46:56.952Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "확인했습니다",
+            "at": "2026-08-10T01:47:02.140Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "기말현금ⓘ",
+            "at": "2026-08-10T01:47:30.986Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:47:34.271Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "기초현금ⓘ",
+            "at": "2026-08-10T01:47:34.890Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:47:36.547Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "200",
+            "at": "2026-08-10T01:47:44.220Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "200",
+            "at": "2026-08-10T01:47:44.701Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:47:47.976Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "200",
+            "at": "2026-08-10T01:47:51.559Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:47:55.408Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "1500",
+            "at": "2026-08-10T01:48:02.510Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "확인했습니다",
+            "at": "2026-08-10T01:48:05.970Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "2500",
+            "at": "2026-08-10T01:48:06.823Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:48:08.570Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:48:09.854Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:48:10.004Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T01:48:10.206Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "기업가치 분석",
+            "at": "2026-08-10T01:52:34.321Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "label",
+            "text": "멀티플 평가보수적중립적극적",
+            "at": "2026-08-10T01:52:37.483Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "input",
+            "text": "멀티플 평가",
+            "at": "2026-08-10T01:52:37.488Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "label",
+            "text": "멀티플 평가보수적중립적극적",
+            "at": "2026-08-10T01:52:37.750Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "input",
+            "text": "멀티플 평가",
+            "at": "2026-08-10T01:52:37.752Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "label",
+            "text": "DCF 평가보수적중립적극적",
+            "at": "2026-08-10T01:52:38.144Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "input",
+            "text": "DCF 평가",
+            "at": "2026-08-10T01:52:38.145Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "label",
+            "text": "DCF 평가보수적중립적극적",
+            "at": "2026-08-10T01:52:38.705Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "input",
+            "text": "DCF 평가",
+            "at": "2026-08-10T01:52:38.707Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "label",
+            "text": "안전마진보수적중립적극적",
+            "at": "2026-08-10T01:52:39.043Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "input",
+            "text": "안전마진",
+            "at": "2026-08-10T01:52:39.045Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:52:39.901Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "Enterprise Value / Earnings Before Interest, Taxes, Depreciation and Amortization (기업가치/감가상각 전 영업이익)ⓘ",
+            "at": "2026-08-10T01:52:41.160Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:52:42.455Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "Enterprise Value / Earnings Before Interest, Taxes, Depreciation and Amortization (기업가치/감가상각 전 영업이익)ⓘ",
+            "at": "2026-08-10T01:52:42.957Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:52:43.650Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "Price to Book Ratio (주가순자산비율)ⓘ",
+            "at": "2026-08-10T01:52:44.196Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:52:44.960Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "Economic Value Added (경제적 부가가치)ⓘ",
+            "at": "2026-08-10T01:52:47.449Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:52:48.290Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "분석기업선정 및 밸류에이션 실습",
+            "at": "2026-08-10T01:52:49.868Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "label",
+            "text": "효성중공업",
+            "at": "2026-08-10T01:52:52.083Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "input",
+            "text": "효성중공업",
+            "at": "2026-08-10T01:52:52.085Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "label",
+            "text": "LS ELECTRIC",
+            "at": "2026-08-10T01:52:52.732Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "input",
+            "text": "LS ELECTRIC",
+            "at": "2026-08-10T01:52:52.734Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "방산",
+            "at": "2026-08-10T01:52:53.510Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "조선",
+            "at": "2026-08-10T01:52:54.140Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "방산",
+            "at": "2026-08-10T01:52:54.682Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "label",
+            "text": "LIG넥스원",
+            "at": "2026-08-10T01:52:55.053Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "input",
+            "text": "LIG넥스원",
+            "at": "2026-08-10T01:52:55.055Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:52:55.655Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:53:33.181Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:53:36.391Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:53:54.998Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:54:21.717Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "작성 내용 점검",
+            "at": "2026-08-10T01:54:30.147Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "button",
+            "text": "추세 분석",
+            "at": "2026-08-10T01:54:32.894Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:54:35.367Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "button",
+            "text": "상승추세ⓘ",
+            "at": "2026-08-10T01:54:36.334Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:54:38.283Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "button",
+            "text": "패턴 · 캔들 차트 분석",
+            "at": "2026-08-10T01:54:38.996Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "label",
+            "text": "거래량 확인보수적중립적극적",
+            "at": "2026-08-10T01:54:40.436Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "input",
+            "text": "거래량 확인",
+            "at": "2026-08-10T01:54:40.438Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "label",
+            "text": "패턴 완성도보수적중립적극적",
+            "at": "2026-08-10T01:54:40.766Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "input",
+            "text": "패턴 완성도",
+            "at": "2026-08-10T01:54:40.768Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "label",
+            "text": "추세 일치보수적중립적극적",
+            "at": "2026-08-10T01:54:41.073Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "input",
+            "text": "추세 일치",
+            "at": "2026-08-10T01:54:41.075Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T01:54:41.531Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "지표 분석 · 엘리어트파동이론",
+            "at": "2026-08-10T01:54:42.105Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "무효화 조건ⓘ",
+            "at": "2026-08-10T01:54:42.768Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:54:43.991Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "무효화 조건ⓘ",
+            "at": "2026-08-10T01:54:45.048Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T01:54:46.023Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "button",
+            "text": "분석기업선정 및 기술적 분석 실습",
+            "at": "2026-08-10T01:54:46.762Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:55:14.468Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:55:23.385Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:55:27.547Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:55:36.329Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:55:49.278Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:55:56.496Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:56:06.387Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T01:56:22.361Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "button",
+            "text": "기술적 분석 메모 점검",
+            "at": "2026-08-10T01:56:30.861Z"
+        },
+        {
+            "lesson": "json-consistency",
+            "target": "button",
+            "text": "정합성검사",
+            "at": "2026-08-10T01:56:33.848Z"
+        }
+    ],
+    "completed": {
+        "click:button:12": true,
+        "click:button:닫기": true,
+        "click:button:13": true,
+        "click:a:https://www.bea.gov/data/personal-consumption-expenditures-price-index": true,
+        "click:input:유가 부담": true,
+        "input:macro-indicator:condition:2": true,
+        "click:input:물가 압력": true,
+        "input:macro-indicator:condition:1": true,
+        "click:input:금리 수준": true,
+        "input:macro-indicator:condition:0": true,
+        "input:macro-indicator:strength:0": true,
+        "click:input:5": true,
+        "click:button:시뮬레이션 실행": true,
+        "action:macro-indicator:run:simulation": true,
+        "click:button:macro-practice": true,
+        "click:button:0": true,
+        "click:button:1": true,
+        "click:button:2": true,
+        "click:button:3": true,
+        "click:input:성장": true,
+        "input:macro-practice:condition:0": true,
+        "click:label:물가 안정보수적중립적극적": true,
+        "click:input:물가 안정": true,
+        "input:macro-practice:condition:1": true,
+        "click:label:유동성보수적중립적극적": true,
+        "click:input:유동성": true,
+        "input:macro-practice:condition:2": true,
+        "input:macro-practice:strength:2": true,
+        "click:input:1": true,
+        "input:macro-practice:strength:1": true,
+        "click:input:2": true,
+        "action:macro-practice:run:simulation": true,
+        "click:button:industry-competitiveness": true,
+        "click:button:17": true,
+        "click:button:6": true,
+        "click:input:진입장벽": true,
+        "input:industry-competitiveness:condition:0": true,
+        "click:label:성장성보수적중립적극적": true,
+        "click:input:성장성": true,
+        "input:industry-competitiveness:condition:1": true,
+        "click:input:가격 결정력": true,
+        "input:industry-competitiveness:condition:2": true,
+        "action:industry-competitiveness:run:simulation": true,
+        "click:button:industry-practice": true,
+        "input:industry-practice:condition:0": true,
+        "click:label:수익성보수적중립적극적": true,
+        "click:input:수익성": true,
+        "input:industry-practice:condition:1": true,
+        "click:label:시장지위보수적중립적극적": true,
+        "click:input:시장지위": true,
+        "input:industry-practice:condition:2": true,
+        "input:industry-practice:strength:2": true,
+        "action:industry-practice:run:simulation": true,
+        "click:a:https://images.samsung.com/is/content/samsung/assets/global/ir/docs/2025_3Q_Interim_Report.pdf": true,
+        "click:a:https://news.skhynix.com/sk-hynix-announces-fy25-financial-results/": true,
+        "click:button:fundamental-financials": true,
+        "click:button:14": true,
+        "click:button:28": true,
+        "click:button:5": true,
+        "click:button:29": true,
+        "click:button:19": true,
+        "click:button:18": true,
+        "click:button:10": true,
+        "click:button:4": true,
+        "click:button:25": true,
+        "click:input:INPUT": true,
+        "input:fundamental-financials:finance:revenue": true,
+        "input:fundamental-financials:finance:operating": true,
+        "input:fundamental-financials:finance:net": true,
+        "input:fundamental-financials:finance:cashflow": true,
+        "click:button:재무제표 정합성 시뮬레이션": true,
+        "action:fundamental-financials:run:finance": true,
+        "click:button:재무상태표": true,
+        "input:fundamental-financials:finance:current_assets": true,
+        "input:fundamental-financials:finance:noncurrent_assets": true,
+        "input:fundamental-financials:finance:current_liabilities": true,
+        "input:fundamental-financials:finance:noncurrent_liabilities": true,
+        "input:fundamental-financials:finance:equity": true,
+        "click:button:확인했습니다": true,
+        "click:input:700": true,
+        "click:input:799": true,
+        "click:input:500": true,
+        "click:button:현금흐름표": true,
+        "input:fundamental-financials:finance:cf_operating": true,
+        "input:fundamental-financials:finance:cf_investing": true,
+        "input:fundamental-financials:finance:cf_financing": true,
+        "input:fundamental-financials:finance:cash_begin": true,
+        "input:fundamental-financials:finance:cash_end": true,
+        "click:input:250": true,
+        "click:input:190": true,
+        "click:input:90": true,
+        "click:input:1800": true,
+        "click:input:1500": true,
+        "click:input:200": true,
+        "click:button:23": true,
+        "click:button:22": true,
+        "click:input:2500": true,
+        "click:button:fundamental-valuation": true,
+        "click:label:멀티플 평가보수적중립적극적": true,
+        "click:input:멀티플 평가": true,
+        "input:fundamental-valuation:condition:0": true,
+        "click:label:DCF 평가보수적중립적극적": true,
+        "click:input:DCF 평가": true,
+        "input:fundamental-valuation:condition:1": true,
+        "click:label:안전마진보수적중립적극적": true,
+        "click:input:안전마진": true,
+        "input:fundamental-valuation:condition:2": true,
+        "action:fundamental-valuation:run:simulation": true,
+        "click:button:16": true,
+        "click:button:15": true,
+        "click:button:fundamental-practice": true,
+        "click:label:효성중공업": true,
+        "click:input:효성중공업": true,
+        "input:fundamental-practice:practice-stock": true,
+        "click:label:LS ELECTRIC": true,
+        "click:input:LS ELECTRIC": true,
+        "click:button:defense": true,
+        "action:fundamental-practice:sector-select": true,
+        "click:button:shipbuilding": true,
+        "click:label:LIG넥스원": true,
+        "click:input:LIG넥스원": true,
+        "click:textarea:TEXTAREA": true,
+        "input:fundamental-practice:practice:thesis": true,
+        "input:fundamental-practice:practice:metrics": true,
+        "input:fundamental-practice:practice:valuation": true,
+        "input:fundamental-practice:practice:risk": true,
+        "input:fundamental-practice:practice:conclusion": true,
+        "click:button:작성 내용 점검": true,
+        "action:fundamental-practice:run:company-practice": true,
+        "click:button:technical-trend": true,
+        "action:technical-trend:run:simulation": true,
+        "click:button:24": true,
+        "click:button:technical-pattern": true,
+        "click:label:거래량 확인보수적중립적극적": true,
+        "click:input:거래량 확인": true,
+        "input:technical-pattern:condition:1": true,
+        "click:label:패턴 완성도보수적중립적극적": true,
+        "click:input:패턴 완성도": true,
+        "input:technical-pattern:condition:0": true,
+        "click:label:추세 일치보수적중립적극적": true,
+        "click:input:추세 일치": true,
+        "input:technical-pattern:condition:2": true,
+        "action:technical-pattern:run:simulation": true,
+        "click:button:technical-indicators": true,
+        "click:button:technical-practice": true,
+        "input:technical-practice:technical:company": true,
+        "input:technical-practice:technical:source": true,
+        "input:technical-practice:technical:selection": true,
+        "input:technical-practice:technical:trend": true,
+        "input:technical-practice:technical:signal": true,
+        "input:technical-practice:technical:plan": true,
+        "input:technical-practice:technical:risk": true,
+        "click:button:기술적 분석 메모 점검": true,
+        "action:technical-practice:run:technical-practice": true,
+        "click:button:json-consistency": true
+    },
+    "activeLesson": "json-consistency"
+}

@@ -1,0 +1,721 @@
+{
+    "lessons": {
+        "macro-indicator": {
+            "fields": {
+                "strength:0": "4",
+                "strength:1": "4",
+                "strength:2": "4",
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "macro-practice": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "industry-competitiveness": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "industry-practice": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "fundamental-financials": {
+            "fields": {
+                "finance:revenue": "1220",
+                "finance:operating": "156",
+                "finance:net": "123",
+                "finance:cashflow": "166",
+                "finance:current_assets": "898",
+                "finance:noncurrent_assets": "1120",
+                "finance:current_liabilities": "510",
+                "finance:noncurrent_liabilities": "590",
+                "finance:equity": "918",
+                "finance:cf_operating": "157",
+                "finance:cf_investing": "-170",
+                "finance:cf_financing": "80",
+                "finance:cash_begin": "181",
+                "finance:cash_end": "248"
+            },
+            "actions": {
+                "run:finance": true
+            }
+        },
+        "fundamental-valuation": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "fundamental-practice": {
+            "fields": {
+                "practice:thesis": "HD 현대일렉트릭은 20%+ 대의 독보적인 영업이익률과 약 85억 달러 규모의 풍부한 수주잔고를 보유하고 있어 섹터 내 가장 확실한 실적 체력을 보유함",
+                "practice:metrics": "신규 수주 단가 유지 및 수주잔고 증가 추세\n\n20% 이상대의 고마진 영업이익률 지속 여부\n\n울산 및 북미 증설 법인의 상업 가동 시점과 가동",
+                "practice:valuation": "글로벌 Peer(이통, 슈나이더, 시멘스 등) 및 국내 동종기업(효성중공업, LS ELECTRIC) 대비 높은 마진율과 성장성을 감안해 Target PER 20~25배 적용. 향후 2~3년간 확실하게 고정된 수주 잔고를 바탕으로 영업이익 증가율 대비 합리적인 멀티플 수준인지 검증",
+                "practice:risk": "미국 대선 등 정책 변화로 인한 신재생/전력망 투자 지연\n\n구리 등 주요 원자재 가격 급등 및 환율 하락 위험\n\n글로벌 전력기기 업체들의 대규모 동시 증설로 인한 가격 경쟁 심화",
+                "practice:conclusion": "매 분기 실적 발표 시 '수주잔고 증가세'와 '영업이익률 유지 여부'를 핵심 관전 포인트로 체크. 다음 분기 실적 컨퍼런스 콜에서 미국 공장 가동률 및 신규 수주 단가 추이를 확인한 뒤 비중 확대/유지 여부를 결정"
+            },
+            "actions": {
+                "run:company-practice": true
+            }
+        },
+        "technical-trend": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "technical-pattern": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "technical-indicators": {
+            "fields": {
+                "condition:2": true
+            },
+            "actions": {
+                "run:simulation": true
+            }
+        },
+        "technical-practice": {
+            "fields": {
+                "technical:company": "삼성전자/005930/KOSPI",
+                "technical:source": "일봉-주봉 확인, TradingView 차트와 DART 실적 공시",
+                "technical:selection": "메모리 공급 부족 장기화 및 사상 최대 실적 달성에 따른 거래대금 급증, 외국인 매수세 유입으로 기술적 자금 쏠림 현상 및 시장 관심도가 매우 높음.",
+                "technical:trend": "6월 고점(374,500원) 이후 단기 조정을 거치며 230,000원 선에서 강한 지지대를 형성. 단기 저항은 250,000원, 중기 저항은 전고점 부근인 300,000원 구간으로 판단.",
+                "technical:signal": "일봉상 230,000원 부근에서 하방 지지 캔들 형성 중. RSI는 40 선으로 과매도 구간 탈출을 시도하고 있어, 거래량 동반 반등 시 MACD 골든크로스 전환 기대.",
+                "technical:plan": "230,000원 지지 확인 후 232,000~235,000원 구간 분할 진입. 1차 목표가 260,000원, 2차 목표가 290,000원 제시하며, 225,000원 증가 이탈 시 손절 응수.",
+                "technical:risk": "225,000원 아래로 증가 마감하거나 거래량이 급감하여 하방 입력이 커질 경우 진입 계획을 철회하고, 차기 실적 발표 및 메모리 수급 추이를 재검토."
+            },
+            "actions": {
+                "run:technical-practice": true
+            }
+        },
+        "json-consistency": {
+            "fields": {},
+            "actions": {}
+        }
+    },
+    "clicks": [
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "4",
+            "at": "2026-08-10T02:16:46.710Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "4",
+            "at": "2026-08-10T02:16:47.688Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "4",
+            "at": "2026-08-10T02:16:48.971Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "input",
+            "text": "유가 부담",
+            "at": "2026-08-10T02:16:49.558Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:16:50.724Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "Consumer Price Index (소비자물가지수)ⓘ",
+            "at": "2026-08-10T02:16:52.253Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T02:16:53.472Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "Personal Consumption Expenditures Price Index (개인소비지출 물가지수)ⓘ",
+            "at": "2026-08-10T02:16:54.106Z"
+        },
+        {
+            "lesson": "macro-indicator",
+            "target": "button",
+            "text": "닫기",
+            "at": "2026-08-10T02:16:54.805Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "거시경제상황 분석 실습",
+            "at": "2026-08-10T02:16:55.964Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "input",
+            "text": "유동성",
+            "at": "2026-08-10T02:16:58.338Z"
+        },
+        {
+            "lesson": "macro-practice",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:16:58.938Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "산업 경쟁력 분석",
+            "at": "2026-08-10T02:17:01.094Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "input",
+            "text": "가격 결정력",
+            "at": "2026-08-10T02:17:02.746Z"
+        },
+        {
+            "lesson": "industry-competitiveness",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:17:03.347Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "button",
+            "text": "산업 분석 실습",
+            "at": "2026-08-10T02:17:04.754Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "input",
+            "text": "시장지위",
+            "at": "2026-08-10T02:17:06.221Z"
+        },
+        {
+            "lesson": "industry-practice",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:17:06.809Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 분석",
+            "at": "2026-08-10T02:17:10.094Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:17:12.449Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:17:29.715Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:17:42.078Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:17:46.623Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:17:52.138Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:17:56.878Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무상태표",
+            "at": "2026-08-10T02:18:14.479Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:15.167Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:21.163Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:25.343Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:30.697Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:34.008Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "현금흐름표",
+            "at": "2026-08-10T02:18:42.816Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:49.951Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:53.587Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:18:58.355Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:19:02.903Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "INPUT",
+            "at": "2026-08-10T02:19:07.613Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "확인했습니다",
+            "at": "2026-08-10T02:19:22.262Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무상태표",
+            "at": "2026-08-10T02:19:35.200Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "손익계산서",
+            "at": "2026-08-10T02:19:38.115Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "123",
+            "at": "2026-08-10T02:20:13.023Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "166",
+            "at": "2026-08-10T02:20:40.027Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "현금흐름표",
+            "at": "2026-08-10T02:20:45.786Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "input",
+            "text": "159",
+            "at": "2026-08-10T02:20:54.035Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T02:20:57.763Z"
+        },
+        {
+            "lesson": "fundamental-financials",
+            "target": "button",
+            "text": "재무제표 정합성 시뮬레이션",
+            "at": "2026-08-10T02:21:15.300Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "기업가치 분석",
+            "at": "2026-08-10T02:21:16.781Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "input",
+            "text": "안전마진",
+            "at": "2026-08-10T02:21:18.891Z"
+        },
+        {
+            "lesson": "fundamental-valuation",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:21:19.511Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "분석기업선정 및 밸류에이션 실습",
+            "at": "2026-08-10T02:21:22.982Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:21:25.591Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:21:43.898Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:22:36.833Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:23:17.913Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:25:10.964Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:26:01.458Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "HD 현대일렉트릭은 경쟁사 대비 북미 매출 비중과 초고압 기기 경쟁력이 높아 구조적 수혜를 가장 크게 받으며 실적 성장을 주도할 것으로 판단함",
+            "at": "2026-08-10T02:27:58.488Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "수주잔고 및 신규 수주 단가 상승 추세 영업이익률 고점 지속 여부 북미/중동 지역 매출 비중 및 증설 완료 후 가동률",
+            "at": "2026-08-10T02:28:45.150Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "신규 수주 단가 유지 및 수주잔고 증가 추세 20% 이상대의 고마진 여",
+            "at": "2026-08-10T02:29:09.034Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "신규 수주 단가 유지 및 수주잔고 증가 추세 20% 이상대의 고마진 영업이익률을",
+            "at": "2026-08-10T02:29:25.188Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "글로벌 Peer(이통, 슈나이더, 시멘스 등) 및 국내 동종기업(효성중공업, LS ELECTRIC) 대비 높은 마진율과 성장성을 감안해 Target PER 20~25배 적용. 향후 2~3년간 확실하게 고정된 수주 잔",
+            "at": "2026-08-10T02:30:10.108Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "textarea",
+            "text": "글로벌 Peer(이통, 슈나이더, 시멘스 등) 및 국내 동종기업(효성중공업, LS ELECTRIC) 대비 높은 마진율과 성장성을 감안해 Target PER 20~25배 적용. 향후 2~3년간 확실하게 고정된 수주 잔",
+            "at": "2026-08-10T02:30:31.737Z"
+        },
+        {
+            "lesson": "fundamental-practice",
+            "target": "button",
+            "text": "작성 내용 점검",
+            "at": "2026-08-10T02:30:45.012Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "button",
+            "text": "추세 분석",
+            "at": "2026-08-10T02:30:56.272Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "label",
+            "text": "지지 강도보수적중립적극적",
+            "at": "2026-08-10T02:30:59.946Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "input",
+            "text": "지지 강도",
+            "at": "2026-08-10T02:30:59.950Z"
+        },
+        {
+            "lesson": "technical-trend",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:31:00.814Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "button",
+            "text": "패턴 · 캔들 차트 분석",
+            "at": "2026-08-10T02:31:03.436Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "input",
+            "text": "추세 일치",
+            "at": "2026-08-10T02:31:05.097Z"
+        },
+        {
+            "lesson": "technical-pattern",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:31:05.623Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "지표 분석 · 엘리어트파동이론",
+            "at": "2026-08-10T02:31:07.762Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "input",
+            "text": "변동성",
+            "at": "2026-08-10T02:31:09.261Z"
+        },
+        {
+            "lesson": "technical-indicators",
+            "target": "button",
+            "text": "시뮬레이션 실행",
+            "at": "2026-08-10T02:31:09.796Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "button",
+            "text": "분석기업선정 및 기술적 분석 실습",
+            "at": "2026-08-10T02:31:11.712Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:31:15.056Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:31:38.612Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:31:59.870Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:32:27.197Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:33:08.520Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:34:02.690Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:34:54.096Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "textarea",
+            "text": "TEXTAREA",
+            "at": "2026-08-10T02:36:01.579Z"
+        },
+        {
+            "lesson": "technical-practice",
+            "target": "button",
+            "text": "기술적 분석 메모 점검",
+            "at": "2026-08-10T02:36:43.179Z"
+        },
+        {
+            "lesson": "json-consistency",
+            "target": "button",
+            "text": "정합성검사",
+            "at": "2026-08-10T02:36:49.599Z"
+        }
+    ],
+    "completed": {
+        "input:macro-indicator:strength:0": true,
+        "click:input:4": true,
+        "input:macro-indicator:strength:1": true,
+        "input:macro-indicator:strength:2": true,
+        "click:input:유가 부담": true,
+        "input:macro-indicator:condition:2": true,
+        "click:button:시뮬레이션 실행": true,
+        "action:macro-indicator:run:simulation": true,
+        "click:button:12": true,
+        "click:button:닫기": true,
+        "click:button:13": true,
+        "click:button:macro-practice": true,
+        "click:input:유동성": true,
+        "input:macro-practice:condition:2": true,
+        "action:macro-practice:run:simulation": true,
+        "click:button:industry-competitiveness": true,
+        "click:input:가격 결정력": true,
+        "input:industry-competitiveness:condition:2": true,
+        "action:industry-competitiveness:run:simulation": true,
+        "click:button:industry-practice": true,
+        "click:input:시장지위": true,
+        "input:industry-practice:condition:2": true,
+        "action:industry-practice:run:simulation": true,
+        "click:button:fundamental-financials": true,
+        "click:input:INPUT": true,
+        "input:fundamental-financials:finance:revenue": true,
+        "input:fundamental-financials:finance:operating": true,
+        "input:fundamental-financials:finance:net": true,
+        "input:fundamental-financials:finance:cashflow": true,
+        "click:button:재무상태표": true,
+        "input:fundamental-financials:finance:current_assets": true,
+        "input:fundamental-financials:finance:noncurrent_assets": true,
+        "input:fundamental-financials:finance:current_liabilities": true,
+        "input:fundamental-financials:finance:noncurrent_liabilities": true,
+        "input:fundamental-financials:finance:equity": true,
+        "click:button:현금흐름표": true,
+        "input:fundamental-financials:finance:cf_operating": true,
+        "input:fundamental-financials:finance:cf_investing": true,
+        "input:fundamental-financials:finance:cf_financing": true,
+        "input:fundamental-financials:finance:cash_begin": true,
+        "input:fundamental-financials:finance:cash_end": true,
+        "click:button:확인했습니다": true,
+        "click:button:손익계산서": true,
+        "click:input:123": true,
+        "click:input:166": true,
+        "click:input:159": true,
+        "click:button:재무제표 정합성 시뮬레이션": true,
+        "action:fundamental-financials:run:finance": true,
+        "click:button:fundamental-valuation": true,
+        "click:input:안전마진": true,
+        "input:fundamental-valuation:condition:2": true,
+        "action:fundamental-valuation:run:simulation": true,
+        "click:button:fundamental-practice": true,
+        "click:textarea:TEXTAREA": true,
+        "input:fundamental-practice:practice:thesis": true,
+        "input:fundamental-practice:practice:metrics": true,
+        "input:fundamental-practice:practice:valuation": true,
+        "input:fundamental-practice:practice:risk": true,
+        "input:fundamental-practice:practice:conclusion": true,
+        "click:textarea:HD 현대일렉트릭은 경쟁사 대비 북미 매출 비중과 초고압 기기 경쟁력이 높아 구조적 수혜를 가장 크게 받으며 실적 성장을 주도할 것으로 판단함": true,
+        "click:textarea:수주잔고 및 신규 수주 단가 상승 추세 영업이익률 고점 지속 여부 북미/중동 지역 매출 비중 및 증설 완료 후 가동률": true,
+        "click:textarea:신규 수주 단가 유지 및 수주잔고 증가 추세 20% 이상대의 고마진 여": true,
+        "click:textarea:신규 수주 단가 유지 및 수주잔고 증가 추세 20% 이상대의 고마진 영업이익률을": true,
+        "click:textarea:글로벌 Peer(이통, 슈나이더, 시멘스 등) 및 국내 동종기업(효성중공업, LS ELECTRIC) 대비 높은 마진율과 성장성을 감안해 Target PER 20~25배 적용. 향후 2~3년간 확실하게 고정된 수주 잔": true,
+        "click:button:작성 내용 점검": true,
+        "action:fundamental-practice:run:company-practice": true,
+        "click:button:technical-trend": true,
+        "click:label:지지 강도보수적중립적극적": true,
+        "click:input:지지 강도": true,
+        "input:technical-trend:condition:2": true,
+        "action:technical-trend:run:simulation": true,
+        "click:button:technical-pattern": true,
+        "click:input:추세 일치": true,
+        "input:technical-pattern:condition:2": true,
+        "action:technical-pattern:run:simulation": true,
+        "click:button:technical-indicators": true,
+        "click:input:변동성": true,
+        "input:technical-indicators:condition:2": true,
+        "action:technical-indicators:run:simulation": true,
+        "click:button:technical-practice": true,
+        "input:technical-practice:technical:company": true,
+        "input:technical-practice:technical:source": true,
+        "input:technical-practice:technical:selection": true,
+        "input:technical-practice:technical:trend": true,
+        "input:technical-practice:technical:signal": true,
+        "input:technical-practice:technical:plan": true,
+        "input:technical-practice:technical:risk": true,
+        "click:button:기술적 분석 메모 점검": true,
+        "action:technical-practice:run:technical-practice": true,
+        "click:button:json-consistency": true
+    },
+    "activeLesson": "json-consistency"
+}

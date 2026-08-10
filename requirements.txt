@@ -3,6 +3,7 @@ uvicorn[standard]
 orjson
 python-multipart
 python-dotenv
+requests
 boto3
 motor
 pymongo
