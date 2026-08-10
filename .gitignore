@@ -11,3 +11,6 @@ play**/
 
 DATA-ROOT/
 data/
+
+**/테스트*
+**/test*.zip

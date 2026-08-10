@@ -2,7 +2,7 @@
 """
 투자분석 실습 로그(JSON) 일괄 분석 스크립트.
 
-이 폴더(4-1-rst)에 있는 학생 제출 JSON 파일을 모두 읽어서
+이 폴더(4-2-rst)에 있는 학생 제출 JSON 파일을 모두 읽어서
   1) 클릭 타임스탬프를 추출해 평균 클릭 간격을 계산하고 랭킹을 매기고
   2) 답안 필드(슬라이더/조건/서술형)를 비교해 파일 간 유사도를 계산한 뒤
   3) 결과를 report.html 로 저장한다.
@@ -435,7 +435,7 @@ def render_html(results, numeric_pairs, text_pairs, generated_at):
 
     return f"""<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
-<title>4-1-rst 실습 로그 분석 리포트</title>
+<title>4-2-rst 실습 로그 분석 리포트</title>
 <style>
   body {{ font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; margin: 2rem; color:#1a1a1a; background:#fafafa; }}
   h1 {{ font-size: 1.4rem; }}
@@ -466,7 +466,7 @@ def render_html(results, numeric_pairs, text_pairs, generated_at):
   .close-btn:hover {{ background:#245c26; }}
 </style></head>
 <body>
-<h1>4-1-rst 실습 로그 분석 리포트</h1>
+<h1>4-2-rst 실습 로그 분석 리포트</h1>
 <p class="meta">생성 시각: {generated_at} &nbsp;|&nbsp; 대상 파일: {n_files}개</p>
 
 <h2>1. JSON 정합성 검사 (엄격 검증)</h2>
