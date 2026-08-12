@@ -25,6 +25,8 @@ const KOREAN_BLUE_CHIPS = [
   { ticker: '373220.KS', name: 'LG에너지솔루션' },
   { ticker: '207940.KS', name: '삼성바이오로직스' },
   { ticker: '005380.KS', name: '현대차' },
+  { ticker: '000270.KS', name: '기아' },
+  { ticker: '035420.KS', name: 'NAVER' },
 ];
 
 function chartCard(market) {
@@ -88,7 +90,7 @@ export function homeView(container) {
         <header class="home-quote-dashboard-head">
           <div>
             <h1 id="home-quote-title">대표 기업 주가</h1>
-            <p>미국 매그니피센트 7과 한국 대표 코스피 5종목의 현재가·전일 대비입니다.</p>
+            <p>미국 매그니피센트 7과 한국 대표 코스피 7종목의 현재가·전일 대비입니다.</p>
           </div>
           <div class="home-quote-actions">
             <span id="home-quote-stamp">조회 전</span>
@@ -97,7 +99,7 @@ export function homeView(container) {
         </header>
         <div class="home-quote-grid">
           ${quotePanel('미국', 'Magnificent Seven · USD', US_MEGA_CAPS, 'us')}
-          ${quotePanel('한국', '대표 KOSPI 기업 · KRW', KOREAN_BLUE_CHIPS, 'kr')}
+          ${quotePanel('한국', 'Korea Seven · 대표 KOSPI 기업 · KRW', KOREAN_BLUE_CHIPS, 'kr')}
         </div>
         <p class="home-quote-note">Yahoo Finance 기준이며, 장중 시세는 지연되거나 시장이 닫힌 경우 마지막 거래 가격일 수 있습니다.</p>
       </section>
