@@ -2146,6 +2146,7 @@ def company_financials(req: CompanyFinancialsRequest) -> dict[str, object]:
 
 
 PERIOD_DAYS = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365}
+INTRADAY_PERIODS = {"1d"}
 HOME_MARKETS = {
     "kospi":  {"ticker": "^KS11", "name": "KOSPI", "base_price": 2650.0, "seed": 42},
     "kosdaq": {"ticker": "^KQ11", "name": "KOSDAQ", "base_price": 850.0, "seed": 73},
@@ -2156,14 +2157,15 @@ HOME_MARKETS = {
 
 @app.get("/api/home/market-candle")
 def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, object]:
-    if period not in PERIOD_DAYS:
+    if period not in PERIOD_DAYS and period not in INTRADAY_PERIODS:
         period = "3mo"
+    intraday = period in INTRADAY_PERIODS
     config = HOME_MARKETS.get(market, HOME_MARKETS["kospi"])
     import pandas as pd
     try:
         import yfinance as yf
-        df = yf.download(config["ticker"], period=period, interval="1d", progress=False,
-                         auto_adjust=True, threads=False)
+        df = yf.download(config["ticker"], period=period, interval="5m" if intraday else "1d",
+                         progress=False, auto_adjust=True, threads=False)
         if df.empty:
             raise ValueError("empty")
         ohlcv = []
@@ -2176,14 +2178,14 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                     v = list(v)[0]
                 return round(float(v), 2)
             ohlcv.append({
-                "date": str(idx)[:10],
+                "date": idx.isoformat() if intraday else str(idx)[:10],
                 "o": _f("Open"), "h": _f("High"),
                 "l": _f("Low"),  "c": _f("Close"),
                 "v": int(_f("Volume") or 0),
             })
         return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv, "is_simulated": False}
     except Exception:
-        import numpy as np, math
+        import math
         rng_state = config["seed"]
         def _rand():
             nonlocal rng_state
@@ -2194,19 +2196,33 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
             return math.sqrt(-2 * math.log(u)) * math.cos(2 * math.pi * v)
         price = config["base_price"]
         ohlcv = []
-        days = PERIOD_DAYS[period]
-        n_bars = int(days * 0.72)
-        base = pd.Timestamp("today") - pd.Timedelta(days=days)
-        for i in range(n_bars):
-            date = (base + pd.Timedelta(days=i + 1)).strftime("%Y-%m-%d")
-            chg = _randn() * price * 0.012
-            o = price
-            c = max(o * 0.9, o + chg)
-            h = max(o, c) * (1 + _rand() * 0.008)
-            l = min(o, c) * (1 - _rand() * 0.008)
-            ohlcv.append({"date": date, "o": round(o, 2), "h": round(h, 2),
-                          "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e8)})
-            price = c
+        if intraday:
+            n_bars = 78  # 5분봉 기준 6.5시간 정규장 분량
+            base = pd.Timestamp("today").normalize() + pd.Timedelta(hours=9)
+            for i in range(n_bars):
+                ts = base + pd.Timedelta(minutes=5 * i)
+                chg = _randn() * price * 0.003
+                o = price
+                c = max(o * 0.97, o + chg)
+                h = max(o, c) * (1 + _rand() * 0.002)
+                l = min(o, c) * (1 - _rand() * 0.002)
+                ohlcv.append({"date": ts.isoformat(), "o": round(o, 2), "h": round(h, 2),
+                              "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e6)})
+                price = c
+        else:
+            days = PERIOD_DAYS[period]
+            n_bars = int(days * 0.72)
+            base = pd.Timestamp("today") - pd.Timedelta(days=days)
+            for i in range(n_bars):
+                date = (base + pd.Timedelta(days=i + 1)).strftime("%Y-%m-%d")
+                chg = _randn() * price * 0.012
+                o = price
+                c = max(o * 0.9, o + chg)
+                h = max(o, c) * (1 + _rand() * 0.008)
+                l = min(o, c) * (1 - _rand() * 0.008)
+                ohlcv.append({"date": date, "o": round(o, 2), "h": round(h, 2),
+                              "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e8)})
+                price = c
         return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv, "is_simulated": True}
 
 
