@@ -692,6 +692,7 @@ img { max-width: 100%; }
 .md-body strong { font-weight: 700; color: var(--text); }
 .md-body a { color: var(--primary); text-decoration: underline; }
 .md-body hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.md-body img { display: block; max-width: 100%; height: auto; margin: 16px auto; border-radius: var(--radius-sm); }
 
 /* ── Home market dashboard ── */
 .home-dashboard { min-width: 0; }
