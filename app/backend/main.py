@@ -56,6 +56,7 @@ FRONTEND_DIR = ROOT_DIR / "app" / "frontend"
 GENERATED_DIR = ROOT_DIR / "app" / "generated"
 QUIZ_SQL_PATH = ROOT_DIR / "app" / "backend" / "quiz_seed.sql"
 DOCS_DIR = ROOT_DIR / "docs"
+NOTEBOOK_IMAGE_DIR = ROOT_DIR / "image"
 GENERATED_DIR.mkdir(parents=True, exist_ok=True)
 _MATPLOTLIB_FONT_CONFIGURED = False
 ACTIVE_VISITOR_TTL_SECONDS = 90
@@ -2795,4 +2796,7 @@ install_openapi(app)
 
 # ─────────────────────────────────────────────────────────────────────────────
 
+# 학습 문서에서 사용하는 Notebook 내보내기 이미지는 프런트엔드 정적 폴더 밖에
+# 보관되어 있으므로, 루트 정적 파일보다 먼저 별도 경로로 제공합니다.
+app.mount("/image", StaticFiles(directory=NOTEBOOK_IMAGE_DIR), name="notebook-images")
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

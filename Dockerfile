@@ -19,6 +19,7 @@ RUN mkdir -p app/frontend/vendor \
     && python -c "import pathlib, urllib.request; pathlib.Path('app/frontend/vendor/mermaid.min.js').write_bytes(urllib.request.urlopen('https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js', timeout=90).read())" \
     && test -s app/frontend/vendor/mermaid.min.js
 COPY docs/ ./docs/
+COPY image/ ./image/
 COPY scripts/upload_docs_to_qdrant.sh ./scripts/upload_docs_to_qdrant.sh
 COPY scripts/sync_learning_menu.py ./scripts/sync_learning_menu.py
 COPY scripts/build_sidebar_partial.py ./scripts/build_sidebar_partial.py
