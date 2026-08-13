@@ -2,6 +2,7 @@ import { homeView }            from './views/home.js';
 import { serverResourcesView } from './views/serverResources.js';
 import { volumeCloudView }    from './views/volumeCloud.js';
 import { worldMarketsView }   from './views/worldMarkets.js';
+import { globalCapitalMapView } from './views/globalCapitalMap.js';
 import { crossValidationView } from './views/crossValidation.js';
 import { decisionBoundaryView } from './views/decisionBoundary.js';
 import { randomForestView }    from './views/randomForest.js';
@@ -71,6 +72,7 @@ const routes = {
   'server-resources':  { label: '서버 리소스',             render: () => serverResourcesView(app) },
   'volume-cloud':     { label: '거래량 클라우드',          render: () => volumeCloudView(app) },
   'world-markets':    { label: '세계증시현황',              render: () => worldMarketsView(app) },
+  'global-capital-map': { label: '세계 거대자금 지도',       render: () => globalCapitalMapView(app) },
   'cross-validation':  { label: 'Cross Validation',       render: () => crossValidationView(app) },
   'decision-boundary': { label: 'Decision Boundary',      render: () => decisionBoundaryView(app) },
   'random-forest':     { label: 'Random Forest',          render: () => randomForestView(app) },
@@ -277,7 +279,7 @@ function navigate(view) {
   if (['learn-10-1', 'learn-10-2', 'learn-10-3', 'learn-11'].includes(view)) activeSections.push('review');
   else if (view?.startsWith('learn-')) activeSections.push('learn');
   if (view?.startsWith('quiz-') || view === 'vocabulary-exam') activeSections.push('quiz');
-  if (['server-resources', 'world-markets', 'volume-cloud'].includes(view)) activeSections.push('visualization');
+  if (['server-resources', 'world-markets', 'volume-cloud', 'global-capital-map'].includes(view)) activeSections.push('visualization');
   if (_portfolioViews.includes(view)) activeSections.push('portfolio');
   if (_practiceViews.includes(view)) activeSections.push('practice');
   if (_aiViews.includes(view)) activeSections.push('aitools');
