@@ -354,10 +354,10 @@ export function homeView(container) {
 
       const series = computeChartSeries(ohlcv);
 
-      modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, 420));
+      modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, 460));
       await modalChart.render();
 
-      modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, 170));
+      modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, 190));
       await modalMacdChart.render();
 
       loading.style.display = 'none';

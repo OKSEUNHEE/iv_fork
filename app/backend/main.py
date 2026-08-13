@@ -1607,6 +1607,61 @@ KOSPI_COMPONENTS = [
     {"ticker": "000120.KS", "name": "CJ대한통운",      "sector": "물류",      "weight": 0.003},
 ]
 
+
+@app.get("/api/market/top-gainers")
+def market_top_gainers(limit: int = 20) -> dict[str, object]:
+    """KOSPI 대표 종목 중 금일 등락률 상위 종목을 반환한다."""
+    import pandas as pd
+    import yfinance as yf
+
+    limit = max(1, min(limit, len(KOSPI_COMPONENTS)))
+    fetched_at = pd.Timestamp.utcnow()
+    valid: list[dict[str, object]] = []
+
+    for stock in KOSPI_COMPONENTS:
+        ticker = stock["ticker"]
+        try:
+            fi = yf.Ticker(ticker).fast_info
+            current = float(fi.last_price)
+            previous = float(fi.previous_close) if fi.previous_close else current
+            change_pct = ((current / previous) - 1) * 100 if previous else 0.0
+            valid.append({
+                "ticker": ticker, "name": stock["name"], "sector": stock["sector"],
+                "price": round(current, 2), "change_pct": round(change_pct, 2),
+            })
+        except Exception:
+            continue
+
+    is_simulated = False
+    if len(valid) < 5:
+        # Yahoo Finance 요청 실패가 많으면 시뮬레이션 데이터로 대체한다.
+        is_simulated = True
+        rng_state = 777
+        def _rand():
+            nonlocal rng_state
+            rng_state = (rng_state * 1664525 + 1013904223) % 2**32
+            return rng_state / 2**32
+        valid = []
+        for stock in KOSPI_COMPONENTS:
+            change_pct = round((_rand() - 0.35) * 12, 2)
+            price = round(20000 + _rand() * 480000, 0)
+            valid.append({
+                "ticker": stock["ticker"], "name": stock["name"], "sector": stock["sector"],
+                "price": price, "change_pct": change_pct,
+            })
+
+    ranked = sorted(valid, key=lambda item: item["change_pct"], reverse=True)[:limit]
+    for i, item in enumerate(ranked, start=1):
+        item["rank"] = i
+
+    return {
+        "items": ranked,
+        "universe": "KOSPI 대표 종목",
+        "universe_size": len(KOSPI_COMPONENTS),
+        "fetched_at": fetched_at.isoformat(),
+        "is_simulated": is_simulated,
+    }
+
 KOSPI_SECTORS = sorted({c["sector"] for c in KOSPI_COMPONENTS})
 
 
@@ -2152,6 +2207,13 @@ HOME_MARKETS = {
     "kosdaq": {"ticker": "^KQ11", "name": "KOSDAQ", "base_price": 850.0, "seed": 73},
     "nasdaq": {"ticker": "^IXIC", "name": "NASDAQ", "base_price": 18000.0, "seed": 109},
     "sp500":  {"ticker": "^GSPC", "name": "S&P 500", "base_price": 5200.0, "seed": 151},
+    "dow":    {"ticker": "^DJI", "name": "다우존스", "base_price": 39000.0, "seed": 187},
+    "gold":    {"ticker": "GC=F", "name": "국제 금 선물", "base_price": 2600.0, "seed": 211},
+    "oil":     {"ticker": "CL=F", "name": "WTI 원유 선물", "base_price": 75.0, "seed": 233},
+    "dxy":     {"ticker": "DX-Y.NYB", "name": "달러인덱스(DXY)", "base_price": 103.0, "seed": 255},
+    "usdkrw":  {"ticker": "KRW=X", "name": "원/달러 환율", "base_price": 1380.0, "seed": 277},
+    "ust10y":  {"ticker": "^TNX", "name": "미국 10년물 국채금리", "base_price": 42.0, "seed": 299},
+    "bitcoin": {"ticker": "BTC-USD", "name": "비트코인(BTC/USD)", "base_price": 65000.0, "seed": 321},
 }
 
 
