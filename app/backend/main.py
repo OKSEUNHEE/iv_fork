@@ -2455,12 +2455,13 @@ def _calc_dart_ratios(fin: dict[str, dict[str, float]]) -> dict[str, float | Non
     cur_l   = g("current_liabilities")
     ret_e   = g("retained_earnings")
     prev_eq = g("total_equity", "prior")
+    avg_equity = (equity + prev_eq) / 2 if prev_eq else equity
 
     return {
         "debt_equity_ratio": safe_r(liab, equity),
         "op_margin":         safe_r(op_inc, rev),
         "net_margin":        safe_r(net_inc, rev),
-        "roe":               safe_r(net_inc, equity),
+        "roe":               safe_r(net_inc, avg_equity),
         "roa":               safe_r(net_inc, assets),
         "current_ratio":     safe_r(cur_a, cur_l),
         "revenue_growth":    safe_r(rev - prev_rev, prev_rev) if prev_rev else None,
