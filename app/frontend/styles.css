@@ -588,6 +588,57 @@ img { max-width: 100%; }
 .md-body code { background: #f4f4f4; border: 1px solid #ddd; border-radius: 4px; padding: 1px 5px; font-size: .85em; font-family: "Fira Code", "Cascadia Code", monospace; }
 .md-body pre  { background: #1e1e1e; border-radius: var(--radius-sm); padding: 16px; overflow-x: auto; margin: 16px 0; border: 1px solid #333; }
 .md-body pre code { background: none; border: none; color: #e2e8f0; font-size: .85rem; }
+.vocabulary-tip {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin: 0 0 18px; padding: 10px 12px;
+  color: #075985; background: #f0f9ff; border: 1px solid #bae6fd;
+  border-radius: 9px; font-size: .84rem; line-height: 1.55;
+}
+.vocabulary-tip i { margin-top: 3px; color: #0284c7; }
+.vocabulary-term {
+  display: inline; padding: 0; color: inherit; background: transparent;
+  border: 0; border-bottom: 1px dashed #0ea5e9; border-radius: 0;
+  font: inherit; font-weight: 700; line-height: inherit; cursor: pointer;
+  text-decoration: none; text-underline-offset: 3px;
+}
+.vocabulary-term:hover { color: #0369a1; border-bottom-style: solid; background: #e0f2fe; }
+.vocabulary-term:focus-visible { outline: 3px solid rgba(14,165,233,.35); outline-offset: 2px; border-radius: 3px; }
+.vocabulary-modal-backdrop {
+  position: fixed; z-index: 1300; inset: 0; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(15,23,42,.58); backdrop-filter: blur(3px);
+}
+.vocabulary-modal-backdrop.show { display: flex; }
+.vocabulary-modal {
+  width: min(680px, 100%); max-height: min(720px, calc(100vh - 40px));
+  overflow: auto; background: #fff; border: 1px solid #cbd5e1;
+  border-radius: 18px; box-shadow: 0 24px 70px rgba(15,23,42,.32);
+}
+.vocabulary-modal-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  padding: 24px 26px 20px; border-bottom: 1px solid #e2e8f0;
+}
+.vocabulary-modal-header > div { display: flex; align-items: center; gap: 14px; }
+.vocabulary-modal-icon {
+  display: inline-grid; place-items: center; width: 46px; height: 46px; flex: 0 0 auto;
+  color: #fff; background: linear-gradient(135deg, #0284c7, #2563eb);
+  border-radius: 12px; font-size: 1.12rem;
+}
+.vocabulary-modal-header p { margin: 0 0 2px; color: #64748b; font-size: .76rem; font-weight: 750; letter-spacing: .03em; }
+.vocabulary-modal-header h2 { margin: 0; color: #0f172a; font-size: clamp(1.25rem, 3vw, 1.6rem); line-height: 1.25; }
+.vocabulary-modal-close {
+  display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 auto;
+  color: #64748b; border-radius: 10px; font-size: 1.05rem;
+}
+.vocabulary-modal-close:hover { color: #0f172a; background: #f1f5f9; }
+.vocabulary-modal-content { display: grid; gap: 14px; padding: 22px 26px 28px; }
+.vocabulary-modal-content section { padding: 15px 17px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 11px; }
+.vocabulary-modal-content h3 { margin: 0 0 8px; color: #334155; font-size: .82rem; }
+.vocabulary-modal-content h3 i { width: 18px; color: #0284c7; }
+.vocabulary-modal-content p { margin: 0; color: #475569; line-height: 1.75; word-break: keep-all; }
+.vocabulary-modal-content .vocabulary-modal-description { background: #f0f9ff; border-color: #bae6fd; }
+.vocabulary-modal-description h3 { color: #075985; }
+body.modal-open { overflow: hidden; }
 .mermaid-view-badge {
   display: inline-flex; align-items: center; gap: 7px;
   margin: 16px 0; padding: 7px 10px;
@@ -687,6 +738,9 @@ img { max-width: 100%; }
   .financial-statement-tabs { padding-inline: 12px; }
   .financial-statement-sample { padding-inline: 12px; }
   .financial-statement-modal-note { margin-inline: 12px; }
+  .vocabulary-modal-backdrop { padding: 12px; }
+  .vocabulary-modal-header { padding: 18px 16px 16px; }
+  .vocabulary-modal-content { padding: 16px; }
 }
 .md-body blockquote { border-left: 4px solid var(--primary); margin: 14px 0; padding: 10px 16px; background: var(--primary-light); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: #444444; }
 .md-body strong { font-weight: 700; color: var(--text); }
