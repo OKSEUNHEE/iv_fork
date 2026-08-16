@@ -12,6 +12,9 @@ const MACD_LINE_COLOR = '#7c3aed';
 const MACD_SIGNAL_COLOR = '#f59e0b';
 const MACD_HIST_UP_COLOR = '#16a34a';
 const MACD_HIST_DOWN_COLOR = '#dc2626';
+const RSI_LINE_COLOR = '#0891b2';
+const BUY_SIGNAL_COLOR = '#16a34a';
+const SELL_SIGNAL_COLOR = '#dc2626';
 
 function isIntradayPeriod(period) {
   return period === '1d';
@@ -35,26 +38,67 @@ function calcMACD(ohlcv, fast = 12, slow = 26, signalSpan = 9) {
   return { macdLine, signalLine, histogram };
 }
 
-function computeChartSeries(ohlcv) {
-  const candles = ohlcv.map((point) => ({
-    x: new Date(point.date).getTime(), y: [point.o, point.h, point.l, point.c],
-  }));
-  const ma20 = ohlcv.map((point, index) => ({
+function calcRSI(ohlcv, period = 14) {
+  const closes = ohlcv.map((point) => point.c);
+  const diffs = closes.map((value, index) => (index === 0 ? 0 : value - closes[index - 1]));
+  return closes.map((_, index) => {
+    if (index < period) return null;
+    const win = diffs.slice(index - period + 1, index + 1);
+    const gain = win.filter((value) => value > 0).reduce((sum, value) => sum + value, 0) / period;
+    const loss = -win.filter((value) => value < 0).reduce((sum, value) => sum + value, 0) / period;
+    return loss === 0 ? 100 : 100 - 100 / (1 + gain / loss);
+  });
+}
+
+// displayFrom(있으면)보다 앞선 봉은 MA20 등 지표의 선행 구간(lookback) 계산에만 쓰고
+// 실제 차트에는 표시하지 않는다. 그래야 짧은 기간(1M 등)을 선택해도 이동평균선이
+// 화면 맨 앞부터 끊김 없이 보인다.
+function computeChartSeries(ohlcv, displayFrom) {
+  const ma20Full = ohlcv.map((point, index) => ({
     x: new Date(point.date).getTime(),
     y: index < 19 ? null : ohlcv.slice(index - 19, index + 1).reduce((sum, item) => sum + item.c, 0) / 20,
   }));
-  const volume = ohlcv.map((point) => ({
-    x: new Date(point.date).getTime(), y: point.v || 0,
-    fillColor: point.c >= point.o ? UPWARD_COLOR : DOWNWARD_COLOR,
-  }));
   const { macdLine, signalLine, histogram } = calcMACD(ohlcv);
-  const macdSeries = ohlcv.map((point, index) => ({ x: new Date(point.date).getTime(), y: macdLine[index] }));
-  const signalSeries = ohlcv.map((point, index) => ({ x: new Date(point.date).getTime(), y: signalLine[index] }));
-  const histogramSeries = ohlcv.map((point, index) => ({
+  const macdFull = ohlcv.map((point, index) => ({ x: new Date(point.date).getTime(), y: macdLine[index] }));
+  const signalFull = ohlcv.map((point, index) => ({ x: new Date(point.date).getTime(), y: signalLine[index] }));
+  const histogramFull = ohlcv.map((point, index) => ({
     x: new Date(point.date).getTime(), y: histogram[index],
     fillColor: (histogram[index] ?? 0) >= 0 ? MACD_HIST_UP_COLOR : MACD_HIST_DOWN_COLOR,
   }));
-  return { candles, ma20, volume, macdSeries, signalSeries, histogramSeries };
+  const rsi = calcRSI(ohlcv);
+  const rsiFull = ohlcv.map((point, index) => ({ x: new Date(point.date).getTime(), y: rsi[index] }));
+
+  const startIdx = displayFrom ? Math.max(0, ohlcv.findIndex((point) => point.date >= displayFrom)) : 0;
+  const displayOhlcv = startIdx > 0 ? ohlcv.slice(startIdx) : ohlcv;
+  const candles = displayOhlcv.map((point) => ({ x: new Date(point.date).getTime(), y: [point.o, point.h, point.l, point.c] }));
+  const volume = displayOhlcv.map((point) => ({
+    x: new Date(point.date).getTime(), y: point.v || 0,
+    fillColor: point.c >= point.o ? UPWARD_COLOR : DOWNWARD_COLOR,
+  }));
+  const cut = (arr) => (startIdx > 0 ? arr.slice(startIdx) : arr);
+  const ma20 = cut(ma20Full);
+
+  // 종가가 MA20을 아래→위로 뚫으면 매수시점, 위→아래로 뚫으면 매도시점으로 표시한다.
+  const buySignal = candles.map((c) => ({ x: c.x, y: null }));
+  const sellSignal = candles.map((c) => ({ x: c.x, y: null }));
+  for (let i = 1; i < candles.length; i++) {
+    const prevMa = ma20[i - 1].y, curMa = ma20[i].y;
+    if (prevMa == null || curMa == null) continue;
+    const prevClose = candles[i - 1].y[3], curClose = candles[i].y[3];
+    if (prevClose < prevMa && curClose >= curMa) {
+      buySignal[i].y = +(candles[i].y[2] * 0.985).toFixed(2); // 캔들 저가 살짝 아래
+    } else if (prevClose > prevMa && curClose <= curMa) {
+      sellSignal[i].y = +(candles[i].y[1] * 1.015).toFixed(2); // 캔들 고가 살짝 위
+    }
+  }
+
+  return {
+    candles, volume, ma20, buySignal, sellSignal,
+    macdSeries: cut(macdFull),
+    signalSeries: cut(signalFull),
+    histogramSeries: cut(histogramFull),
+    rsiSeries: cut(rsiFull),
+  };
 }
 
 function buildCandleConfig(market, series, period, height) {
@@ -65,12 +109,28 @@ function buildCandleConfig(market, series, period, height) {
       { name: market.name, type: 'candlestick', data: series.candles },
       { name: 'MA20', type: 'line', data: series.ma20 },
       { name: '거래량', type: 'bar', data: series.volume },
+      { name: '매수', type: 'scatter', data: series.buySignal, dataLabels: { offsetY: 16 } },
+      { name: '매도', type: 'scatter', data: series.sellSignal, dataLabels: { offsetY: -16 } },
     ],
     plotOptions: { candlestick: { colors: { upward: UPWARD_COLOR, downward: DOWNWARD_COLOR }, wick: { useFillColor: true } }, bar: { columnWidth: '65%' } },
-    colors: [UPWARD_COLOR, market.color, '#94a3b8'],
-    stroke: { curve: 'smooth', width: [1, 1.7, 0] },
+    colors: [UPWARD_COLOR, market.color, '#94a3b8', BUY_SIGNAL_COLOR, SELL_SIGNAL_COLOR],
+    stroke: { curve: 'smooth', width: [1, 1.7, 0, 0, 0] },
+    markers: { size: [0, 0, 0, 7, 7], strokeColors: '#fff', strokeWidth: 2, hover: { size: 9 } },
+    dataLabels: {
+      enabled: true,
+      enabledOnSeries: [3, 4],
+      formatter: (value, opts) => (value == null ? '' : opts.seriesIndex === 3 ? '매수' : opts.seriesIndex === 4 ? '매도' : ''),
+      style: { fontSize: '10px', fontWeight: 800, colors: ['#334155', market.color, '#334155', BUY_SIGNAL_COLOR, SELL_SIGNAL_COLOR] },
+      background: { enabled: true, foreColor: '#fff', borderWidth: 0, opacity: 0.92 },
+    },
     xaxis: { type: 'datetime', labels: { format: intraday ? 'HH:mm' : 'MM-dd', style: { fontSize: '10px', colors: '#94a3b8' }, hideOverlappingLabels: true, datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
-    yaxis: [{ labels: { formatter: (value) => value ? Math.round(value).toLocaleString() : '', style: { fontSize: '10px', colors: '#94a3b8' } } }, { show: false }, { show: false }],
+    yaxis: [
+      { seriesName: market.name, labels: { formatter: (value) => value ? Math.round(value).toLocaleString() : '', style: { fontSize: '10px', colors: '#94a3b8' } } },
+      { seriesName: market.name, show: false },
+      { show: false },
+      { seriesName: market.name, show: false },
+      { seriesName: market.name, show: false },
+    ],
     grid: { borderColor: '#eef2f7', strokeDashArray: 3, padding: { right: 10, left: 4 } },
     tooltip: { shared: false, x: { format: intraday ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd' }, y: { formatter: (value) => value == null ? '' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 }) } },
     legend: { show: false },
@@ -98,8 +158,28 @@ function buildMacdConfig(series, period, height) {
   };
 }
 
-function barsFootLabel(period) {
-  return isIntradayPeriod(period) ? '5분봉 · MA20 · MACD · 거래량' : '일봉 · MA20 · MACD · 거래량';
+function buildRsiConfig(series, period, height) {
+  const intraday = isIntradayPeriod(period);
+  return {
+    chart: { type: 'line', height, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
+    series: [{ name: 'RSI', type: 'line', data: series.rsiSeries }],
+    colors: [RSI_LINE_COLOR],
+    stroke: { curve: 'smooth', width: [1.6] },
+    xaxis: { type: 'datetime', labels: { format: intraday ? 'HH:mm' : 'MM-dd', style: { fontSize: '10px', colors: '#94a3b8' }, hideOverlappingLabels: true, datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+    yaxis: { min: 0, max: 100, tickAmount: 4, labels: { formatter: (value) => value == null ? '' : Math.round(value), style: { fontSize: '9px', colors: '#94a3b8' } } },
+    annotations: { yaxis: [
+      { y: 70, strokeDashArray: 3, borderColor: '#dc2626', borderWidth: 1, label: { text: '70', style: { fontSize: '9px', color: '#dc2626', background: 'transparent' }, position: 'left', offsetX: 4 } },
+      { y: 30, strokeDashArray: 3, borderColor: '#16a34a', borderWidth: 1, label: { text: '30', style: { fontSize: '9px', color: '#16a34a', background: 'transparent' }, position: 'left', offsetX: 4 } },
+    ] },
+    grid: { borderColor: '#eef2f7', strokeDashArray: 3, padding: { top: 0, bottom: 0, left: 4, right: 10 } },
+    legend: { show: false },
+    tooltip: { shared: true, x: { format: intraday ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd' }, y: { formatter: (value) => value == null ? '' : Number(value).toFixed(1) } },
+  };
+}
+
+function barsFootLabel(period, withRsi = false) {
+  const bar = isIntradayPeriod(period) ? '5분봉' : '일봉';
+  return withRsi ? `${bar} · MA20 · MACD · RSI · 거래량` : `${bar} · MA20 · MACD · 거래량`;
 }
 
 const US_MEGA_CAPS = [
@@ -147,6 +227,7 @@ function chartCard(market) {
       <div class="home-market-chart-wrap">
         <div class="home-market-chart" data-chart="${market.id}"></div>
         <div class="home-market-loading" data-loading="${market.id}"><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
+        <div class="home-chart-ma20-badge"><span class="dot" style="background:${market.color}"></span>MA20 (20일 이동평균)</div>
       </div>
       <div class="home-market-macd-wrap">
         <div class="home-market-macd-label">MACD (12, 26, 9)</div>
@@ -180,13 +261,18 @@ function chartModal() {
           <div class="home-market-chart-wrap home-chart-modal-chart-wrap">
             <div class="home-market-chart" id="home-chart-modal-chart"></div>
             <div class="home-market-loading" id="home-chart-modal-loading"><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
+            <div class="home-chart-ma20-badge" id="home-chart-modal-ma20-badge"><span class="dot"></span>MA20 (20일 이동평균)</div>
           </div>
           <div class="home-market-macd-wrap">
             <div class="home-market-macd-label">MACD (12, 26, 9)</div>
             <div class="home-market-macd home-chart-modal-macd" id="home-chart-modal-macd"></div>
           </div>
+          <div class="home-market-macd-wrap">
+            <div class="home-market-macd-label">RSI (14)</div>
+            <div class="home-market-macd home-chart-modal-rsi" id="home-chart-modal-rsi"></div>
+          </div>
           <footer class="home-market-foot">
-            <span id="home-chart-modal-foot-label"><i class="fa-solid fa-chart-line"></i> ${barsFootLabel('3mo')}</span>
+            <span id="home-chart-modal-foot-label"><i class="fa-solid fa-chart-line"></i> ${barsFootLabel('3mo', true)}</span>
             <span id="home-chart-modal-source"></span>
           </footer>
         </div>
@@ -254,6 +340,7 @@ export function homeView(container) {
   let modalPeriod = '3mo';
   let modalChart = null;
   let modalMacdChart = null;
+  let modalRsiChart = null;
   let modalTrigger = null;
 
   function destroyChart(id) {
@@ -272,6 +359,7 @@ export function homeView(container) {
   function destroyModalCharts() {
     if (modalChart) { try { modalChart.destroy(); } catch {} modalChart = null; }
     if (modalMacdChart) { try { modalMacdChart.destroy(); } catch {} modalMacdChart = null; }
+    if (modalRsiChart) { try { modalRsiChart.destroy(); } catch {} modalRsiChart = null; }
   }
 
   async function loadChart(market) {
@@ -306,7 +394,7 @@ export function homeView(container) {
       source.classList.toggle('is-simulated', Boolean(data.is_simulated));
       footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period)}`;
 
-      const series = computeChartSeries(ohlcv);
+      const series = computeChartSeries(ohlcv, data.display_from || null);
 
       const chart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, 250));
       charts.set(id, chart);
@@ -325,6 +413,7 @@ export function homeView(container) {
   async function loadModalChart(market, period) {
     const chartEl = container.querySelector('#home-chart-modal-chart');
     const macdEl = container.querySelector('#home-chart-modal-macd');
+    const rsiEl = container.querySelector('#home-chart-modal-rsi');
     const loading = container.querySelector('#home-chart-modal-loading');
     const price = container.querySelector('#home-chart-modal-price');
     const change = container.querySelector('#home-chart-modal-change');
@@ -350,15 +439,18 @@ export function homeView(container) {
       change.className = isUp ? 'is-up' : 'is-down';
       source.textContent = data.is_simulated ? '시뮬레이션 데이터' : 'Yahoo Finance · 15분 지연';
       source.classList.toggle('is-simulated', Boolean(data.is_simulated));
-      footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period)}`;
+      footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period, true)}`;
 
-      const series = computeChartSeries(ohlcv);
+      const series = computeChartSeries(ohlcv, data.display_from || null);
 
-      modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, 460));
+      modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, '100%'));
       await modalChart.render();
 
-      modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, 190));
+      modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, '100%'));
       await modalMacdChart.render();
+
+      modalRsiChart = new ApexCharts(rsiEl, buildRsiConfig(series, period, '100%'));
+      await modalRsiChart.render();
 
       loading.style.display = 'none';
     } catch (error) {
@@ -374,6 +466,7 @@ export function homeView(container) {
     modalPeriod = periods.get(market.id);
     modalTrigger = trigger;
     container.querySelector('#home-chart-modal-title').textContent = `${market.name} · ${market.ticker}`;
+    container.querySelector('#home-chart-modal-ma20-badge .dot').style.background = market.color;
     container.querySelectorAll('#home-chart-modal-periods [data-period]').forEach((button) => {
       button.classList.toggle('active', button.dataset.period === modalPeriod);
     });

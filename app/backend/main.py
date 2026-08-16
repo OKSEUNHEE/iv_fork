@@ -2203,6 +2203,9 @@ def company_financials(req: CompanyFinancialsRequest) -> dict[str, object]:
 
 PERIOD_DAYS = {"1mo": 30, "3mo": 90, "6mo": 180, "1y": 365}
 INTRADAY_PERIODS = {"1d"}
+# 이동평균(MA20) 등 보조지표가 표시 구간 맨 앞부터 끊김 없이 나오도록, 실제 요청 기간보다
+# 이만큼 앞선 과거 데이터까지 함께 가져와 지표를 계산한 뒤 표시 구간만 잘라서 내려준다.
+MA_LOOKBACK_BUFFER_DAYS = 40
 HOME_MARKETS = {
     "kospi":  {"ticker": "^KS11", "name": "KOSPI", "base_price": 2650.0, "seed": 42},
     "kosdaq": {"ticker": "^KQ11", "name": "KOSDAQ", "base_price": 850.0, "seed": 73},
@@ -2225,10 +2228,20 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
     intraday = period in INTRADAY_PERIODS
     config = HOME_MARKETS.get(market, HOME_MARKETS["kospi"])
     import pandas as pd
+    import datetime as _dt
+    display_from: str | None = None
     try:
         import yfinance as yf
-        df = yf.download(config["ticker"], period=period, interval="5m" if intraday else "1d",
-                         progress=False, auto_adjust=True, threads=False)
+        if intraday:
+            df = yf.download(config["ticker"], period=period, interval="5m",
+                             progress=False, auto_adjust=True, threads=False)
+        else:
+            days = PERIOD_DAYS[period]
+            end_date = _dt.date.today() + _dt.timedelta(days=1)
+            start_date = end_date - _dt.timedelta(days=days + MA_LOOKBACK_BUFFER_DAYS)
+            display_from = (end_date - _dt.timedelta(days=days)).isoformat()
+            df = yf.download(config["ticker"], start=start_date.isoformat(), end=end_date.isoformat(),
+                             interval="1d", progress=False, auto_adjust=True, threads=False)
         if df.empty:
             raise ValueError("empty")
         ohlcv = []
@@ -2246,7 +2259,8 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                 "l": _f("Low"),  "c": _f("Close"),
                 "v": int(_f("Volume") or 0),
             })
-        return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv, "is_simulated": False}
+        return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv,
+                "is_simulated": False, "display_from": display_from}
     except Exception:
         import math
         rng_state = config["seed"]
@@ -2274,8 +2288,10 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                 price = c
         else:
             days = PERIOD_DAYS[period]
-            n_bars = int(days * 0.72)
-            base = pd.Timestamp("today") - pd.Timedelta(days=days)
+            total_days = days + MA_LOOKBACK_BUFFER_DAYS
+            n_bars = int(total_days * 0.72)
+            base = pd.Timestamp("today") - pd.Timedelta(days=total_days)
+            display_from = (pd.Timestamp("today") - pd.Timedelta(days=days)).strftime("%Y-%m-%d")
             for i in range(n_bars):
                 date = (base + pd.Timedelta(days=i + 1)).strftime("%Y-%m-%d")
                 chg = _randn() * price * 0.012
@@ -2286,7 +2302,8 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                 ohlcv.append({"date": date, "o": round(o, 2), "h": round(h, 2),
                               "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e8)})
                 price = c
-        return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv, "is_simulated": True}
+        return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv,
+                "is_simulated": True, "display_from": display_from}
 
 
 @app.get("/api/home/kospi-candle")

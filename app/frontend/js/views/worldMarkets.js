@@ -166,12 +166,18 @@ export function worldMarketsView(container) {
       source.textContent = data.is_simulated ? '시뮬레이션 데이터' : 'Yahoo Finance · 15분 지연';
       source.classList.toggle('is-simulated', Boolean(data.is_simulated));
 
-      const candles = ohlcv.map((point) => ({ x: new Date(point.date).getTime(), y: [point.o, point.h, point.l, point.c] }));
-      const ma20 = ohlcv.map((point, index) => ({
+      // 백엔드가 MA20 계산용으로 표시 기간보다 앞선 봉을 함께 내려주므로, 이동평균은
+      // 전체 구간으로 계산한 뒤 실제 표시 구간(display_from 이후)만 잘라서 보여준다.
+      const ma20Full = ohlcv.map((point, index) => ({
         x: new Date(point.date).getTime(),
         y: index < 19 ? null : ohlcv.slice(index - 19, index + 1).reduce((sum, item) => sum + item.c, 0) / 20,
       }));
-      const volume = ohlcv.map((point) => ({
+      const displayFrom = data.display_from || null;
+      const startIdx = displayFrom ? Math.max(0, ohlcv.findIndex((point) => point.date >= displayFrom)) : 0;
+      const displayOhlcv = startIdx > 0 ? ohlcv.slice(startIdx) : ohlcv;
+      const candles = displayOhlcv.map((point) => ({ x: new Date(point.date).getTime(), y: [point.o, point.h, point.l, point.c] }));
+      const ma20 = startIdx > 0 ? ma20Full.slice(startIdx) : ma20Full;
+      const volume = displayOhlcv.map((point) => ({
         x: new Date(point.date).getTime(), y: point.v || 0,
         fillColor: point.c >= point.o ? CHART_UPWARD_COLOR : CHART_DOWNWARD_COLOR,
       }));
