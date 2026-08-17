@@ -1134,6 +1134,53 @@ class MarketSnapshotRequest(BaseModel):
     tickers: list[str] = ["^KS11", "^IXIC", "KRW=X"]
 
 
+MARKET_FUNDAMENTALS_CACHE_SECONDS = 60 * 60
+_market_fundamentals_cache: dict[str, tuple[float, dict[str, float | None]]] = {}
+
+
+def _market_fundamentals(ticker: str) -> dict[str, float | None]:
+    """Yahoo의 기업 기본지표를 짧게 캐시해 시세 화면의 응답을 안정화한다."""
+    cached = _market_fundamentals_cache.get(ticker)
+    if cached and monotonic() - cached[0] < MARKET_FUNDAMENTALS_CACHE_SECONDS:
+        return cached[1]
+    result: dict[str, float | None] = {"per": None, "pbr": None, "revenue_ttm": None}
+    try:
+        import yfinance as yf
+        instrument = yf.Ticker(ticker)
+        info = instrument.get_info()
+        for key, field in (("trailingPE", "per"), ("priceToBook", "pbr"), ("totalRevenue", "revenue_ttm")):
+            value = info.get(key)
+            if value is not None:
+                result[field] = round(float(value), 4)
+        # 해외·국내 종목에 따라 Yahoo 요약 정보의 PER/PBR이 비어 있을 수 있다.
+        # 이때 최근 연간 재무제표와 시가총액으로 보완한 값을 제공한다.
+        if result["per"] is None or result["pbr"] is None or result["revenue_ttm"] is None:
+            def latest_row_value(frame, names: tuple[str, ...]) -> float | None:
+                for name in names:
+                    if name in frame.index:
+                        values = frame.loc[name].dropna()
+                        if not values.empty:
+                            return float(values.iloc[0])
+                return None
+
+            financials = instrument.get_financials(freq="yearly")
+            balance_sheet = instrument.get_balance_sheet(freq="yearly")
+            market_cap = info.get("marketCap") or instrument.fast_info.market_cap
+            net_income = latest_row_value(financials, ("Net Income", "Net Income Common Stockholders", "NetIncomeFromContinuingAndDiscontinuedOperation", "NetIncomeFromContinuingOperationNetMinorityInterest"))
+            equity = latest_row_value(balance_sheet, ("Stockholders Equity", "Common Stock Equity", "CommonStockEquity"))
+            revenue = latest_row_value(financials, ("Total Revenue",))
+            if result["per"] is None and market_cap and net_income and net_income > 0:
+                result["per"] = round(float(market_cap) / net_income, 4)
+            if result["pbr"] is None and market_cap and equity and equity > 0:
+                result["pbr"] = round(float(market_cap) / equity, 4)
+            if result["revenue_ttm"] is None and revenue:
+                result["revenue_ttm"] = round(revenue, 4)
+    except Exception:
+        pass
+    _market_fundamentals_cache[ticker] = (monotonic(), result)
+    return result
+
+
 class PortfolioCombinationRequest(BaseModel):
     ticker_a: str = Field(default="AAPL", min_length=1, max_length=20)
     ticker_b: str = Field(default="JNJ", min_length=1, max_length=20)
@@ -1298,6 +1345,7 @@ def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
             current  = float(fi.last_price)
             previous = float(fi.previous_close) if fi.previous_close else current
             change_pct = ((current / previous) - 1) * 100 if previous else 0.0
+            fundamentals = _market_fundamentals(ticker)
 
             items.append({
                 "ticker": ticker,
@@ -1306,6 +1354,7 @@ def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
                 "change_pct": round(change_pct, 2),
                 "latest_data_at": fetched_at.isoformat(),
                 "status": "ok",
+                **fundamentals,
             })
         except Exception as exc:
             # fallback: last daily close
@@ -1316,12 +1365,14 @@ def market_snapshot(req: MarketSnapshotRequest) -> dict[str, object]:
                 current  = float(close.iloc[-1])
                 previous = float(close.iloc[-2]) if len(close) > 1 else current
                 change_pct = ((current / previous) - 1) * 100 if previous else 0.0
+                fundamentals = _market_fundamentals(ticker)
                 items.append({
                     "ticker": ticker, "label": label,
                     "value": round(current, 4),
                     "change_pct": round(change_pct, 2),
                     "latest_data_at": pd.Timestamp(close.index[-1]).isoformat(),
                     "status": "ok",
+                    **fundamentals,
                 })
             except Exception as exc2:
                 items.append({"ticker": ticker, "label": label,

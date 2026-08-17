@@ -15,6 +15,7 @@ const MACD_HIST_DOWN_COLOR = '#dc2626';
 const RSI_LINE_COLOR = '#0891b2';
 const BUY_SIGNAL_COLOR = '#16a34a';
 const SELL_SIGNAL_COLOR = '#dc2626';
+const QUOTE_CACHE_KEY = 'investment_analysis_home_quotes_v2';
 
 function isIntradayPeriod(period) {
   return period === '1d';
@@ -369,13 +370,7 @@ function quotePanel(title, subtitle, items, region) {
         </div>
         <span class="home-quote-count">${items.length}종목</span>
       </header>
-      <div class="home-quote-list" data-quote-list="${region}">
-        ${items.map((item) => `
-          <div class="home-quote-row is-loading" data-quote="${item.ticker}">
-            <div class="home-quote-name"><strong>${item.name}</strong><span>${item.ticker}</span></div>
-            <div class="home-quote-value"><b>--</b><em>조회 중</em></div>
-          </div>`).join('')}
-      </div>
+      <div class="home-quote-ag-grid" data-quote-grid="${region}" aria-label="${title} 대표 기업 지표 표"></div>
     </section>`;
 }
 
@@ -384,6 +379,37 @@ function formatQuoteValue(value, region) {
   return region === 'kr'
     ? `${Math.round(value).toLocaleString()}원`
     : `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatFundamentals(quote, region) {
+  const per = Number(quote.per);
+  const pbr = Number(quote.pbr);
+  const revenue = Number(quote.revenue_ttm);
+  const metric = (label, value) => Number.isFinite(value) && value > 0 ? `${label} ${value.toFixed(1)}배` : `${label} --`;
+  const revenueText = !Number.isFinite(revenue) || revenue <= 0
+    ? '매출(TTM) --'
+    : region === 'kr'
+      ? `매출(TTM) ${(revenue / 1e12).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}조원`
+      : `매출(TTM) $${(revenue / 1e9).toLocaleString('en-US', { maximumFractionDigits: 1 })}B`;
+  return { per: metric('PER', per), pbr: metric('PBR', pbr), revenue: revenueText };
+}
+
+function quoteCacheDate() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+
+function readQuoteCache(tickers) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(QUOTE_CACHE_KEY));
+    if (cached?.date !== quoteCacheDate() || !Array.isArray(cached.tickers) || cached.tickers.join('|') !== tickers.join('|') || !Array.isArray(cached.items)) return null;
+    return cached;
+  } catch { return null; }
+}
+
+function saveQuoteCache(tickers, data) {
+  try {
+    localStorage.setItem(QUOTE_CACHE_KEY, JSON.stringify({ date: quoteCacheDate(), tickers, fetched_at: data.fetched_at, items: data.items || [] }));
+  } catch { /* 저장 공간을 사용할 수 없어도 실시간 조회는 계속한다. */ }
 }
 
 export function homeView(container) {
@@ -405,7 +431,7 @@ export function homeView(container) {
           ${quotePanel('미국', 'Magnificent Seven · USD', US_MEGA_CAPS, 'us')}
           ${quotePanel('한국', 'Korea Seven · 대표 KOSPI 기업 · KRW', KOREAN_BLUE_CHIPS, 'kr')}
         </div>
-        <p class="home-quote-note">Yahoo Finance 기준이며, 장중 시세는 지연되거나 시장이 닫힌 경우 마지막 거래 가격일 수 있습니다.</p>
+        <p class="home-quote-note">Yahoo Finance 기준이며, 장중 시세는 지연되거나 시장이 닫힌 경우 마지막 거래 가격일 수 있습니다. 대표 기업 데이터는 한국 시간 기준 하루 한 번 브라우저에 저장됩니다.</p>
       </section>
       ${chartModal()}
     </div>`;
@@ -414,6 +440,7 @@ export function homeView(container) {
   const macdCharts = new Map();
   const periods = new Map(HOME_MARKETS.map((market) => [market.id, '3mo']));
   let quoteAbortController = null;
+  const quoteGrids = new Map();
 
   let modalMarket = null;
   const modalPeriod = '1d';
@@ -643,52 +670,90 @@ export function homeView(container) {
     loadChart(market);
   });
 
+  const quoteTickers = [...US_MEGA_CAPS, ...KOREAN_BLUE_CHIPS].map((item) => item.ticker);
+
+  function quoteGridRows(stocks, region, quoteByTicker = new Map()) {
+    return stocks.map((stock) => {
+      const quote = quoteByTicker.get(stock.ticker);
+      const changePct = Number(quote?.change_pct);
+      const fundamentals = quote ? formatFundamentals(quote, region) : { per: '--', pbr: '--', revenue: '--' };
+      return {
+        company: stock.name, ticker: stock.ticker,
+        price: quote?.status === 'ok' ? formatQuoteValue(Number(quote.value), region) : '조회 불가',
+        change: Number.isFinite(changePct) ? `${changePct >= 0 ? '▲' : '▼'} ${Math.abs(changePct).toFixed(2)}%` : '--',
+        changeDirection: Number.isFinite(changePct) ? (changePct >= 0 ? 'is-up' : 'is-down') : '',
+        per: fundamentals.per.replace('PER ', ''), pbr: fundamentals.pbr.replace('PBR ', ''),
+        revenue: fundamentals.revenue.replace('매출(TTM) ', ''),
+      };
+    });
+  }
+
+  function createQuoteGrid(region, stocks) {
+    const gridElement = container.querySelector(`[data-quote-grid="${region}"]`);
+    if (!gridElement || !window.agGrid?.createGrid) {
+      if (gridElement) gridElement.textContent = '표 구성 요소를 불러오지 못했습니다.';
+      return;
+    }
+    const api = window.agGrid.createGrid(gridElement, {
+      columnDefs: [
+        { headerName: '종목', field: 'company', flex: 1.25, minWidth: 120, cellRenderer: (params) => `<div class="quote-company-cell"><strong>${params.value}</strong><small>${params.data.ticker}</small></div>` },
+        { headerName: '현재가', field: 'price', flex: .9, minWidth: 88, cellClass: 'quote-number' },
+        { headerName: '등락률', field: 'change', flex: .75, minWidth: 74, cellClass: (params) => `quote-number ${params.data.changeDirection}` },
+        { headerName: 'PER', field: 'per', flex: .65, minWidth: 58, cellClass: 'quote-number' },
+        { headerName: 'PBR', field: 'pbr', flex: .65, minWidth: 58, cellClass: 'quote-number' },
+        { headerName: '매출(TTM)', field: 'revenue', flex: 1, minWidth: 102, cellClass: 'quote-number' },
+      ],
+      rowData: quoteGridRows(stocks, region),
+      defaultColDef: { sortable: true, resizable: true, suppressMovable: true },
+      headerHeight: 34,
+      rowHeight: 48,
+      animateRows: false,
+      suppressCellFocus: true,
+    });
+    quoteGrids.set(region, { api, stocks });
+  }
+
+  createQuoteGrid('us', US_MEGA_CAPS);
+  createQuoteGrid('kr', KOREAN_BLUE_CHIPS);
+
+  function renderQuotes(data) {
+    const quoteByTicker = new Map((data.items || []).map((item) => [item.ticker, item]));
+    quoteGrids.forEach(({ api, stocks }, region) => {
+      api.setGridOption('rowData', quoteGridRows(stocks, region, quoteByTicker));
+    });
+  }
+
   async function loadQuotes() {
     const refreshButton = container.querySelector('#home-quote-refresh');
     const stamp = container.querySelector('#home-quote-stamp');
+    const cached = readQuoteCache(quoteTickers);
+    if (cached) {
+      renderQuotes(cached);
+      const fetchedAt = cached.fetched_at ? new Date(cached.fetched_at) : null;
+      stamp.textContent = fetchedAt && !Number.isNaN(fetchedAt.valueOf())
+        ? `오늘 저장 ${fetchedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`
+        : '오늘 저장 데이터';
+      return;
+    }
+
     quoteAbortController?.abort();
     quoteAbortController = new AbortController();
     refreshButton.disabled = true;
     refreshButton.classList.add('is-loading');
     stamp.textContent = '시세 조회 중…';
-
     try {
-      const tickers = [...US_MEGA_CAPS, ...KOREAN_BLUE_CHIPS].map((item) => item.ticker);
       const response = await fetch('/api/market/snapshot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tickers }),
-        signal: quoteAbortController.signal,
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tickers: quoteTickers }), signal: quoteAbortController.signal,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      const quoteByTicker = new Map((data.items || []).map((item) => [item.ticker, item]));
-
-      [['us', US_MEGA_CAPS], ['kr', KOREAN_BLUE_CHIPS]].forEach(([region, stocks]) => {
-        stocks.forEach((stock) => {
-          const row = container.querySelector(`[data-quote="${stock.ticker}"]`);
-          const quote = quoteByTicker.get(stock.ticker);
-          const value = row.querySelector('.home-quote-value b');
-          const change = row.querySelector('.home-quote-value em');
-          row.classList.remove('is-loading');
-          if (!quote || quote.status !== 'ok') {
-            row.classList.add('is-error');
-            value.textContent = '조회 불가';
-            change.textContent = '잠시 후 재시도';
-            return;
-          }
-          const changePct = Number(quote.change_pct) || 0;
-          const isUp = changePct >= 0;
-          row.classList.remove('is-error');
-          value.textContent = formatQuoteValue(Number(quote.value), region);
-          change.textContent = `${isUp ? '▲' : '▼'} ${Math.abs(changePct).toFixed(2)}%`;
-          change.className = isUp ? 'is-up' : 'is-down';
-        });
-      });
+      saveQuoteCache(quoteTickers, data);
+      renderQuotes(data);
       const fetchedAt = data.fetched_at ? new Date(data.fetched_at) : null;
       stamp.textContent = fetchedAt && !Number.isNaN(fetchedAt.valueOf())
-        ? `조회 ${fetchedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`
-        : '조회 완료';
+        ? `조회 ${fetchedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} · 오늘 저장됨`
+        : '조회 완료 · 오늘 저장됨';
     } catch (error) {
       if (error.name !== 'AbortError') stamp.textContent = '시세 조회 실패';
     } finally {
@@ -702,6 +767,8 @@ export function homeView(container) {
 
   window._viewCleanup = () => {
     quoteAbortController?.abort();
+    quoteGrids.forEach(({ api }) => { try { api.destroy(); } catch {} });
+    quoteGrids.clear();
     charts.forEach((chart) => {
       try { chart.destroy(); } catch {}
     });
