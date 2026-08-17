@@ -187,6 +187,34 @@ function barsFootLabel(period, withRsi = false, interval = '5m') {
   return withRsi ? `${bar} · MA20 · MACD · RSI · 거래량` : `${bar} · MA20 · MACD · 거래량`;
 }
 
+function trendAnalysis(ohlcv, interval) {
+  const closes = ohlcv.map((point) => Number(point.c)).filter(Number.isFinite);
+  if (closes.length < 3) return '<p>추세를 설명하기에 충분한 가격 데이터가 없습니다.</p>';
+  const last = closes.at(-1);
+  const average = (count) => closes.slice(-count).reduce((sum, value) => sum + value, 0) / Math.min(count, closes.length);
+  const change = (count) => {
+    const start = closes[Math.max(0, closes.length - count)];
+    return start ? (last / start - 1) * 100 : 0;
+  };
+  const ma20 = average(20);
+  const ma60 = average(60);
+  const shortChange = change(20);
+  const mediumChange = change(60);
+  const averageMove = closes.slice(-21).reduce((sum, value, index, values) => index ? sum + Math.abs(value / values[index - 1] - 1) : sum, 0) / Math.max(1, Math.min(20, closes.length - 1)) * 100;
+  const phase = last >= ma20 && ma20 >= ma60 ? '상승 추세 우위' : last <= ma20 && ma20 <= ma60 ? '하락 추세 우위' : '추세 혼조';
+  const relation = last >= ma20 ? '위' : '아래';
+  const direction = shortChange >= 0 ? '상승' : '하락';
+  const unit = interval === '1y' ? '연' : interval === '1mo' ? '월' : interval === '1wk' ? '주' : isIntradayInterval(interval) ? '분봉' : '일';
+  return `
+    <div class="home-chart-trend-kpis">
+      <span><b>${phase}</b><small>현재 가격이 MA20 ${relation}</small></span>
+      <span><b>${shortChange >= 0 ? '+' : ''}${shortChange.toFixed(2)}%</b><small>최근 20개 봉 변화</small></span>
+      <span><b>${mediumChange >= 0 ? '+' : ''}${mediumChange.toFixed(2)}%</b><small>최근 60개 봉 변화</small></span>
+      <span><b>${averageMove.toFixed(2)}%</b><small>최근 20개 봉 평균 변동폭</small></span>
+    </div>
+    <p><strong>해설:</strong> 단기 흐름은 ${direction} 방향이며, 현재 가격은 20개 ${unit} 이동평균선 ${relation}에 있습니다. ${ma20 >= ma60 ? '단기 이동평균이 중기 이동평균보다 높아' : '단기 이동평균이 중기 이동평균보다 낮아'} ${phase}로 분류했습니다. 변동폭이 커질수록 같은 방향의 움직임도 빠르게 바뀔 수 있으므로 거래량·뉴스·실적을 함께 확인하세요.</p>`;
+}
+
 const US_MEGA_CAPS = [
   { ticker: 'AAPL',  name: 'Apple' },
   { ticker: 'MSFT',  name: 'Microsoft' },
@@ -294,6 +322,34 @@ function chartModal() {
             <div class="home-market-macd-label">RSI (14)</div>
             <div class="home-market-macd home-chart-modal-rsi" id="home-chart-modal-rsi"></div>
           </div>
+          <section class="home-chart-trend" aria-labelledby="home-chart-trend-title">
+            <h3 id="home-chart-trend-title"><i class="fa-solid fa-chart-line"></i> 추세 해설 <small>기술적 참고 정보</small></h3>
+            <div id="home-chart-modal-trend">데이터를 불러오는 중…</div>
+          </section>
+          <section class="home-chart-learning" aria-labelledby="home-chart-learning-title">
+            <header><h3 id="home-chart-learning-title"><i class="fa-solid fa-graduation-cap"></i> 차트를 쉽게 읽는 방법</h3><span>예시 인포그래픽</span></header>
+            <div class="home-chart-learning-grid">
+              <article class="trend-lesson is-up">
+                <div class="trend-illustration" aria-hidden="true"><i></i><i></i><i></i><b class="price-line"></b><b class="ma-line"></b></div>
+                <h4><i class="fa-solid fa-arrow-trend-up"></i> 상승 추세</h4>
+                <p>저점과 고점이 차례로 높아지고, 가격이 우상향하는 이평선 위에서 움직이는 모습입니다.</p>
+                <small>확인: <b>가격 &gt; MA20</b> · MA20 기울기 ↑</small>
+              </article>
+              <article class="trend-lesson is-down">
+                <div class="trend-illustration" aria-hidden="true"><i></i><i></i><i></i><b class="price-line"></b><b class="ma-line"></b></div>
+                <h4><i class="fa-solid fa-arrow-trend-down"></i> 하락 추세</h4>
+                <p>저점과 고점이 낮아지고, 가격이 하향하는 이평선 아래에서 움직이는 모습입니다.</p>
+                <small>확인: <b>가격 &lt; MA20</b> · MA20 기울기 ↓</small>
+              </article>
+              <article class="trend-lesson is-ma">
+                <div class="trend-illustration" aria-hidden="true"><i></i><i></i><i></i><b class="price-line"></b><b class="ma-line"></b></div>
+                <h4><i class="fa-solid fa-wave-square"></i> 이평선 함께 보기</h4>
+                <p>가격 한 번의 움직임보다 MA20의 방향과 MA20·MA60의 위아래 관계를 같이 봅니다.</p>
+                <small>순서: <b>가격 위치 → MA20 방향 → MA20/60 관계</b></small>
+              </article>
+            </div>
+            <p class="home-chart-learning-note"><i class="fa-solid fa-lightbulb"></i> 예를 들어 가격이 MA20 위에 있어도 MA20이 아래로 꺾이면 상승 힘이 약해졌을 수 있습니다. 거래량과 기업 뉴스도 함께 확인하세요.</p>
+          </section>
           <footer class="home-market-foot">
             <span id="home-chart-modal-foot-label"><i class="fa-solid fa-chart-line"></i> ${barsFootLabel('3mo', true)}</span>
             <span id="home-chart-modal-source"></span>
@@ -446,6 +502,7 @@ export function homeView(container) {
     const change = container.querySelector('#home-chart-modal-change');
     const source = container.querySelector('#home-chart-modal-source');
     const footLabel = container.querySelector('#home-chart-modal-foot-label');
+    const trend = container.querySelector('#home-chart-modal-trend');
     loading.style.display = 'flex';
     loading.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…';
     modalAbortController?.abort();
@@ -472,6 +529,7 @@ export function homeView(container) {
       footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period, true, interval)}`;
 
       const series = computeChartSeries(ohlcv, data.display_from || null);
+      trend.innerHTML = trendAnalysis(ohlcv, interval);
 
       modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, '100%', interval));
       await modalChart.render();
@@ -485,6 +543,7 @@ export function homeView(container) {
       loading.style.display = 'none';
     } catch (error) {
       if (error.name === 'AbortError') return;
+      trend.textContent = '추세 해설을 계산할 수 없습니다.';
       loading.innerHTML = `<span class="home-market-error">데이터 오류: ${error.message}</span>`;
     }
   }
