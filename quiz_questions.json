@@ -13,7 +13,7 @@
 	],
 	"explanation": "확장은 소비·생산·고용·투자가 활발해질 수 있는 국면입니다. 그렇다고 모든 기업이나 주가가 반드시 같은 방향으로 움직이는 것은 아닙니다.",
 	"question": "경기 확장 국면에 대한 설명으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "03",
 	"topic": "경제 순환"
 },
@@ -32,7 +32,7 @@
 	],
 	"explanation": "산업 구조는 신규 진입자, 대체재, 고객·공급자의 힘, 기존 경쟁 등으로 살펴볼 수 있습니다.",
 	"question": "산업을 분석할 때 개별 회사 외에 함께 확인할 사항으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "03",
 	"topic": "산업 분석"
 },
@@ -51,7 +51,7 @@
 	],
 	"explanation": "DART는 기업이 제출한 사업보고서와 주요 공시 원문을 확인하는 전자공시시스템입니다.",
 	"question": "국내 상장회사의 사업보고서와 주요 계약 등 공식 정보를 우선 확인할 곳은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "03",
 	"topic": "공시"
 },
@@ -70,7 +70,7 @@
 	],
 	"explanation": "한국은 수출과 제조업의 비중이 큰 개방형 경제이므로 해외 수요, 환율, 원자재 가격이 기업 실적과 시장에 영향을 줄 수 있습니다.",
 	"question": "한국 경제를 읽을 때 세계 수요·환율·원자재 가격을 함께 보는 이유로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "03",
 	"topic": "한국 경제"
 },
@@ -89,7 +89,7 @@
 	],
 	"explanation": "재무상태표에서는 회사가 가진 자산이 부채와 자본의 합으로 구성됩니다.",
 	"question": "재무상태표의 기본 관계로 옳은 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "04",
 	"topic": "재무제표"
 },
@@ -108,7 +108,7 @@
 	],
 	"explanation": "장부상 매출·이익이 있어도 판매 대금을 아직 받지 못하면 실제 현금은 부족할 수 있습니다.",
 	"question": "매출과 이익이 늘었는데도 현금이 부족할 수 있는 사례로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "04",
 	"topic": "이익과 현금"
 },
@@ -127,7 +127,7 @@
 	],
 	"explanation": "PER·PBR은 하나의 참고 지표입니다. 사업 구조와 성장 단계가 비슷한 기업을 비교하고 현금·부채·위험도 함께 봐야 합니다.",
 	"question": "PER과 PBR을 사용할 때 가장 바람직한 태도는?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "04",
 	"topic": "기업가치"
 },
@@ -137,18 +137,18 @@
 	},
 	"question_no": 4,
 	"day": 2,
-	"answer": 0,
+	"answer": 1,
 	"choices": [
-		"새 자금의 사용처와 기존 주주의 지분 영향",
-		"댓글의 긍정·부정 비율만 확인",
-		"공시 제목만 읽고 바로 주문",
-		"주가 색깔만 확인"
+		"판매 대금을 아직 받지 못한 매출채권",
+		"공장에서 여러 해 사용하는 생산설비",
+		"외부에서 취득한 소프트웨어 사용권",
+		"1년 안에 갚아야 할 매입채무"
 	],
-	"explanation": "유상증자는 새 자금을 모으는 방식입니다. 자금 사용처와 기존 주주의 지분 희석 가능성을 함께 확인해야 합니다.",
-	"question": "유상증자 공시를 볼 때 확인할 내용으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"explanation": "생산설비처럼 물리적 형태가 있고 여러 기간에 걸쳐 사용하는 자산은 유형자산입니다. 매출채권은 유동자산, 소프트웨어 사용권은 무형자산, 매입채무는 부채에 해당합니다.",
+	"question": "다음 중 유형자산에 해당하는 사례로 가장 적절한 것은?",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "04",
-	"topic": "공시 읽기"
+	"topic": "자산 분류"
 },
 {
 	"_id": {
@@ -165,7 +165,7 @@
 	],
 	"explanation": "미국 시장에는 비슷한 이름의 기업, 서로 다른 주식 종류, ETF가 있을 수 있으므로 종목명·티커·시장·상품 종류를 함께 확인해야 합니다.",
 	"question": "미국 주식을 주문하기 전에 티커와 함께 확인해야 할 사항으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "05",
 	"topic": "티커"
 },
@@ -184,7 +184,7 @@
 	],
 	"explanation": "거래량 증가는 관심이나 주문 집중의 단서일 뿐입니다. 원인과 지속 가능성은 공시·실적·뉴스로 따로 확인해야 합니다.",
 	"question": "가격 상승과 거래량 급증을 해석하는 태도로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "05",
 	"topic": "거래량"
 },
@@ -203,7 +203,7 @@
 	],
 	"explanation": "양봉은 해당 기간의 종가가 시가보다 높았다는 기록입니다. 미래 가격을 보장하지는 않습니다.",
 	"question": "양봉의 의미로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "05",
 	"topic": "캔들"
 },
@@ -222,7 +222,7 @@
 	],
 	"explanation": "근거 없는 소문은 가격과 거래량을 흔들 수 있습니다. 공식 공시와 원문을 확인하기 전에는 주문과 재전파를 피하는 것이 안전합니다.",
 	"question": "확인되지 않은 찌라시를 받았을 때 가장 적절한 행동은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "05",
 	"topic": "찌라시"
 },
@@ -241,7 +241,7 @@
 	],
 	"explanation": "보통주는 주주총회 의결권과 연결될 수 있고, 우선주는 배당 조건이 다르거나 의결권이 없는 경우가 많습니다. 세부 조건은 회사별로 확인해야 합니다.",
 	"question": "보통주와 우선주의 일반적인 차이에 대한 설명으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "06",
 	"topic": "주식 종류"
 },
@@ -260,7 +260,7 @@
 	],
 	"explanation": "ETF는 여러 자산을 담을 수 있는 펀드이면서 거래소에서 주식처럼 거래됩니다. 가격 하락 가능성과 보수·구성 자산을 확인해야 합니다.",
 	"question": "ETF에 대한 설명으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "06",
 	"topic": "ETF"
 },
@@ -279,7 +279,7 @@
 	],
 	"explanation": "지정가 주문은 투자자가 정한 가격 조건에서 체결됩니다. 상대 주문이 없으면 미체결로 남을 수 있습니다.",
 	"question": "지정가 주문의 설명으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "06",
 	"topic": "주문"
 },
@@ -298,7 +298,7 @@
 	],
 	"explanation": "처음에는 공식 앱인지 확인하고, 필요한 돈과 분리한 소액으로 현금 거래 절차를 익히는 편이 안전합니다.",
 	"question": "처음 주식 계좌를 사용할 때 가장 안전한 방법은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "06",
 	"topic": "거래 유의사항"
 },
@@ -317,7 +317,7 @@
 	],
 	"explanation": "분산투자는 한 곳의 손실이 전체 자산에 미치는 영향을 낮추려는 방법입니다. 손실 자체를 없애지는 못합니다.",
 	"question": "분산투자의 목적로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "07",
 	"topic": "분산투자"
 },
@@ -336,7 +336,7 @@
 	],
 	"explanation": "리밸런싱은 미래 가격을 맞히기보다, 처음 정한 위험 수준과 자산배분 계획을 지키기 위한 점검 방법입니다.",
 	"question": "리밸런싱의 설명으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "07",
 	"topic": "리밸런싱"
 },
@@ -355,7 +355,7 @@
 	],
 	"explanation": "100만 원이 50만 원이 되면 50만 원을 다시 100만 원으로 만들려면 100% 상승이 필요합니다. 큰 손실 관리가 중요한 이유입니다.",
 	"question": "투자금이 50% 줄었을 때 원래 금액으로 돌아가기 위해 필요한 수익률은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "07",
 	"topic": "손실 관리"
 },
@@ -374,8 +374,7 @@
 	],
 	"explanation": "확증 편향은 자신이 믿는 정보만 찾는 경향입니다. 결정 이유를 기록하고 반대 근거도 확인하면 감정적 판단을 줄이는 데 도움이 됩니다.",
 	"question": "확증 편향을 줄이는 습관으로 가장 적절한 것은?",
-	"seed_version": "stock-learning-2026-08-01-v1",
+	"seed_version": "stock-learning-2026-08-17-v2",
 	"source_doc": "07",
 	"topic": "투자 심리"
 }]
-

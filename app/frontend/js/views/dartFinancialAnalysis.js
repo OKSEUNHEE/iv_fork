@@ -125,6 +125,7 @@ function finTableHTML(snap, bsns_year) {
     ['자본총계',      snap.total_equity,  null],
     ['유동자산',      snap.current_assets, null],
     ['유동부채',      snap.current_liabilities, null],
+    ['자본잉여금',    snap.capital_surplus, null],
     ['이익잉여금',    snap.retained_earnings, null],
   ];
   const ths = (txt) => `<th style="padding:8px 14px; text-align:${txt === '항목' ? 'left' : 'right'}; color:#64748b; font-size:0.75rem; border-bottom:1px solid #334155; white-space:nowrap;">${txt}</th>`;
