@@ -47,6 +47,7 @@ import { dartFinancialAnalysisView } from './views/dartFinancialAnalysis.js';
 import { api }                 from './api.js';
 import { LEARN_DOCS }          from './data/learnDocs.js';
 import { restoreFormState, saveFormState } from './utils/localState.js';
+import { initAuth, recordUsage } from './auth.js';
 
 const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
@@ -292,6 +293,7 @@ function navigate(view) {
   if (view?.startsWith('quiz-') || view === 'vocabulary-exam') updateQuizSidebarLock();
 
   route.render();
+  recordUsage(view);
   // MongoDB를 사용하지 않는 화면의 사용자 입력은 화면별로 브라우저에 보관한다.
   // 렌더링 직후 실행해 각 뷰의 기본값 대신 마지막 입력값을 복원한다.
   requestAnimationFrame(() => restoreFormState(view, app));
@@ -426,6 +428,7 @@ async function refreshVisitorCount() {
 }
 
 checkHealth();
+initAuth().then(() => { if (currentView) recordUsage(currentView); });
 setInterval(checkHealth, 30000);
 refreshTopbarMarkets();
 setInterval(refreshTopbarMarkets, TOPBAR_REFRESH_MS);

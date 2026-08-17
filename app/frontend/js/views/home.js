@@ -20,6 +20,10 @@ function isIntradayPeriod(period) {
   return period === '1d';
 }
 
+function isIntradayInterval(interval) {
+  return ['1m', '3m', '5m', '15m', '30m', '1h'].includes(interval);
+}
+
 function calcEma(data, span) {
   const k = 2 / (span + 1);
   const out = [];
@@ -101,8 +105,8 @@ function computeChartSeries(ohlcv, displayFrom) {
   };
 }
 
-function buildCandleConfig(market, series, period, height) {
-  const intraday = isIntradayPeriod(period);
+function buildCandleConfig(market, series, period, height, interval = '') {
+  const intraday = interval ? isIntradayInterval(interval) : isIntradayPeriod(period);
   return {
     chart: { type: 'candlestick', height, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
     series: [
@@ -137,8 +141,8 @@ function buildCandleConfig(market, series, period, height) {
   };
 }
 
-function buildMacdConfig(series, period, height) {
-  const intraday = isIntradayPeriod(period);
+function buildMacdConfig(series, period, height, interval = '') {
+  const intraday = interval ? isIntradayInterval(interval) : isIntradayPeriod(period);
   return {
     chart: { type: 'line', height, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
     series: [
@@ -158,8 +162,8 @@ function buildMacdConfig(series, period, height) {
   };
 }
 
-function buildRsiConfig(series, period, height) {
-  const intraday = isIntradayPeriod(period);
+function buildRsiConfig(series, period, height, interval = '') {
+  const intraday = interval ? isIntradayInterval(interval) : isIntradayPeriod(period);
   return {
     chart: { type: 'line', height, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
     series: [{ name: 'RSI', type: 'line', data: series.rsiSeries }],
@@ -177,8 +181,9 @@ function buildRsiConfig(series, period, height) {
   };
 }
 
-function barsFootLabel(period, withRsi = false) {
-  const bar = isIntradayPeriod(period) ? '5분봉' : '일봉';
+function barsFootLabel(period, withRsi = false, interval = '5m') {
+  const labels = { '1m': '1분봉', '3m': '3분봉', '5m': '5분봉', '15m': '15분봉', '30m': '30분봉', '1h': '1시간봉', '1d': '일봉', '1wk': '주봉', '1mo': '월봉', '1y': '연봉' };
+  const bar = labels[interval] || (isIntradayPeriod(period) ? '5분봉' : '일봉');
   return withRsi ? `${bar} · MA20 · MACD · RSI · 거래량` : `${bar} · MA20 · MACD · 거래량`;
 }
 
@@ -253,7 +258,23 @@ function chartModal() {
             </div>
           </div>
           <div class="home-market-controls">
-            <div class="home-market-periods" id="home-chart-modal-periods">${periodButtonsHtml('')}</div>
+            <div class="home-chart-search">
+              <label class="home-chart-instrument-label" for="home-chart-modal-search">종목</label>
+              <input id="home-chart-modal-search" class="home-chart-instrument-select" type="search" placeholder="종목명 또는 티커 검색" autocomplete="off" aria-label="종목명 또는 티커 검색">
+              <div id="home-chart-search-results" class="home-chart-search-results" role="listbox" hidden></div>
+            </div>
+            <div class="home-market-periods home-chart-intervals" id="home-chart-modal-intervals" aria-label="분봉 간격">
+              <button type="button" data-interval="1m">1분</button>
+              <button type="button" data-interval="3m">3분</button>
+              <button type="button" data-interval="5m">5분</button>
+              <button type="button" data-interval="15m">15분</button>
+              <button type="button" data-interval="30m">30분</button>
+              <button type="button" data-interval="1h">1시간</button>
+              <button type="button" data-interval="1d">일</button>
+              <button type="button" data-interval="1wk">주</button>
+              <button type="button" data-interval="1mo">월</button>
+              <button type="button" data-interval="1y">Yearly</button>
+            </div>
             <button type="button" class="home-chart-modal-close" aria-label="차트 닫기"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </header>
@@ -261,7 +282,7 @@ function chartModal() {
           <div class="home-market-chart-wrap home-chart-modal-chart-wrap">
             <div class="home-market-chart" id="home-chart-modal-chart"></div>
             <div class="home-market-loading" id="home-chart-modal-loading"><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
-            <div class="home-chart-ma20-badge" id="home-chart-modal-ma20-badge"><span class="dot"></span>MA20 (20일 이동평균)</div>
+            <div class="home-chart-ma20-badge" id="home-chart-modal-ma20-badge"><span class="dot"></span>MA20 (20봉 이동평균)</div>
           </div>
           <div class="home-market-macd-wrap">
             <div class="home-market-macd-label">MACD (12, 26, 9)</div>
@@ -337,11 +358,15 @@ export function homeView(container) {
   let quoteAbortController = null;
 
   let modalMarket = null;
-  let modalPeriod = '3mo';
+  const modalPeriod = '1d';
+  let modalInterval = '1m';
   let modalChart = null;
   let modalMacdChart = null;
   let modalRsiChart = null;
   let modalTrigger = null;
+  let modalAbortController = null;
+  let modalSearchAbortController = null;
+  let modalSearchTimer = null;
 
   function destroyChart(id) {
     const chart = charts.get(id);
@@ -410,7 +435,7 @@ export function homeView(container) {
     }
   }
 
-  async function loadModalChart(market, period) {
+  async function loadModalChart(market, period, interval) {
     const chartEl = container.querySelector('#home-chart-modal-chart');
     const macdEl = container.querySelector('#home-chart-modal-macd');
     const rsiEl = container.querySelector('#home-chart-modal-rsi');
@@ -421,10 +446,13 @@ export function homeView(container) {
     const footLabel = container.querySelector('#home-chart-modal-foot-label');
     loading.style.display = 'flex';
     loading.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…';
+    modalAbortController?.abort();
+    modalAbortController = new AbortController();
+    const signal = modalAbortController.signal;
     destroyModalCharts();
 
     try {
-      const response = await fetch(`/api/home/market-candle?market=${encodeURIComponent(market.id)}&period=${period}`);
+      const response = await fetch(`/api/home/market-candle?market=${encodeURIComponent(market.id)}&period=${period}&interval=${interval}&ticker=${encodeURIComponent(market.ticker)}&timeframe=${interval}`, { signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const ohlcv = data.ohlcv || [];
@@ -439,44 +467,53 @@ export function homeView(container) {
       change.className = isUp ? 'is-up' : 'is-down';
       source.textContent = data.is_simulated ? '시뮬레이션 데이터' : 'Yahoo Finance · 15분 지연';
       source.classList.toggle('is-simulated', Boolean(data.is_simulated));
-      footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period, true)}`;
+      footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period, true, interval)}`;
 
       const series = computeChartSeries(ohlcv, data.display_from || null);
 
-      modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, '100%'));
+      modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, '100%', interval));
       await modalChart.render();
 
-      modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, '100%'));
+      modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, '100%', interval));
       await modalMacdChart.render();
 
-      modalRsiChart = new ApexCharts(rsiEl, buildRsiConfig(series, period, '100%'));
+      modalRsiChart = new ApexCharts(rsiEl, buildRsiConfig(series, period, '100%', interval));
       await modalRsiChart.render();
 
       loading.style.display = 'none';
     } catch (error) {
+      if (error.name === 'AbortError') return;
       loading.innerHTML = `<span class="home-market-error">데이터 오류: ${error.message}</span>`;
     }
   }
 
   const modalEl = container.querySelector('#home-chart-modal');
   const modalPanel = modalEl.querySelector('.home-chart-modal');
+  const modalSearchInput = container.querySelector('#home-chart-modal-search');
+  const modalSearchResults = container.querySelector('#home-chart-search-results');
+
+  function updateModalHeader() {
+    container.querySelector('#home-chart-modal-title').textContent = `${modalMarket.name} · ${modalMarket.ticker}`;
+    container.querySelector('#home-chart-modal-ma20-badge .dot').style.background = modalMarket.color;
+    container.querySelectorAll('#home-chart-modal-intervals [data-interval]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.interval === modalInterval);
+    });
+  }
 
   function openModal(market, trigger) {
     modalMarket = market;
-    modalPeriod = periods.get(market.id);
+    modalInterval = '1m';
     modalTrigger = trigger;
-    container.querySelector('#home-chart-modal-title').textContent = `${market.name} · ${market.ticker}`;
-    container.querySelector('#home-chart-modal-ma20-badge .dot').style.background = market.color;
-    container.querySelectorAll('#home-chart-modal-periods [data-period]').forEach((button) => {
-      button.classList.toggle('active', button.dataset.period === modalPeriod);
-    });
+    updateModalHeader();
     modalEl.hidden = false;
     modalPanel.focus();
-    loadModalChart(modalMarket, modalPeriod);
+    loadModalChart(modalMarket, modalPeriod, modalInterval);
   }
 
   function closeModal() {
     modalEl.hidden = true;
+    modalAbortController?.abort();
+    modalSearchAbortController?.abort();
     destroyModalCharts();
     modalTrigger?.focus();
     modalMarket = null;
@@ -489,12 +526,46 @@ export function homeView(container) {
   modalPanel.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeModal();
   });
-  container.querySelector('#home-chart-modal-periods').addEventListener('click', (event) => {
-    const button = event.target.closest('[data-period]');
+  container.querySelector('#home-chart-modal-intervals').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-interval]');
     if (!button || !modalMarket) return;
-    modalPeriod = button.dataset.period;
-    container.querySelectorAll('#home-chart-modal-periods [data-period]').forEach((item) => item.classList.toggle('active', item === button));
-    loadModalChart(modalMarket, modalPeriod);
+    modalInterval = button.dataset.interval;
+    updateModalHeader();
+    loadModalChart(modalMarket, modalPeriod, modalInterval);
+  });
+  modalSearchInput.addEventListener('input', () => {
+    const query = modalSearchInput.value.trim();
+    clearTimeout(modalSearchTimer);
+    modalSearchAbortController?.abort();
+    modalSearchResults.hidden = true;
+    modalSearchResults.replaceChildren();
+    if (!query) return;
+    modalSearchTimer = setTimeout(async () => {
+      modalSearchAbortController = new AbortController();
+      try {
+        const response = await fetch(`/api/home/chart-search?q=${encodeURIComponent(query)}`, { signal: modalSearchAbortController.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        (data.items || []).forEach((item) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'home-chart-search-result';
+          button.setAttribute('role', 'option');
+          button.textContent = `${item.name} · ${item.ticker}${item.exchange ? ` (${item.exchange})` : ''}`;
+          button.addEventListener('click', () => {
+            modalMarket = { id: item.ticker, name: item.name, ticker: item.ticker, color: '#0078d4' };
+            modalSearchInput.value = '';
+            modalSearchResults.hidden = true;
+            updateModalHeader();
+            loadModalChart(modalMarket, modalPeriod, modalInterval);
+          });
+          modalSearchResults.appendChild(button);
+        });
+        modalSearchResults.hidden = !modalSearchResults.childElementCount;
+      } catch (error) {
+        if (error.name !== 'AbortError') modalSearchResults.hidden = true;
+      }
+    }, 250);
   });
 
   HOME_MARKETS.forEach((market) => {

@@ -123,6 +123,7 @@ try:
     from .routers.tax import router as tax_router
     from .routers.rag import router as rag_router
     from .routers.lex import router as lex_router
+    from .routers.auth import router as auth_router
 except ImportError:  # Allows `uvicorn main:app` from app/backend.
     from routers.ml import router as ml_router  # type: ignore
     from routers.quant import router as quant_router  # type: ignore
@@ -131,10 +132,12 @@ except ImportError:  # Allows `uvicorn main:app` from app/backend.
     from routers.tax import router as tax_router  # type: ignore
     from routers.rag import router as rag_router  # type: ignore
     from routers.lex import router as lex_router  # type: ignore
+    from routers.auth import router as auth_router  # type: ignore
 app.include_router(ml_router)
 app.include_router(quant_router)
 app.include_router(vocabulary_exam_router)
 app.include_router(lex_router)
+app.include_router(auth_router)
 # Routers registered below are also included before the schema is first requested;
 # the OpenAPI factory is installed at the bottom of this module.
 
@@ -2220,28 +2223,106 @@ HOME_MARKETS = {
     "bitcoin": {"ticker": "BTC-USD", "name": "비트코인(BTC/USD)", "base_price": 65000.0, "seed": 321},
 }
 
+# 검색 서버가 일시적으로 응답하지 않을 때도 찾을 수 있도록 제공하는 대표 종목이다.
+MODAL_CHART_STOCKS = {
+    "aapl": {"ticker": "AAPL", "name": "Apple", "base_price": 220.0, "seed": 401},
+    "msft": {"ticker": "MSFT", "name": "Microsoft", "base_price": 450.0, "seed": 419},
+    "googl": {"ticker": "GOOGL", "name": "Alphabet", "base_price": 180.0, "seed": 431},
+    "amzn": {"ticker": "AMZN", "name": "Amazon", "base_price": 220.0, "seed": 443},
+    "nvda": {"ticker": "NVDA", "name": "NVIDIA", "base_price": 180.0, "seed": 457},
+    "meta": {"ticker": "META", "name": "Meta", "base_price": 750.0, "seed": 467},
+    "tsla": {"ticker": "TSLA", "name": "Tesla", "base_price": 330.0, "seed": 479},
+    "samsung": {"ticker": "005930.KS", "name": "삼성전자", "base_price": 75000.0, "seed": 491},
+    "skhynix": {"ticker": "000660.KS", "name": "SK하이닉스", "base_price": 250000.0, "seed": 503},
+    "lgenergy": {"ticker": "373220.KS", "name": "LG에너지솔루션", "base_price": 350000.0, "seed": 521},
+    "samsungbio": {"ticker": "207940.KS", "name": "삼성바이오로직스", "base_price": 1000000.0, "seed": 541},
+    "hyundai": {"ticker": "005380.KS", "name": "현대차", "base_price": 220000.0, "seed": 557},
+    "kia": {"ticker": "000270.KS", "name": "기아", "base_price": 100000.0, "seed": 571},
+    "naver": {"ticker": "035420.KS", "name": "NAVER", "base_price": 200000.0, "seed": 587},
+}
+MODAL_CHART_INSTRUMENTS = {**HOME_MARKETS, **MODAL_CHART_STOCKS}
+INTRADAY_INTERVALS = {"1m", "3m", "5m", "15m", "30m", "1h"}
+CHART_TIMEFRAMES = {
+    "1m": ("1m", 1), "3m": ("3m", 1), "5m": ("5m", 1), "15m": ("15m", 1),
+    "30m": ("30m", 1), "1h": ("1h", 1), "1d": ("1d", 365), "1wk": ("1wk", 365 * 5),
+    "1mo": ("1mo", 365 * 10), "1y": ("1y", 365 * 30),
+}
+
+
+@app.get("/api/home/chart-search")
+def home_chart_search(q: str = "") -> dict[str, object]:
+    """Yahoo Finance 자동완성과 기본 대표 종목으로 차트 검색 결과를 제공한다."""
+    query = q.strip()
+    if len(query) < 1:
+        return {"items": []}
+    items: list[dict[str, str]] = []
+    try:
+        url = "https://query1.finance.yahoo.com/v1/finance/search?" + urllib.parse.urlencode({"q": query, "quotesCount": 12, "newsCount": 0})
+        request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(request, timeout=4) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        allowed_types = {"EQUITY", "ETF", "INDEX", "CRYPTOCURRENCY", "FUTURE", "MUTUALFUND"}
+        for quote in payload.get("quotes", []):
+            ticker = str(quote.get("symbol", "")).upper()
+            if quote.get("quoteType") not in allowed_types or not re.fullmatch(r"[A-Z0-9.^=\-]{1,24}", ticker):
+                continue
+            items.append({"ticker": ticker, "name": str(quote.get("shortname") or quote.get("longname") or ticker), "exchange": str(quote.get("exchange", ""))})
+    except Exception:
+        pass
+    if not items:
+        lowered = query.lower()
+        for config in MODAL_CHART_INSTRUMENTS.values():
+            if lowered in config["ticker"].lower() or lowered in config["name"].lower():
+                items.append({"ticker": config["ticker"], "name": config["name"], "exchange": ""})
+    return {"items": items[:12]}
+
 
 @app.get("/api/home/market-candle")
-def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, object]:
+def home_market_candle(market: str = "kospi", period: str = "3mo", interval: str = "5m", ticker: str = "", timeframe: str = "") -> dict[str, object]:
     if period not in PERIOD_DAYS and period not in INTRADAY_PERIODS:
         period = "3mo"
-    intraday = period in INTRADAY_PERIODS
-    config = HOME_MARKETS.get(market, HOME_MARKETS["kospi"])
+    if interval not in INTRADAY_INTERVALS:
+        interval = "5m"
+    if ticker and re.fullmatch(r"[A-Za-z0-9.^=\-]{1,24}", ticker):
+        config = {"ticker": ticker.upper(), "name": ticker.upper(), "base_price": 100.0, "seed": 911}
+    else:
+        config = MODAL_CHART_INSTRUMENTS.get(market, HOME_MARKETS["kospi"])
+    if timeframe in CHART_TIMEFRAMES:
+        interval, history_days = CHART_TIMEFRAMES[timeframe]
+        intraday = interval in INTRADAY_INTERVALS
+        display_days = history_days
+    else:
+        intraday = period in INTRADAY_PERIODS
+        display_days = PERIOD_DAYS.get(period, 90)
     import pandas as pd
     import datetime as _dt
     display_from: str | None = None
     try:
         import yfinance as yf
         if intraday:
-            df = yf.download(config["ticker"], period=period, interval="5m",
+            # Yahoo Finance에는 3분 간격이 없으므로 1분 OHLCV를 3분봉으로 집계한다.
+            fetch_interval = "1m" if interval in {"1m", "3m"} else interval
+            df = yf.download(config["ticker"], period="1d", interval=fetch_interval,
                              progress=False, auto_adjust=True, threads=False)
+            if interval == "3m" and not df.empty:
+                # yfinance 버전에 따라 단일 티커도 MultiIndex 열을 반환한다.
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+                df = df.resample("3min", label="left", closed="left").agg({
+                    "Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum",
+                }).dropna(subset=["Open", "High", "Low", "Close"])
         else:
-            days = PERIOD_DAYS[period]
+            days = display_days
             end_date = _dt.date.today() + _dt.timedelta(days=1)
             start_date = end_date - _dt.timedelta(days=days + MA_LOOKBACK_BUFFER_DAYS)
             display_from = (end_date - _dt.timedelta(days=days)).isoformat()
             df = yf.download(config["ticker"], start=start_date.isoformat(), end=end_date.isoformat(),
                              interval="1d", progress=False, auto_adjust=True, threads=False)
+            if timeframe in {"1wk", "1mo", "1y"} and not df.empty:
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+                rule = {"1wk": "W-FRI", "1mo": "ME", "1y": "YE"}[timeframe]
+                df = df.resample(rule).agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}).dropna(subset=["Open", "High", "Low", "Close"])
         if df.empty:
             raise ValueError("empty")
         ohlcv = []
@@ -2260,7 +2341,7 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                 "v": int(_f("Volume") or 0),
             })
         return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv,
-                "is_simulated": False, "display_from": display_from}
+                "is_simulated": False, "display_from": display_from, "interval": interval}
     except Exception:
         import math
         rng_state = config["seed"]
@@ -2274,10 +2355,11 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
         price = config["base_price"]
         ohlcv = []
         if intraday:
-            n_bars = 78  # 5분봉 기준 6.5시간 정규장 분량
+            interval_minutes = int(interval[:-1])
+            n_bars = 390 // interval_minutes  # 미국 정규장 6.5시간 분량
             base = pd.Timestamp("today").normalize() + pd.Timedelta(hours=9)
             for i in range(n_bars):
-                ts = base + pd.Timedelta(minutes=5 * i)
+                ts = base + pd.Timedelta(minutes=interval_minutes * i)
                 chg = _randn() * price * 0.003
                 o = price
                 c = max(o * 0.97, o + chg)
@@ -2287,7 +2369,7 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                               "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e6)})
                 price = c
         else:
-            days = PERIOD_DAYS[period]
+            days = display_days
             total_days = days + MA_LOOKBACK_BUFFER_DAYS
             n_bars = int(total_days * 0.72)
             base = pd.Timestamp("today") - pd.Timedelta(days=total_days)
@@ -2303,7 +2385,7 @@ def home_market_candle(market: str = "kospi", period: str = "3mo") -> dict[str, 
                               "l": round(l, 2), "c": round(c, 2), "v": int(_rand() * 1e8)})
                 price = c
         return {"market": market, "name": config["name"], "ticker": config["ticker"], "ohlcv": ohlcv,
-                "is_simulated": True, "display_from": display_from}
+                "is_simulated": True, "display_from": display_from, "interval": interval}
 
 
 @app.get("/api/home/kospi-candle")
