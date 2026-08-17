@@ -2244,8 +2244,21 @@ MODAL_CHART_INSTRUMENTS = {**HOME_MARKETS, **MODAL_CHART_STOCKS}
 INTRADAY_INTERVALS = {"1m", "3m", "5m", "15m", "30m", "1h"}
 CHART_TIMEFRAMES = {
     "1m": ("1m", 1), "3m": ("3m", 1), "5m": ("5m", 1), "15m": ("15m", 1),
-    "30m": ("30m", 1), "1h": ("1h", 1), "1d": ("1d", 365), "1wk": ("1wk", 365 * 5),
+    "30m": ("30m", 1), "1h": ("1h", 1), "1d": ("1d", 365), "2y": ("2y", 365 * 2), "5y": ("5y", 365 * 5), "1wk": ("1wk", 365 * 5),
     "1mo": ("1mo", 365 * 10), "1y": ("1y", 365 * 30),
+}
+# Yahoo 자동완성은 한글 회사명을 충분히 지원하지 않으므로, 국내에서 많이 조회하는
+# 종목은 KRX 코드와 함께 보완한다. 이후 Yahoo 결과와 동일한 형식으로 반환된다.
+KOREAN_SEARCH_ALIASES = {
+    "삼성전자": ("005930.KS", "삼성전자"), "SK하이닉스": ("000660.KS", "SK하이닉스"),
+    "LG에너지솔루션": ("373220.KS", "LG에너지솔루션"), "삼성바이오로직스": ("207940.KS", "삼성바이오로직스"),
+    "현대차": ("005380.KS", "현대자동차"), "기아": ("000270.KS", "기아"), "NAVER": ("035420.KS", "NAVER"),
+    "카카오": ("035720.KS", "카카오"), "셀트리온": ("068270.KS", "셀트리온"), "삼성물산": ("028260.KS", "삼성물산"),
+    "삼성SDI": ("006400.KS", "삼성SDI"), "LG화학": ("051910.KS", "LG화학"), "KB금융": ("105560.KS", "KB금융"),
+    "신한지주": ("055550.KS", "신한지주"), "POSCO홀딩스": ("005490.KS", "POSCO홀딩스"), "한화에어로스페이스": ("012450.KS", "한화에어로스페이스"),
+    "두산에너빌리티": ("034020.KS", "두산에너빌리티"), "HD현대중공업": ("329180.KS", "HD현대중공업"),
+    "알테오젠": ("196170.KQ", "알테오젠"), "에코프로비엠": ("247540.KQ", "에코프로비엠"), "에코프로": ("086520.KQ", "에코프로"),
+    "HLB": ("028300.KQ", "HLB"), "펄어비스": ("263750.KQ", "펄어비스"), "JYP": ("035900.KQ", "JYP Ent."),
 }
 
 
@@ -2256,6 +2269,11 @@ def home_chart_search(q: str = "") -> dict[str, object]:
     if len(query) < 1:
         return {"items": []}
     items: list[dict[str, str]] = []
+    lowered = query.lower()
+    # 한글 검색은 먼저 KRX 별칭을 확인한다. 부분 검색도 지원한다.
+    for alias, (ticker, name) in KOREAN_SEARCH_ALIASES.items():
+        if lowered in alias.lower() or lowered in name.lower():
+            items.append({"ticker": ticker, "name": name, "exchange": "Korea Exchange"})
     try:
         url = "https://query1.finance.yahoo.com/v1/finance/search?" + urllib.parse.urlencode({"q": query, "quotesCount": 12, "newsCount": 0})
         request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -2270,7 +2288,6 @@ def home_chart_search(q: str = "") -> dict[str, object]:
     except Exception:
         pass
     if not items:
-        lowered = query.lower()
         for config in MODAL_CHART_INSTRUMENTS.values():
             if lowered in config["ticker"].lower() or lowered in config["name"].lower():
                 items.append({"ticker": config["ticker"], "name": config["name"], "exchange": ""})

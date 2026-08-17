@@ -182,7 +182,7 @@ function buildRsiConfig(series, period, height, interval = '') {
 }
 
 function barsFootLabel(period, withRsi = false, interval = '5m') {
-  const labels = { '1m': '1분봉', '3m': '3분봉', '5m': '5분봉', '15m': '15분봉', '30m': '30분봉', '1h': '1시간봉', '1d': '일봉', '1wk': '주봉', '1mo': '월봉', '1y': '연봉' };
+  const labels = { '1m': '1분봉', '3m': '3분봉', '5m': '5분봉', '15m': '15분봉', '30m': '30분봉', '1h': '1시간봉', '1d': '일봉', '2y': '2년 일봉', '5y': '5년 일봉', '1wk': '주봉', '1mo': '월봉', '1y': '연봉' };
   const bar = labels[interval] || (isIntradayPeriod(period) ? '5분봉' : '일봉');
   return withRsi ? `${bar} · MA20 · MACD · RSI · 거래량` : `${bar} · MA20 · MACD · 거래량`;
 }
@@ -271,6 +271,8 @@ function chartModal() {
               <button type="button" data-interval="30m">30분</button>
               <button type="button" data-interval="1h">1시간</button>
               <button type="button" data-interval="1d">일</button>
+              <button type="button" data-interval="2y">2년</button>
+              <button type="button" data-interval="5y">5년</button>
               <button type="button" data-interval="1wk">주</button>
               <button type="button" data-interval="1mo">월</button>
               <button type="button" data-interval="1y">Yearly</button>
