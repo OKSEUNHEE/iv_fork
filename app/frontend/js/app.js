@@ -5,6 +5,7 @@ import { worldMarketsView }   from './views/worldMarkets.js';
 import { assetClassesView }   from './views/assetClasses.js';
 import { todayGainersView }   from './views/todayGainers.js';
 import { globalCapitalMapView } from './views/globalCapitalMap.js';
+import { perBandView }          from './views/perBand.js';
 import { crossValidationView } from './views/crossValidation.js';
 import { decisionBoundaryView } from './views/decisionBoundary.js';
 import { randomForestView }    from './views/randomForest.js';
@@ -78,6 +79,7 @@ const routes = {
   'asset-classes':    { label: '다양한 기초자산 차트',       render: () => assetClassesView(app) },
   'today-gainers':    { label: '금일 상승종목',              render: () => todayGainersView(app) },
   'global-capital-map': { label: '세계 거대자금 지도',       render: () => globalCapitalMapView(app) },
+  'per-band':          { label: 'PER 밴드 차트',            render: () => perBandView(app) },
   'cross-validation':  { label: 'Cross Validation',       render: () => crossValidationView(app) },
   'decision-boundary': { label: 'Decision Boundary',      render: () => decisionBoundaryView(app) },
   'random-forest':     { label: 'Random Forest',          render: () => randomForestView(app) },
@@ -284,7 +286,7 @@ function navigate(view) {
   if (['learn-10-1', 'learn-10-2', 'learn-10-3', 'learn-11'].includes(view)) activeSections.push('review');
   else if (view?.startsWith('learn-')) activeSections.push('learn');
   if (view?.startsWith('quiz-') || view === 'vocabulary-exam') activeSections.push('quiz');
-  if (['server-resources', 'world-markets', 'asset-classes', 'today-gainers', 'volume-cloud', 'global-capital-map'].includes(view)) activeSections.push('visualization');
+  if (['server-resources', 'world-markets', 'asset-classes', 'today-gainers', 'volume-cloud', 'global-capital-map', 'per-band'].includes(view)) activeSections.push('visualization');
   if (_portfolioViews.includes(view)) activeSections.push('portfolio');
   if (_practiceViews.includes(view)) activeSections.push('practice');
   if (_aiViews.includes(view)) activeSections.push('aitools');
