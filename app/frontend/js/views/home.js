@@ -55,6 +55,72 @@ function calcRSI(ohlcv, period = 14) {
   });
 }
 
+// 각 봉의 거래량을 고가~저가 구간에 겹치는 비율만큼 나눠 가격대별로 합산한다.
+// 체결별 데이터가 아닌 OHLCV 기반의 추정 매물대이므로, 실제 호가/체결 분포와는 차이가 날 수 있다.
+function calcVolumeProfile(ohlcv) {
+  const points = ohlcv.filter((point) => [point.h, point.l, point.c, point.v].every(Number.isFinite));
+  if (!points.length) return { bins: [], maxVolume: 0, poc: null };
+
+  const low = Math.min(...points.map((point) => point.l));
+  const high = Math.max(...points.map((point) => point.h));
+  const range = high - low;
+  if (range <= 0) {
+    const volume = points.reduce((sum, point) => sum + Math.max(0, point.v), 0);
+    return { bins: [{ low, high, volume }], maxVolume: volume, poc: { low, high, volume } };
+  }
+
+  const count = Math.max(14, Math.min(28, Math.round(Math.sqrt(points.length) * 2)));
+  const step = range / count;
+  const bins = Array.from({ length: count }, (_, index) => ({
+    low: low + step * index,
+    high: index === count - 1 ? high : low + step * (index + 1),
+    volume: 0,
+  }));
+
+  points.forEach((point) => {
+    const candleLow = Math.min(point.l, point.h);
+    const candleHigh = Math.max(point.l, point.h);
+    const volume = Math.max(0, point.v);
+    if (!volume) return;
+    if (candleHigh === candleLow) {
+      const index = Math.min(count - 1, Math.max(0, Math.floor((point.c - low) / step)));
+      bins[index].volume += volume;
+      return;
+    }
+    const candleRange = candleHigh - candleLow;
+    bins.forEach((bin) => {
+      const overlap = Math.max(0, Math.min(candleHigh, bin.high) - Math.max(candleLow, bin.low));
+      if (overlap) bin.volume += volume * (overlap / candleRange);
+    });
+  });
+
+  const poc = bins.reduce((highest, bin) => bin.volume > highest.volume ? bin : highest, bins[0]);
+  return { bins, maxVolume: poc.volume, poc };
+}
+
+function formatProfilePrice(value) {
+  if (!Number.isFinite(value)) return '--';
+  return value.toLocaleString(undefined, { maximumFractionDigits: Math.abs(value) < 100 ? 2 : 0 });
+}
+
+function renderVolumeProfile(ohlcv) {
+  const profile = calcVolumeProfile(ohlcv);
+  if (!profile.bins.length || !profile.maxVolume) {
+    return '<p class="home-volume-profile-empty">거래량 데이터가 없어 매물대를 계산할 수 없습니다.</p>';
+  }
+  const currentPrice = ohlcv.at(-1)?.c;
+  const rows = [...profile.bins].reverse().map((bin) => {
+    const center = (bin.low + bin.high) / 2;
+    const width = Math.max(2, (bin.volume / profile.maxVolume) * 100);
+    const isPoc = bin === profile.poc;
+    const direction = center <= currentPrice ? 'is-below' : 'is-above';
+    return `<li class="home-volume-profile-row ${direction}${isPoc ? ' is-poc' : ''}" title="${formatProfilePrice(bin.low)} ~ ${formatProfilePrice(bin.high)}: ${Math.round(bin.volume).toLocaleString()}">
+      <span>${formatProfilePrice(center)}</span><i><b style="width:${width.toFixed(1)}%"></b></i>${isPoc ? '<em>최대</em>' : ''}
+    </li>`;
+  }).join('');
+  return `<div class="home-volume-profile-summary"><span>현재가 ${formatProfilePrice(currentPrice)}</span><span>최대 매물 ${formatProfilePrice((profile.poc.low + profile.poc.high) / 2)}</span></div><ol class="home-volume-profile-bars">${rows}</ol>`;
+}
+
 // displayFrom(있으면)보다 앞선 봉은 MA20 등 지표의 선행 구간(lookback) 계산에만 쓰고
 // 실제 차트에는 표시하지 않는다. 그래야 짧은 기간(1M 등)을 선택해도 이동평균선이
 // 화면 맨 앞부터 끊김 없이 보인다.
@@ -98,7 +164,7 @@ function computeChartSeries(ohlcv, displayFrom) {
   }
 
   return {
-    candles, volume, ma20, buySignal, sellSignal,
+    candles, volume, ma20, buySignal, sellSignal, displayOhlcv,
     macdSeries: cut(macdFull),
     signalSeries: cut(signalFull),
     histogramSeries: cut(histogramFull),
@@ -315,6 +381,13 @@ function chartModal() {
             <div class="home-market-loading" id="home-chart-modal-loading"><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
             <div class="home-chart-ma20-badge" id="home-chart-modal-ma20-badge"><span class="dot"></span>MA20 (20봉 이동평균)</div>
           </div>
+          <section class="home-volume-profile" aria-labelledby="home-volume-profile-title">
+            <header>
+              <h3 id="home-volume-profile-title"><i class="fa-solid fa-chart-bar"></i> 매물대 <small>표시 구간의 거래량 분포</small></h3>
+              <span>OHLCV 추정</span>
+            </header>
+            <div id="home-chart-modal-volume-profile">데이터를 불러오는 중…</div>
+          </section>
           <div class="home-market-macd-wrap">
             <div class="home-market-macd-label">MACD (12, 26, 9)</div>
             <div class="home-market-macd home-chart-modal-macd" id="home-chart-modal-macd"></div>
@@ -350,6 +423,24 @@ function chartModal() {
               </article>
             </div>
             <p class="home-chart-learning-note"><i class="fa-solid fa-lightbulb"></i> 예를 들어 가격이 MA20 위에 있어도 MA20이 아래로 꺾이면 상승 힘이 약해졌을 수 있습니다. 거래량과 기업 뉴스도 함께 확인하세요.</p>
+            <section class="home-volume-profile-learning" aria-labelledby="volume-profile-learning-title">
+              <h4 id="volume-profile-learning-title"><i class="fa-solid fa-chart-bar"></i> 매물대(Volume Profile) 읽기</h4>
+              <p>일반 거래량이 <b>특정 날짜·시간</b>의 거래량을 보여준다면, 매물대는 <b>특정 가격대</b>에 거래가 얼마나 집중됐는지 보여주는 세로축 지표입니다. 막대가 길수록 그 가격대의 누적 거래량이 많습니다.</p>
+              <div class="volume-profile-concepts">
+                <article><b>매물대 막대</b><span>특정 가격 구간에서 체결된 총 거래량입니다. 길수록 많은 참여자의 거래 가격이 모여 있습니다.</span></article>
+                <article><b>POC (최대 매물대)</b><span>표시 구간에서 거래량이 가장 많이 쌓인 가격대입니다. 이 화면에서는 보라색 테두리와 ‘최대’로 표시됩니다.</span></article>
+              </div>
+              <div class="volume-profile-support-resistance">
+                <article><i class="fa-solid fa-arrow-up"></i><div><b>저항 가능 구간</b><span>현재가 위의 두꺼운 매물대는 상승 시 과거 매수자의 매도 물량이 나올 수 있어 저항으로 작용할 수 있습니다.</span></div></article>
+                <article><i class="fa-solid fa-arrow-down"></i><div><b>지지 가능 구간</b><span>현재가 아래의 두꺼운 매물대는 하락 시 방어 매수와 신규 매수 관심이 모여 지지로 작용할 수 있습니다.</span></div></article>
+              </div>
+              <div class="volume-profile-use-table-wrap"><table class="volume-profile-use-table"><thead><tr><th>상황</th><th>차트 특징</th><th>읽어 볼 점</th></tr></thead><tbody>
+                <tr><td>상향 돌파</td><td>두꺼운 매물대를 거래량과 함께 통과</td><td>매도 물량이 소화됐는지 이후 가격 유지 여부를 확인합니다.</td></tr>
+                <tr><td>하향 이탈</td><td>아래 받치던 매물대 아래로 내려감</td><td>기존 지지 구간이 저항으로 바뀔 수 있어 위험 관리 기준을 점검합니다.</td></tr>
+                <tr><td>매물대 공백</td><td>막대가 얇거나 거의 없는 가격 구간</td><td>지지·저항이 약해 가격이 빠르게 움직일 수 있습니다.</td></tr>
+              </tbody></table></div>
+              <small><i class="fa-solid fa-circle-info"></i> 매물대는 과거 거래를 요약한 참고 지표입니다. 이 화면은 OHLCV로 추정하므로 실제 체결 분포와 다를 수 있으며, 뉴스·실적·시장 상황과 함께 확인하세요.</small>
+            </section>
           </section>
           <footer class="home-market-foot">
             <span id="home-chart-modal-foot-label"><i class="fa-solid fa-chart-line"></i> ${barsFootLabel('3mo', true)}</span>
@@ -530,6 +621,7 @@ export function homeView(container) {
     const source = container.querySelector('#home-chart-modal-source');
     const footLabel = container.querySelector('#home-chart-modal-foot-label');
     const trend = container.querySelector('#home-chart-modal-trend');
+    const volumeProfile = container.querySelector('#home-chart-modal-volume-profile');
     loading.style.display = 'flex';
     loading.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…';
     modalAbortController?.abort();
@@ -557,6 +649,7 @@ export function homeView(container) {
 
       const series = computeChartSeries(ohlcv, data.display_from || null);
       trend.innerHTML = trendAnalysis(ohlcv, interval);
+      volumeProfile.innerHTML = renderVolumeProfile(series.displayOhlcv);
 
       modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, '100%', interval));
       await modalChart.render();
@@ -571,6 +664,7 @@ export function homeView(container) {
     } catch (error) {
       if (error.name === 'AbortError') return;
       trend.textContent = '추세 해설을 계산할 수 없습니다.';
+      volumeProfile.textContent = '매물대를 계산할 수 없습니다.';
       loading.innerHTML = `<span class="home-market-error">데이터 오류: ${error.message}</span>`;
     }
   }
