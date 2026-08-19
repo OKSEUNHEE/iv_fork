@@ -810,6 +810,11 @@ body.modal-open { overflow: hidden; }
 .home-chart-modal-body .home-market-macd-wrap { flex: 0 0 170px; min-height: 170px; display: flex; flex-direction: column; margin-top: 4px; padding-top: 6px; }
 .home-chart-modal-body .home-market-macd-label { flex: 0 0 auto; }
 .home-chart-modal-macd, .home-chart-modal-rsi { flex: 1 1 auto; min-height: 0; width: 100%; }
+.home-macd-learning { flex: 0 0 auto; margin-top: 8px; padding: 11px 12px; border: 1px solid #ddd6fe; border-radius: 9px; background: #fcfbff; }
+.home-macd-learning > header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.home-macd-learning h3 { margin: 0; color: #4c1d95; font-size: .78rem; }.home-macd-learning h3 i { margin-right: 4px; color: #7c3aed; }.home-macd-learning > header span { color: #8b5cf6; font-size: .62rem; font-weight: 750; }
+.home-macd-learning > p { margin: 7px 0 0; color: #475569; font-size: .68rem; line-height: 1.55; }.home-macd-learning > p b { color: #4c1d95; }
+.home-macd-learning-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 9px; }.home-macd-learning-grid article { padding: 8px 9px; border: 1px solid #ede9fe; border-radius: 7px; background: #fff; }.home-macd-learning-grid h4 { margin: 0; color: #6d28d9; font-size: .68rem; }.home-macd-learning-grid ul { margin: 5px 0 0; padding-left: 14px; color: #64748b; font-size: .62rem; line-height: 1.5; }.home-macd-learning-grid li + li { margin-top: 3px; }.home-macd-learning-grid b { color: #475569; }
 .home-volume-profile { flex: 0 0 auto; margin-top: 7px; padding: 9px 11px; border: 1px solid #e2e8f0; border-radius: 9px; background: #fbfdff; }
 .home-volume-profile > header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .home-volume-profile h3 { margin: 0; color: #334155; font-size: .76rem; }
@@ -839,6 +844,7 @@ body.modal-open { overflow: hidden; }
   .home-chart-modal-macd, .home-chart-modal-rsi { flex: none; min-height: 140px; }
   .home-volume-profile-bars { grid-template-columns: 1fr; }
   .home-chart-trend-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-macd-learning-grid { grid-template-columns: 1fr; }
   .home-chart-learning-grid { grid-template-columns: 1fr; }
   .volume-profile-concepts, .volume-profile-support-resistance { grid-template-columns: 1fr; }
 }

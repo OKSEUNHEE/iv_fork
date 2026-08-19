@@ -22,7 +22,7 @@ export function ragChatView(app) {
     return sources.map((source, index) => `
       <article class="rag-source-card">
         <div class="rag-source-head"><strong>출처 ${index + 1}</strong><span>유사도 ${Number(source.score).toFixed(3)}</span></div>
-        <p class="rag-source-name">${escapeHtml(source.source_doc)} · 문서 조각 ${Number(source.chunk_index) + 1}</p>
+        <p class="rag-source-name">${escapeHtml(source.source_doc)} · ${escapeHtml(source.section_path || '문서 본문')} · 조각 ${Number(source.chunk_index) + 1}</p>
         <p class="rag-source-text">${formatText(source.text)}</p>
       </article>`).join('');
   }
@@ -32,7 +32,7 @@ export function ragChatView(app) {
       <section class="card rag-chat-heading">
         <div class="rag-chat-heading-copy">
           <h2><i class="fa-solid fa-comments"></i>문서 검색 채팅</h2>
-          <p>질문에 직접 답하는 요약을 먼저 보여드립니다. 검색 원문은 필요할 때만 아래에서 확인하세요.</p>
+          <p>문서의 제목·본문 문맥과 핵심어를 함께 찾아 답변합니다. 검색 원문은 필요할 때만 아래에서 확인하세요.</p>
         </div>
         <div class="rag-chat-controls">
           <label for="rag-provider">답변 생성</label>

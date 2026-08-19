@@ -392,6 +392,39 @@ function chartModal() {
             <div class="home-market-macd-label">MACD (12, 26, 9)</div>
             <div class="home-market-macd home-chart-modal-macd" id="home-chart-modal-macd"></div>
           </div>
+          <section class="home-macd-learning" aria-labelledby="home-macd-learning-title">
+            <header>
+              <h3 id="home-macd-learning-title"><i class="fa-solid fa-chart-column"></i> MACD 오실레이터 읽기</h3>
+              <span>추세 강도 · 모멘텀 참고</span>
+            </header>
+            <p>MACD 오실레이터(히스토그램)는 단기·장기 이동평균선의 차이인 <b>MACD선</b>과 그 평균값인 <b>시그널선</b> 사이의 격차를 막대로 보여주는 지표입니다. 추세 방향뿐 아니라 추세의 강도와 모멘텀 변화를 빠르게 파악할 때 유용합니다.</p>
+            <div class="home-macd-learning-grid">
+              <article>
+                <h4>구성 요소</h4>
+                <ul>
+                  <li><b>MACD선</b>: 단기 이동평균(기본 12일) − 장기 이동평균(기본 26일)</li>
+                  <li><b>시그널선</b>: MACD선의 9일 지수이동평균</li>
+                  <li><b>오실레이터</b>: MACD선 − 시그널선을 나타낸 막대</li>
+                </ul>
+              </article>
+              <article>
+                <h4>주요 신호</h4>
+                <ul>
+                  <li><b>상향 돌파</b>: MACD선이 시그널선 위로 올라가면 상승 모멘텀의 시작 신호로 봅니다.</li>
+                  <li><b>하향 돌파</b>: MACD선이 시그널선 아래로 내려가면 하락 모멘텀의 시작 신호로 봅니다.</li>
+                  <li><b>막대 변화</b>: 0선 위·아래로 길어지면 기존 추세 강화, 줄어들면 힘이 약해지는 전환 임계점일 수 있습니다.</li>
+                </ul>
+              </article>
+              <article>
+                <h4>실전에서 함께 보기</h4>
+                <ul>
+                  <li><b>다이버전스</b>: 주가와 오실레이터의 고·저점이 엇갈리면 추세 반전 가능성을 살핍니다.</li>
+                  <li><b>지연성 보완</b>: MACD선보다 막대 길이가 줄어드는 시점을 먼저 확인해 볼 수 있습니다.</li>
+                  <li><b>횡보장 주의</b>: 박스권에서는 속임 신호가 잦아 RSI·거래량과 함께 판단합니다.</li>
+                </ul>
+              </article>
+            </div>
+          </section>
           <div class="home-market-macd-wrap">
             <div class="home-market-macd-label">RSI (14)</div>
             <div class="home-market-macd home-chart-modal-rsi" id="home-chart-modal-rsi"></div>

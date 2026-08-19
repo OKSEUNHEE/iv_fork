@@ -146,8 +146,9 @@ DART_API_KEY=
 docker compose --profile tools run --rm docs-index
 ```
 
-문서 검색은 Ollama의 `embeddinggemma`로 문서와 질문을 같은 벡터 공간에 임베딩하고,
-선택 시 로컬 Ollama 채팅 모델이 검색 원문만 근거로 답변을 생성합니다. 기본 모델은
+문서 검색은 Markdown의 제목 계층을 보존해 청크를 만들고, Ollama의 `embeddinggemma`로
+문서와 질문을 같은 벡터 공간에 임베딩합니다. 질의 시에는 넓게 찾은 벡터 후보를 문서 제목·핵심어
+일치로 한 번 더 정렬하며, 선택 시 로컬 Ollama 채팅 모델이 검색 원문만 근거로 답변을 생성합니다. 기본 모델은
 `embeddinggemma`(임베딩)와 `qwen3:8b`(답변)이며, 저장소 루트 `.env`에서
 `RAG_EMBEDDING_MODEL`, `RAG_LLM_MODEL`로 바꿀 수 있습니다. 모델을 바꿨다면 반드시
 문서 색인을 다시 만드세요.
@@ -258,6 +259,7 @@ Lex 봇은 배포한 버전의 별칭을 사용하세요. 애플리케이션을 
 | `RAG_EMBEDDING_PROVIDER` | 문서 검색 | 로컬은 `ollama`, Ollama를 설치하지 않는 AWS 구성은 `hash`를 사용합니다. 두 방식의 색인은 서로 호환되지 않습니다. |
 | `RAG_EMBEDDING_URL` | 문서 검색 | Ollama의 `/api/embed` 주소입니다. 색인과 질의가 같은 주소·모델을 사용해야 합니다. |
 | `RAG_EMBEDDING_MODEL` | 문서 검색 | 문서·질문을 벡터화할 Ollama 임베딩 모델입니다. 모델을 바꾸면 색인을 다시 만듭니다. |
+| `RAG_DENSE_CANDIDATES` | 문서 검색 | 하이브리드 재정렬 전 벡터 후보 수입니다. 기본값은 `40`이며, 큰 값은 검색 품질 후보를 넓히는 대신 응답 처리량이 조금 늘어납니다. |
 | `RAG_LLM_BASE_URL` | 문서 검색 답변 생성 | Ollama OpenAI 호환 API의 기본 주소입니다. 기본값은 `http://localhost:11434/v1`입니다. |
 | `RAG_LLM_API_KEY` | 문서 검색 답변 생성 | Ollama 로컬 API에서는 무시되지만, 앱의 OpenAI 호환 호출을 위해 비어 있지 않은 값을 사용합니다. |
 | `RAG_LLM_MODEL` | 문서 검색 답변 생성 | 검색 원문만 바탕으로 답변을 만들 Ollama 채팅 모델입니다. |

@@ -23,8 +23,8 @@ Usage: $(basename "$0")
   DOCS_DIR            Markdown 문서 폴더 (기본: ./docs)
   QDRANT_URL          Qdrant HTTP URL (기본: http://localhost:6333)
   QDRANT_COLLECTION   컬렉션 이름 (기본: investment_docs)
-  CHUNK_SIZE          문서 청크 크기(문자 수, 기본: 1200)
-  CHUNK_OVERLAP       청크 오버랩(문자 수, 기본: 200)
+  CHUNK_SIZE          문서 청크 최대 크기(문자 수, 기본: 1200)
+  CHUNK_OVERLAP       같은 절 안에서 긴 청크를 나눌 때의 문맥 오버랩(기본: 200)
   BATCH_SIZE          업로드 배치 크기(기본: 64)
   RAG_EMBEDDING_URL   Ollama /api/embed 주소 (기본: http://localhost:11434/api/embed)
   RAG_EMBEDDING_MODEL 문서와 질의에 공통으로 쓸 Ollama 임베딩 모델 (기본: embeddinggemma)
@@ -67,6 +67,7 @@ import re
 import sys
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 
 
@@ -94,22 +95,61 @@ def http_json(method: str, url: str, payload: dict | None = None) -> dict:
         raise RuntimeError(f"Qdrant 연결 실패: {method} {url} :: {exc.reason}") from exc
 
 
-def chunk_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+def split_long_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    """문단·문장 경계를 우선해 긴 절을 자른다."""
     text = text.strip()
-    if not text:
-        return []
+    if len(text) <= chunk_size:
+        return [text] if text else []
     chunks: list[str] = []
-    step = chunk_size - chunk_overlap
     start = 0
     while start < len(text):
         end = min(len(text), start + chunk_size)
+        if end < len(text):
+            boundary = max(text.rfind("\n", start, end), text.rfind(". ", start, end), text.rfind(".\n", start, end))
+            if boundary > start + chunk_size // 2:
+                end = boundary + 1
         chunk = text[start:end].strip()
         if chunk:
             chunks.append(chunk)
         if end >= len(text):
             break
-        start += step
+        start = max(end - chunk_overlap, start + 1)
     return chunks
+
+
+def markdown_chunks(text: str, default_section: str, chunk_size: int, chunk_overlap: int) -> list[dict[str, str]]:
+    """Markdown 제목 계층을 보존해, 검색 결과가 어느 문단인지 함께 전달한다."""
+    heading_stack: list[str] = []
+    section_parts: list[str] = []
+    records: list[dict[str, str]] = []
+
+    def flush() -> None:
+        nonlocal section_parts
+        body = "\n\n".join(section_parts).strip()
+        section_parts = []
+        if not body:
+            return
+        section_path = " > ".join(heading_stack) or default_section
+        for part in split_long_text(body, chunk_size, chunk_overlap):
+            records.append({
+                "section_path": section_path,
+                "text": part,
+                # 제목을 임베딩에 포함해 제목형 질문의 검색 품질을 높인다.
+                "embedding_text": f"{section_path}\n\n{part}",
+            })
+
+    for line in text.splitlines():
+        match = re.match(r"^(#{1,6})\s+(.+?)\s*#*\s*$", line)
+        if match:
+            flush()
+            level = len(match.group(1))
+            title = match.group(2).strip()
+            heading_stack[:] = heading_stack[:level - 1]
+            heading_stack.append(title)
+        else:
+            section_parts.append(line)
+    flush()
+    return records
 
 
 def ollama_embed(url: str, model: str, inputs: list[str]) -> list[list[float]]:
@@ -162,9 +202,9 @@ if not files:
 records: list[dict] = []
 for file_path in files:
     content = file_path.read_text(encoding="utf-8")
-    chunks = chunk_text(content, chunk_size, chunk_overlap)
+    chunks = markdown_chunks(content, file_path.stem, chunk_size, chunk_overlap)
     for idx, chunk in enumerate(chunks):
-        records.append({"source_doc": file_path.name, "chunk_index": idx, "text": chunk})
+        records.append({"source_doc": file_path.name, "chunk_index": idx, **chunk})
 
 if not records:
     raise SystemExit("[ERROR] 업로드할 문서 청크가 없습니다.")
@@ -177,12 +217,12 @@ if embedding_provider == "ollama":
     matrix: list[list[float]] = []
     for start in range(0, len(records), batch_size):
         batch = records[start:start + batch_size]
-        matrix.extend(ollama_embed(embedding_url, embedding_model, [record["text"] for record in batch]))
+        matrix.extend(ollama_embed(embedding_url, embedding_model, [record["embedding_text"] for record in batch]))
         print(f"[INFO] embedded {min(start + batch_size, len(records))}/{len(records)}")
     embed_type = f"ollama/{embedding_model}"
 elif embedding_provider == "hash":
     print("[INFO] 해시 임베딩 생성 중 (dim=384)...")
-    matrix = [hash_embed(record["text"]) for record in records]
+    matrix = [hash_embed(record["embedding_text"]) for record in records]
     embed_type = "hash/384"
 else:
     raise SystemExit("[ERROR] RAG_EMBEDDING_PROVIDER는 ollama 또는 hash여야 합니다.")
@@ -221,9 +261,9 @@ for start in range(0, len(records), batch_size):
     end = min(len(records), start + batch_size)
     points = [
         {
-            "id": i + 1,
+            "id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"{records[i]['source_doc']}:{records[i]['chunk_index']}:{records[i]['text']}")),
             "vector": matrix[i],
-            "payload": {**records[i], "embed_type": embed_type},
+            "payload": {key: value for key, value in records[i].items() if key != "embedding_text"} | {"embed_type": embed_type},
         }
         for i in range(start, end)
     ]

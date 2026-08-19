@@ -21,6 +21,7 @@ _RAG_EMBEDDING_MODEL = os.getenv("RAG_EMBEDDING_MODEL", "")
 # CPU 환경에서는 임베딩 모델의 첫 로딩이 30초를 넘을 수 있다.
 _RAG_EMBEDDING_TIMEOUT_SECONDS = max(30, int(os.getenv("RAG_EMBEDDING_TIMEOUT_SECONDS", "180")))
 _RAG_LLM_TIMEOUT_SECONDS = max(30, int(os.getenv("RAG_LLM_TIMEOUT_SECONDS", "180")))
+_RAG_DENSE_CANDIDATES = max(20, min(100, int(os.getenv("RAG_DENSE_CANDIDATES", "40"))))
 
 
 def _qdrant_request(method: str, path: str, payload: dict | None = None) -> dict:
@@ -117,17 +118,54 @@ class RagAskRequest(RagSearchRequest):
     provider: str = Field(default="rag", pattern="^(rag|openai_compatible)$", description="답변 다듬기에 사용할 외부 AI 모듈")
 
 
+def _search_terms(text: str) -> set[str]:
+    """한국어·영문 질의에 공통으로 쓸 가벼운 어휘 점수용 토큰을 만든다."""
+    return {token for token in re.findall(r"[0-9A-Za-z가-힣_]{2,}", text.lower()) if len(token) >= 2}
+
+
+def _lexical_score(query_terms: set[str], text: str, section_path: str = "") -> float:
+    """의미 유사도 후보 안에서 제목·핵심어 일치를 보강한다.
+
+    별도 형태소 분석기 없이도 약어, 영문 티커, 투자 용어가 많은 학습 문서에서
+    동점 후보를 더 읽기 좋은 순서로 정렬하기 위한 보수적인 점수다.
+    """
+    if not query_terms:
+        return 0.0
+    body_terms = _search_terms(text)
+    heading_terms = _search_terms(section_path)
+    matched_body = len(query_terms & body_terms) / len(query_terms)
+    matched_heading = len(query_terms & heading_terms) / len(query_terms)
+    return min(1.0, matched_body * 0.8 + matched_heading * 0.2)
+
+
 def _search(query: str, top_k: int, score_threshold: float) -> list[dict[str, object]]:
-    payload: dict[str, object] = {"vector": _embed_query(query), "limit": top_k, "with_payload": True, "with_vector": False}
+    # 넓게 의미 후보를 가져온 뒤, 제목·핵심어 일치로 재정렬한다. 검색 DB에는
+    # 벡터만 저장하므로 이 단계는 임베딩 모델이나 Qdrant 버전과 독립적으로 동작한다.
+    candidate_limit = min(_RAG_DENSE_CANDIDATES, max(top_k * 6, top_k))
+    payload: dict[str, object] = {"vector": _embed_query(query), "limit": candidate_limit, "with_payload": True, "with_vector": False}
     if score_threshold > 0:
         payload["score_threshold"] = score_threshold
     result = _qdrant_request("POST", f"/collections/{_QDRANT_COLLECTION}/points/search", payload)
-    return [{
-        "score": round(hit.get("score", 0), 4),
-        "source_doc": hit.get("payload", {}).get("source_doc", ""),
-        "chunk_index": hit.get("payload", {}).get("chunk_index", 0),
-        "text": hit.get("payload", {}).get("text", ""),
-    } for hit in result.get("result", [])]
+    query_terms = _search_terms(query)
+    chunks = []
+    for hit in result.get("result", []):
+        hit_payload = hit.get("payload", {})
+        text = str(hit_payload.get("text", ""))
+        section_path = str(hit_payload.get("section_path", ""))
+        semantic_score = float(hit.get("score", 0))
+        lexical_score = _lexical_score(query_terms, text, section_path)
+        # Cosine 점수는 보통 0~1이지만, 다른 거리 설정도 안전하게 처리한다.
+        normalized_semantic = max(0.0, min(1.0, (semantic_score + 1) / 2)) if semantic_score < 0 else min(1.0, semantic_score)
+        chunks.append({
+            "score": round(normalized_semantic * 0.8 + lexical_score * 0.2, 4),
+            "semantic_score": round(semantic_score, 4),
+            "lexical_score": round(lexical_score, 4),
+            "source_doc": hit_payload.get("source_doc", ""),
+            "section_path": section_path,
+            "chunk_index": hit_payload.get("chunk_index", 0),
+            "text": text,
+        })
+    return sorted(chunks, key=lambda chunk: (float(chunk["score"]), float(chunk["semantic_score"])), reverse=True)[:top_k]
 
 
 def _require_qdrant() -> None:
@@ -162,7 +200,7 @@ def _openai_compatible_answer(query: str, chunks: list[dict[str, object]]) -> st
         raise HTTPException(503, "Ollama 답변 생성을 사용하려면 RAG_LLM_API_KEY와 RAG_LLM_MODEL을 설정하세요.")
 
     context = "\n\n".join(
-        f"[출처 {index + 1}: {chunk.get('source_doc', '')} / 조각 {int(chunk.get('chunk_index', 0)) + 1}]\n{chunk.get('text', '')}"
+        f"[출처 {index + 1}: {chunk.get('source_doc', '')} / {chunk.get('section_path', '문서 본문')} / 조각 {int(chunk.get('chunk_index', 0)) + 1}]\n{chunk.get('text', '')}"
         for index, chunk in enumerate(chunks)
     )[:14000]
     prompt = (
