@@ -24,7 +24,7 @@ load_dotenv(Path(__file__).parent / ".env")
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -283,6 +283,17 @@ def get_learn_doc(doc_id: str) -> dict[str, str]:
     if not target:
         raise HTTPException(status_code=404, detail="지원하지 않는 학습 문서입니다.")
     return {"doc_id": doc_id, "file": target.name, "content": target.read_text(encoding="utf-8")}
+
+
+@app.get("/api/learn/image/{image_name}")
+def get_learn_image(image_name: str) -> FileResponse:
+    """Serve image assets that belong to a learning document without exposing docs files."""
+    if not re.fullmatch(r"[A-Za-z0-9_-]+\.(?:png|jpe?g|gif|svg)", image_name, re.IGNORECASE):
+        raise HTTPException(status_code=404, detail="지원하지 않는 학습 이미지입니다.")
+    target = DOCS_DIR / image_name
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="학습 이미지를 찾을 수 없습니다.")
+    return FileResponse(target)
 
 
 def _dart_api_key() -> str:

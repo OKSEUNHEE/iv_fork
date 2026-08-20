@@ -14,8 +14,6 @@ function ensureMarked() {
   });
 }
 
-let vocabularyEntriesLoader;
-
 function cleanVocabularyText(value = '') {
   return value
     .replace(/!?(?:\[([^\]]+)\]\([^)]*\))/g, '$1')
@@ -44,7 +42,75 @@ function vocabularyAliases(term) {
   return [...aliases];
 }
 
-/** docs/voca.md의 표를 읽어 학습 본문에서 쓸 용어 사전을 만든다. */
+function vocabularyEntryScore(entry) {
+  // 정식 이름이 있는 항목을 우선해, 본문에서 찾은 약어만의 문장이 기존 영문명을 덮어쓰지 않게 한다.
+  return (entry.name ? 10000 : 0) + (entry.origin.length * 1.2) + entry.description.length;
+}
+
+function addVocabularyEntry(entries, entry) {
+  const previous = entries.get(entry.term);
+  const score = vocabularyEntryScore(entry);
+  const previousScore = previous ? vocabularyEntryScore(previous) : -1;
+  if (score > previousScore) entries.set(entry.term, entry);
+}
+
+function addHeadingVocabularyEntries(markdown, entries) {
+  const lines = markdown.split(/\r?\n/);
+
+  lines.forEach((line, index) => {
+    const match = line.match(/^#{2,3}\s+(.+)$/);
+    if (!match) return;
+
+    const heading = cleanVocabularyText(match[1]).replace(/^\d+[.)]\s*/, '');
+    const term = heading.split(/[:：]/, 1)[0].replace(/^[①-⑳]\s*/, '').trim();
+    if (!term || term.length > 24 || /[?？]|무엇|어떻게|왜|어디서|언제/.test(term)) return;
+
+    let description = '';
+    for (let next = index + 1; next < lines.length; next += 1) {
+      const candidate = lines[next].trim();
+      if (!candidate) continue;
+      if (/^#{1,3}\s|^\||^[-*+]\s/.test(candidate)) break;
+      description = cleanVocabularyText(candidate);
+      break;
+    }
+    if (!description) return;
+
+    const name = term.match(/\(([^)]+)\)/)?.[1]?.trim() || '';
+    addVocabularyEntry(entries, { term, name, origin: '', description });
+  });
+}
+
+function addInlineVocabularyEntries(markdown, entries) {
+  markdown.split(/\r?\n/).forEach((line) => {
+    const matches = [...line.matchAll(/\*\*([^*]+)\*\*/g)];
+    matches.forEach((match) => {
+      const label = cleanVocabularyText(match[1]);
+      const termMatch = label.match(/^([A-Z][A-Z0-9/-]{1,})\s*(?:\(([^)]+)\))?$/);
+      if (!termMatch) return;
+
+      const term = termMatch[1];
+      const name = termMatch[2]?.trim() || '';
+      const description = cleanVocabularyText(line.replace(match[0], term));
+      if (!description) return;
+      addVocabularyEntry(entries, { term, name, origin: '', description });
+    });
+  });
+}
+
+function addAcronymVocabularyEntries(markdown, entries) {
+  markdown.split(/\r?\n/).forEach((line) => {
+    if (!line.trim() || /^```/.test(line)) return;
+    const description = cleanVocabularyText(line);
+    if (!description) return;
+
+    [...line.matchAll(/\b([A-Z][A-Z0-9/-]{1,})\b/g)].forEach((match) => {
+      const term = match[1];
+      addVocabularyEntry(entries, { term, name: '', origin: '', description });
+    });
+  });
+}
+
+/** 현재 학습 문서의 용어 표를 읽어 본문에서 쓸 용어 사전을 만든다. */
 function parseVocabularyEntries(markdown) {
   const entries = new Map();
   const lines = markdown.split(/\r?\n/);
@@ -52,8 +118,11 @@ function parseVocabularyEntries(markdown) {
   for (let index = 0; index < lines.length - 1; index += 1) {
     if (!/^\s*\|/.test(lines[index]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitVocabularyRow(lines[index]);
+    const termIndex = headers.findIndex((header) => /^(말|용어|표현|지표|항목|보고 싶은 것)$/.test(header));
     const originIndex = headers.findIndex((header) => /말의 구조|유래/.test(header));
     const nameIndex = headers.findIndex((header) => /한자|영어/.test(header));
+    // 비교표가 아니라, 첫 열에 용어를 명시한 표만 학습 용어로 등록한다.
+    if (termIndex !== 0) continue;
     index += 2;
 
     while (index < lines.length && /^\s*\|/.test(lines[index])) {
@@ -74,40 +143,26 @@ function parseVocabularyEntries(markdown) {
       }
       const description = descriptionCells.join(' ').trim() || (originIndex === 2 && cells.length === 3 ? cells[2] : '');
 
-      const entry = { term, name, origin, description };
-      const previous = entries.get(term);
-      const score = (name.length * 0.35) + (origin.length * 1.2) + description.length;
-      const previousScore = previous ? (previous.name.length * 0.35) + (previous.origin.length * 1.2) + previous.description.length : -1;
-      if (score > previousScore) entries.set(term, entry);
+      const fullName = term.match(/\(([^)]+)\)/)?.[1]?.trim();
+      if (!name && fullName && /[A-Za-z]/.test(fullName)) name = fullName;
+      addVocabularyEntry(entries, { term, name, origin, description });
       index += 1;
     }
     index -= 1;
   }
 
+  addHeadingVocabularyEntries(markdown, entries);
+  addInlineVocabularyEntries(markdown, entries);
+  addAcronymVocabularyEntries(markdown, entries);
+
   const aliases = new Map();
   entries.forEach((entry) => {
     vocabularyAliases(entry.term).forEach((alias) => {
       const existing = aliases.get(alias);
-      if (!existing || entry.description.length > existing.description.length) aliases.set(alias, entry);
+      if (!existing || vocabularyEntryScore(entry) > vocabularyEntryScore(existing)) aliases.set(alias, entry);
     });
   });
   return aliases;
-}
-
-function loadVocabularyEntries() {
-  if (!vocabularyEntriesLoader) {
-    vocabularyEntriesLoader = fetch('/api/learn/doc/voca')
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((data) => parseVocabularyEntries(data.content || ''))
-      .catch((error) => {
-        vocabularyEntriesLoader = null;
-        throw error;
-      });
-  }
-  return vocabularyEntriesLoader;
 }
 
 function escapeRegExp(value) {
@@ -166,7 +221,7 @@ function installVocabularyModal(root, vocabulary) {
 
   const tip = document.createElement('p');
   tip.className = 'vocabulary-tip';
-  tip.innerHTML = '<i class="fa-solid fa-book-open" aria-hidden="true"></i> 밑줄 친 용어를 누르면 단어장의 한자·영어 이름, 말의 구조와 쉬운 설명을 볼 수 있어요.';
+  tip.innerHTML = '<i class="fa-solid fa-book-open" aria-hidden="true"></i> 밑줄 친 용어를 누르면 이 학습 자료에 적힌 영어 이름과 쉬운 설명을 볼 수 있어요.';
   root.prepend(tip);
 
   const modal = document.createElement('div');
@@ -177,12 +232,12 @@ function installVocabularyModal(root, vocabulary) {
   modal.innerHTML = `
     <section class="vocabulary-modal">
       <header class="vocabulary-modal-header">
-        <div><span class="vocabulary-modal-icon"><i class="fa-solid fa-book-bookmark"></i></span><div><p>주식 학습 단어장</p><h2 id="vocabulary-modal-title"></h2></div></div>
+        <div><span class="vocabulary-modal-icon"><i class="fa-solid fa-book-bookmark"></i></span><div><p>학습 용어</p><h2 id="vocabulary-modal-title"></h2></div></div>
         <button type="button" class="vocabulary-modal-close" aria-label="용어 설명 닫기"><i class="fa-solid fa-xmark"></i></button>
       </header>
       <div class="vocabulary-modal-content">
-        <section><h3><i class="fa-solid fa-language"></i> 한자·영어 전체 이름</h3><p data-vocabulary="name"></p></section>
-        <section><h3><i class="fa-solid fa-seedling"></i> 유래·말의 구조</h3><p data-vocabulary="origin"></p></section>
+        <section data-vocabulary-section="name"><h3><i class="fa-solid fa-language"></i> 한자·영어 전체 이름</h3><p data-vocabulary="name"></p></section>
+        <section data-vocabulary-section="origin"><h3><i class="fa-solid fa-seedling"></i> 유래·말의 구조</h3><p data-vocabulary="origin"></p></section>
         <section class="vocabulary-modal-description"><h3><i class="fa-solid fa-lightbulb"></i> 쉬운 설명</h3><p data-vocabulary="description"></p></section>
       </div>
     </section>`;
@@ -195,6 +250,8 @@ function installVocabularyModal(root, vocabulary) {
     origin: modal.querySelector('[data-vocabulary="origin"]'),
     description: modal.querySelector('[data-vocabulary="description"]'),
   };
+  const nameSection = modal.querySelector('[data-vocabulary-section="name"]');
+  const originSection = modal.querySelector('[data-vocabulary-section="origin"]');
   let lastFocused = null;
   const closeModal = () => {
     modal.classList.remove('show');
@@ -209,8 +266,10 @@ function installVocabularyModal(root, vocabulary) {
     if (!entry) return;
     lastFocused = trigger;
     title.textContent = entry.term;
-    fields.name.textContent = entry.name || '단어장에 한자·영어 전체 이름이 별도로 적혀 있지 않아요.';
-    fields.origin.textContent = entry.origin || '단어장에 유래·말의 구조가 별도로 적혀 있지 않아요.';
+    fields.name.textContent = entry.name;
+    nameSection.hidden = !entry.name;
+    fields.origin.textContent = entry.origin;
+    originSection.hidden = !entry.origin;
     fields.description.textContent = entry.description || '단어장에 쉬운 설명이 아직 준비되지 않았어요.';
     modal.classList.add('show');
     document.body.classList.add('modal-open');
@@ -570,21 +629,14 @@ export function learnView(app, docId) {
       <div class="loading-text">문서 로딩 중…</div>
     </div>`;
 
-  const vocabularyRequest = docId === 'voca'
-    ? Promise.resolve(new Map())
-    : loadVocabularyEntries().catch((error) => {
-      console.warn('단어장 정보를 불러오지 못했습니다:', error);
-      return new Map();
-    });
-
   Promise.all([
     ensureMarked(),
     fetch(`/api/learn/doc/${encodeURIComponent(docId)}`).then(r => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     }),
-    vocabularyRequest,
-  ]).then(([, data, vocabulary]) => {
+  ]).then(([, data]) => {
+    const vocabulary = parseVocabularyEntries(data.content || '');
     const html = window.marked.parse(data.content || '');
 
     app.innerHTML = `

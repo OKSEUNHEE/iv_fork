@@ -109,7 +109,7 @@ async def get_vocabulary_exam_result(submission_id: str) -> dict[str, object]:
             **question,
             "selected": submission["answers"][index],
             "answer": correct,
-            "explanation": "단어장(voca.md)의 해당 용어 설명과 주의할 점을 다시 확인해 보세요.",
+            "explanation": "해당 학습 자료의 용어 설명과 주의할 점을 다시 확인해 보세요.",
         })
     score = sum(answer == correct for answer, correct in zip(submission["answers"], ANSWER_KEY))
     return {"score": score, "total": len(ANSWER_KEY), "questions": reviewed}
