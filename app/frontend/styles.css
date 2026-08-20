@@ -714,6 +714,8 @@ body.modal-open { overflow: hidden; }
 .macro-news-disclaimer { margin: 16px clamp(24px, 3vw, 42px) 28px; color: #94a3b8; font-size: clamp(.8rem, 1.15vw, .95rem); line-height: 1.55; }
 .financial-statement-samples-button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9px; font-size: .82rem; font-weight: 800; box-shadow: 0 2px 5px rgba(37,99,235,.08); }
 .financial-statement-samples-button:hover { color: #fff; background: #2563eb; border-color: #2563eb; }
+.md-body a.macd-ema-video-button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; color: #5b21b6; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 9px; font-size: .82rem; font-weight: 800; box-shadow: 0 2px 5px rgba(124,58,237,.08); text-decoration: none; }
+.md-body a.macd-ema-video-button:hover { color: #fff; background: #7c3aed; border-color: #7c3aed; }
 .financial-statement-modal-backdrop { position: fixed; z-index: 1200; inset: 0; display: none; align-items: center; justify-content: center; padding: 2vh 2vw; background: rgba(15,23,42,.58); backdrop-filter: blur(2px); }
 .financial-statement-modal-backdrop.show { display: flex; }
 .financial-statement-modal { width: 100%; height: 100%; overflow: auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 18px; box-shadow: 0 24px 70px rgba(15,23,42,.32); }
