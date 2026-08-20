@@ -783,6 +783,11 @@ body.modal-open { overflow: hidden; }
 .home-chart-ma20-badge { position: absolute; top: 6px; left: 6px; display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.92); border: 1px solid #e2e8f0; border-radius: 6px; padding: 3px 9px; font-size: .68rem; font-weight: 750; color: #334155; pointer-events: none; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
 .home-chart-ma20-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #0078d4; flex: 0 0 auto; }
 .home-chart-modal-body .home-chart-ma20-badge { top: 10px; left: 10px; font-size: .74rem; padding: 4px 10px; }
+.home-chart-ma-toggles { position: absolute; z-index: 2; top: 10px; left: 10px; display: flex; flex-wrap: wrap; gap: 6px; max-width: calc(100% - 20px); }
+.home-chart-ma-toggle { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.94); border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px; font-size: .74rem; font-weight: 750; color: #94a3b8; box-shadow: 0 1px 3px rgba(15,23,42,.06); cursor: pointer; transition: color .12s, border-color .12s, background .12s; }
+.home-chart-ma-toggle .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ma-color, #cbd5e1); flex: 0 0 auto; }
+.home-chart-ma-toggle:hover { border-color: var(--ma-color, #94a3b8); color: #475569; }
+.home-chart-ma-toggle.active { color: var(--ma-color, #334155); border-color: var(--ma-color, #cbd5e1); background: rgba(255,255,255,.98); }
 .home-market-macd-wrap { margin-top: 6px; padding-top: 8px; border-top: 1px dashed #eef2f7; }
 .home-market-macd-label { font-size: .67rem; font-weight: 750; color: #94a3b8; letter-spacing: .02em; margin-bottom: 2px; }
 .home-market-macd { width: 100%; min-height: 110px; }

@@ -2309,6 +2309,18 @@ CHART_TIMEFRAMES = {
     "30m": ("30m", 1), "1h": ("1h", 1), "1d": ("1d", 365), "2y": ("2y", 365 * 2), "5y": ("5y", 365 * 5), "1wk": ("1wk", 365 * 5),
     "1mo": ("1mo", 365 * 10), "1y": ("1y", 365 * 30),
 }
+# MA20 등 지표가 표시 구간 맨 앞부터 끊김 없이 나오려면 봉 하나의 길이만큼의 과거
+# 데이터가 최소 20개(1개 지표 주기) 더 필요하다. 리샘플링 후 봉 단위가 굵어지는
+# 주봉/월봉/연봉은 MA_LOOKBACK_BUFFER_DAYS(달력일 40일)로는 턱없이 부족해서
+# 타임프레임별로 필요한 만큼의 달력일 버퍼를 따로 둔다.
+CHART_TIMEFRAME_LOOKBACK_BUFFER_DAYS = {
+    "1d": 320,                   # 일봉 MA200까지 커버(거래일 ~200개 ≈ 달력 280일 + 여유)
+    "2y": 320,
+    "5y": 320,
+    "1wk": 52 * 7 + 30,          # 주봉 MA52까지 커버
+    "1mo": 60 * 31 + 60,         # 월봉 MA60까지 커버
+    "1y": 10 * 365 + 365,        # 연봉 MA10까지 커버
+}
 # Yahoo 자동완성은 한글 회사명을 충분히 지원하지 않으므로, 국내에서 많이 조회하는
 # 종목은 KRX 코드와 함께 보완한다. 이후 Yahoo 결과와 동일한 형식으로 반환된다.
 KOREAN_SEARCH_ALIASES = {
@@ -2392,8 +2404,9 @@ def home_market_candle(market: str = "kospi", period: str = "3mo", interval: str
                 }).dropna(subset=["Open", "High", "Low", "Close"])
         else:
             days = display_days
+            buffer_days = CHART_TIMEFRAME_LOOKBACK_BUFFER_DAYS.get(timeframe, MA_LOOKBACK_BUFFER_DAYS)
             end_date = _dt.date.today() + _dt.timedelta(days=1)
-            start_date = end_date - _dt.timedelta(days=days + MA_LOOKBACK_BUFFER_DAYS)
+            start_date = end_date - _dt.timedelta(days=days + buffer_days)
             display_from = (end_date - _dt.timedelta(days=days)).isoformat()
             df = yf.download(config["ticker"], start=start_date.isoformat(), end=end_date.isoformat(),
                              interval="1d", progress=False, auto_adjust=True, threads=False)
@@ -2449,12 +2462,16 @@ def home_market_candle(market: str = "kospi", period: str = "3mo", interval: str
                 price = c
         else:
             days = display_days
-            total_days = days + MA_LOOKBACK_BUFFER_DAYS
-            n_bars = int(total_days * 0.72)
-            base = pd.Timestamp("today") - pd.Timedelta(days=total_days)
+            buffer_days = CHART_TIMEFRAME_LOOKBACK_BUFFER_DAYS.get(timeframe, MA_LOOKBACK_BUFFER_DAYS)
+            total_days = days + buffer_days
             display_from = (pd.Timestamp("today") - pd.Timedelta(days=days)).strftime("%Y-%m-%d")
+            # 주봉/월봉/연봉은 실제 데이터처럼 해당 봉 하나당 실제 기간만큼 간격을 둔다.
+            bar_days = {"1wk": 7, "1mo": 30, "1y": 365}.get(timeframe)
+            n_bars = max(2, total_days // bar_days) if bar_days else int(total_days * 0.72)
+            step_days = bar_days or (total_days / max(1, n_bars))
+            base = pd.Timestamp("today") - pd.Timedelta(days=total_days)
             for i in range(n_bars):
-                date = (base + pd.Timedelta(days=i + 1)).strftime("%Y-%m-%d")
+                date = (base + pd.Timedelta(days=step_days * (i + 1))).strftime("%Y-%m-%d")
                 chg = _randn() * price * 0.012
                 o = price
                 c = max(o * 0.9, o + chg)
