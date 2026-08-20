@@ -14,6 +14,7 @@ export function ragChatView(app) {
   let provider = 'rag';
   let providerSelectedByUser = false;
   let externalAiAvailable = false;
+  let sourcesOpen = false;
 
   function renderSources() {
     if (!sources.length) {
@@ -32,7 +33,8 @@ export function ragChatView(app) {
       <section class="card rag-chat-heading">
         <div class="rag-chat-heading-copy">
           <h2><i class="fa-solid fa-comments"></i>문서 검색 채팅</h2>
-          <p>문서의 제목·본문 문맥과 핵심어를 함께 찾아 답변합니다. 검색 원문은 필요할 때만 아래에서 확인하세요.</p>
+          <p>문서의 제목·본문 문맥과 핵심어를 함께 찾아 답변합니다. 검색 원문은 오른쪽 패널에서 확인할 수 있습니다.</p>
+          <button type="button" class="rag-sources-trigger" id="rag-sources-trigger" aria-controls="rag-sources-offcanvas" aria-expanded="${sourcesOpen}"><i class="fa-solid fa-book-open"></i> 검색 근거 보기 <span>${sources.length ? `${sources.length}개` : '대기 중'}</span></button>
         </div>
         <div class="rag-chat-controls">
           <label for="rag-provider">답변 생성</label>
@@ -58,10 +60,15 @@ export function ragChatView(app) {
           </div>
         </section>
       </section>
-      <details class="card rag-source-panel" aria-label="RAG 검색 원문">
-          <summary class="rag-source-title"><div><h3><i class="fa-solid fa-book-open"></i>검색 근거 보기</h3><p>답변에 사용한 문서 조각을 확인합니다.</p></div><span>${sources.length ? `${sources.length}개` : '대기 중'}</span></summary>
+      <div class="rag-sources-offcanvas-backdrop" id="rag-sources-backdrop" ${sourcesOpen ? '' : 'hidden'}>
+        <aside class="rag-sources-offcanvas" id="rag-sources-offcanvas" role="dialog" aria-modal="true" aria-labelledby="rag-sources-title" tabindex="-1">
+          <header class="rag-sources-offcanvas-header">
+            <div><h3 id="rag-sources-title"><i class="fa-solid fa-book-open"></i> 검색 근거</h3><p>답변에 사용한 문서 조각 ${sources.length ? `${sources.length}개` : ''}</p></div>
+            <button type="button" class="rag-sources-close" aria-label="검색 근거 닫기"><i class="fa-solid fa-xmark"></i></button>
+          </header>
           <div id="rag-sources" class="rag-sources">${renderSources()}</div>
-      </details>`;
+        </aside>
+      </div>`;
 
     const messagesEl = app.querySelector('#rag-messages');
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -74,6 +81,24 @@ export function ragChatView(app) {
       event.preventDefault();
       const input = app.querySelector('#rag-input');
       ask(input.value.trim());
+    });
+    app.querySelector('#rag-sources-trigger').addEventListener('click', () => {
+      sourcesOpen = true;
+      render();
+      app.querySelector('#rag-sources-offcanvas').focus();
+    });
+    const sourcesBackdrop = app.querySelector('#rag-sources-backdrop');
+    const closeSources = () => {
+      sourcesOpen = false;
+      render();
+      app.querySelector('#rag-sources-trigger').focus();
+    };
+    app.querySelector('.rag-sources-close').addEventListener('click', closeSources);
+    sourcesBackdrop.addEventListener('click', (event) => {
+      if (event.target === sourcesBackdrop) closeSources();
+    });
+    app.querySelector('#rag-sources-offcanvas').addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeSources();
     });
     updateStatus();
   }

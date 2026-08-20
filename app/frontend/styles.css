@@ -1600,14 +1600,11 @@ body.modal-open { overflow: hidden; }
   color: var(--text-muted);
   line-height: 1.65;
 }
-/* RAG는 답변을 우선 보여 주고, 검색 근거는 사용자가 필요할 때만 펼친다. */
+/* RAG는 답변을 우선 보여 주고, 검색 근거는 오른쪽 오프캔버스에서 확인한다. */
 .rag-answer-layout { grid-template-columns: minmax(0, 1fr); }
-.rag-source-panel { min-height: 0; margin-top: 16px; }
-.rag-source-panel > summary { list-style: none; cursor: pointer; }
-.rag-source-panel > summary::-webkit-details-marker { display: none; }
-.rag-source-panel > summary::after { align-self: center; color: var(--text-muted); content: '⌄'; font-size: 1.1rem; }
-.rag-source-panel[open] > summary::after { transform: rotate(180deg); }
-.rag-source-panel:not([open]) > .rag-sources { display: none; }
+.rag-sources-trigger { display: inline-flex; align-items: center; gap: 6px; margin-top: 11px; padding: 7px 10px; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 8px; background: #eff6ff; font-size: .75rem; font-weight: 750; }.rag-sources-trigger:hover, .rag-sources-trigger:focus-visible { color: #1e3a8a; border-color: #60a5fa; background: #dbeafe; }.rag-sources-trigger:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }.rag-sources-trigger span { padding: 2px 5px; border-radius: 99px; color: #1d4ed8; background: #dbeafe; font-size: .65rem; }
+.rag-sources-offcanvas-backdrop { position: fixed; z-index: 1400; inset: 0; display: flex; justify-content: flex-end; background: rgba(15,23,42,.42); }.rag-sources-offcanvas-backdrop[hidden] { display: none; }.rag-sources-offcanvas { display: flex; width: min(470px, 94vw); height: 100%; min-height: 0; flex-direction: column; overflow: hidden; border-left: 1px solid #cbd5e1; background: #fff; box-shadow: -18px 0 44px rgba(15,23,42,.2); outline: none; animation: rag-offcanvas-in .2s ease-out; }.rag-sources-offcanvas-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid #e2e8f0; background: #f8fbff; }.rag-sources-offcanvas-header h3 { margin: 0; color: #0f172a; font-size: 1rem; }.rag-sources-offcanvas-header h3 i { margin-right: 5px; color: #2563eb; }.rag-sources-offcanvas-header p { margin: 5px 0 0; color: #64748b; font-size: .73rem; }.rag-sources-close { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border-radius: 8px; color: #64748b; font-size: 1rem; }.rag-sources-close:hover, .rag-sources-close:focus-visible { color: #0f172a; background: #e2e8f0; }.rag-sources-offcanvas .rag-sources { flex: 1 1 auto; min-height: 0; }.rag-sources-offcanvas .rag-source-empty { min-height: 100%; }@keyframes rag-offcanvas-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@media (max-width: 600px) { .rag-sources-offcanvas { width: 100%; }.rag-sources-offcanvas-header { padding: 17px; } }
 
  .dart-result-summary {
   display: flex;
