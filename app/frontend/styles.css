@@ -812,8 +812,10 @@ body.modal-open { overflow: hidden; }
 .home-chart-modal-close { display: grid; flex: 0 0 auto; place-items: center; width: 38px; height: 38px; border-radius: 9px; color: #64748b; font-size: 1.1rem; }
 .home-chart-modal-close:hover, .home-chart-modal-close:focus-visible { color: #0f172a; background: #f1f5f9; }
 .home-chart-modal-body { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; box-sizing: border-box; padding: 14px 32px 16px; width: 100%; max-width: none; margin: 0; overflow-y: auto; }
-.home-chart-modal-body .home-market-chart-wrap { flex: 0 0 clamp(280px, 40vh, 480px); height: clamp(280px, 40vh, 480px); min-height: 280px; }
+.home-chart-modal-body .home-market-chart-wrap { flex: 0 0 clamp(260px, 36vh, 430px); height: clamp(260px, 36vh, 430px); min-height: 260px; }
 .home-chart-modal-body .home-market-chart { height: 100%; }
+.home-chart-modal-body .home-market-volume-wrap { flex: 0 0 132px; min-height: 132px; display: flex; flex-direction: column; margin-top: 4px; padding-top: 6px; }
+.home-chart-modal-body .home-market-volume { flex: 1 1 auto; min-height: 0; width: 100%; }
 .home-chart-modal-body .home-market-macd-wrap { flex: 0 0 170px; min-height: 170px; display: flex; flex-direction: column; margin-top: 4px; padding-top: 6px; }
 .home-chart-modal-body .home-market-macd-label { flex: 0 0 auto; }
 .home-chart-modal-macd, .home-chart-modal-rsi { flex: 1 1 auto; min-height: 0; width: 100%; }
@@ -846,7 +848,8 @@ body.modal-open { overflow: hidden; }
   .home-chart-search { flex: 1 1 100%; }
   .home-chart-instrument-select { flex: 1 1 170px; max-width: none; }
   .home-chart-modal-body { padding: 10px 16px 12px; overflow-y: auto; }
-  .home-chart-modal-body .home-market-chart-wrap { flex: 0 0 320px; height: 320px; min-height: 320px; }
+  .home-chart-modal-body .home-market-chart-wrap { flex: 0 0 280px; height: 280px; min-height: 280px; }
+  .home-chart-modal-body .home-market-volume-wrap { flex: 0 0 132px; min-height: 132px; }
   .home-chart-modal-body .home-market-macd-wrap { flex: 0 0 170px; min-height: 170px; }
   .home-chart-modal-macd, .home-chart-modal-rsi { flex: none; min-height: 140px; }
   .home-volume-profile-bars { grid-template-columns: 1fr; }

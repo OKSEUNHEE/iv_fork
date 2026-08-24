@@ -194,7 +194,17 @@ export function rsiZoneSignal(rsiFull) {
 // displayFrom(있으면)보다 앞선 봉은 이동평균 등 지표의 선행 구간(lookback) 계산에만
 // 쓰고 실제 차트에는 표시하지 않는다. 그래야 짧은 기간을 선택해도 이동평균선이
 // 화면 맨 앞부터 끊김 없이 보인다. maPeriods는 함께 그릴 이동평균 기간들(예: [20, 60]).
-export function computeChartSeries(ohlcv, displayFrom, maPeriods = [20]) {
+function priceSignalRules(interval, candleCount) {
+  const base = isIntradayInterval(interval) ? { minGap: 8, threshold: 0.002 }
+    : interval === '1wk' ? { minGap: 3, threshold: 0.01 }
+      : interval === '1mo' ? { minGap: 2, threshold: 0.015 }
+        : interval === '1y' ? { minGap: 1, threshold: 0.03 }
+          : { minGap: 5, threshold: 0.006 };
+  // 화면 폭과 무관하게 신호 라벨을 약 40개 이내로 제한해 긴 기간 차트에서도 겹치지 않게 한다.
+  return { ...base, minGap: Math.max(base.minGap, Math.ceil(candleCount / 40)) };
+}
+
+export function computeChartSeries(ohlcv, displayFrom, maPeriods = [20], interval = '1d') {
   const toSeries = (arr) => ohlcv.map((point, index) => ({ x: new Date(point.date).getTime(), y: arr[index] }));
   const maFullByPeriod = new Map(maPeriods.map((p) => [p, toSeries(calcMA(ohlcv, p))]));
   const { macdLine, signalLine, histogram } = calcMACD(ohlcv);
@@ -226,14 +236,21 @@ export function computeChartSeries(ohlcv, displayFrom, maPeriods = [20]) {
   const sellSignal = candles.map((c) => ({ x: c.x, y: null }));
   const refMa = maLines[0]?.data;
   if (refMa) {
+    const { minGap, threshold } = priceSignalRules(interval, candles.length);
+    let lastSignalIndex = -minGap;
     for (let i = 1; i < candles.length; i++) {
       const prevMa = refMa[i - 1].y, curMa = refMa[i].y;
       if (prevMa == null || curMa == null) continue;
       const prevClose = candles[i - 1].y[3], curClose = candles[i].y[3];
+      // 이평선 바로 주변의 작은 왕복은 신호로 표시하지 않고, 최근 신호와 지나치게
+      // 가까운 봉도 생략한다. 긴 기간 차트에서 매수·매도 라벨이 겹치는 것을 막는다.
+      if (i - lastSignalIndex < minGap || Math.abs(curClose / curMa - 1) < threshold) continue;
       if (prevClose < prevMa && curClose >= curMa) {
         buySignal[i].y = +(candles[i].y[2] * 0.985).toFixed(2); // 캔들 저가 살짝 아래
+        lastSignalIndex = i;
       } else if (prevClose > prevMa && curClose <= curMa) {
         sellSignal[i].y = +(candles[i].y[1] * 1.015).toFixed(2); // 캔들 고가 살짝 위
+        lastSignalIndex = i;
       }
     }
   }
@@ -255,38 +272,55 @@ export function buildCandleConfig(market, series, period, height, interval = '')
   const intraday = interval ? isIntradayInterval(interval) : isIntradayPeriod(period);
   const maLines = series.maLines || [];
   const maSeries = maLines.map((ma) => ({ name: `MA${ma.period}`, type: 'line', data: ma.data }));
-  const buyIdx = 1 + maLines.length + 1; // candlestick(0) + MA선들 + 거래량(1개) 다음이 매수
+  const buyIdx = 1 + maLines.length; // candlestick(0) + MA선들 다음이 매수
   const sellIdx = buyIdx + 1;
   return {
     chart: { type: 'candlestick', height, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
     series: [
       { name: market.name, type: 'candlestick', data: series.candles },
       ...maSeries,
-      { name: '거래량', type: 'bar', data: series.volume },
       { name: '매수', type: 'scatter', data: series.buySignal, dataLabels: { offsetY: 16 } },
       { name: '매도', type: 'scatter', data: series.sellSignal, dataLabels: { offsetY: -16 } },
     ],
-    plotOptions: { candlestick: { colors: { upward: UPWARD_COLOR, downward: DOWNWARD_COLOR }, wick: { useFillColor: true } }, bar: { columnWidth: '65%' } },
-    colors: [UPWARD_COLOR, ...maLines.map((ma) => ma.color), '#94a3b8', BUY_SIGNAL_COLOR, SELL_SIGNAL_COLOR],
-    stroke: { curve: 'smooth', width: [1, ...maLines.map(() => 1.7), 0, 0, 0] },
-    markers: { size: [0, ...maLines.map(() => 0), 0, 7, 7], strokeColors: '#fff', strokeWidth: 2, hover: { size: 9 } },
+    plotOptions: { candlestick: { colors: { upward: UPWARD_COLOR, downward: DOWNWARD_COLOR }, wick: { useFillColor: true } } },
+    colors: [UPWARD_COLOR, ...maLines.map((ma) => ma.color), BUY_SIGNAL_COLOR, SELL_SIGNAL_COLOR],
+    stroke: { curve: 'smooth', width: [1, ...maLines.map(() => 1.7), 0, 0] },
+    markers: { size: [0, ...maLines.map(() => 0), 7, 7], strokeColors: '#fff', strokeWidth: 2, hover: { size: 9 } },
     dataLabels: {
       enabled: true,
       enabledOnSeries: [buyIdx, sellIdx],
       formatter: (value, opts) => (value == null ? '' : opts.seriesIndex === buyIdx ? '매수' : opts.seriesIndex === sellIdx ? '매도' : ''),
-      style: { fontSize: '10px', fontWeight: 800, colors: ['#334155', ...maLines.map(() => '#334155'), '#334155', BUY_SIGNAL_COLOR, SELL_SIGNAL_COLOR] },
+      style: { fontSize: '10px', fontWeight: 800, colors: ['#334155', ...maLines.map(() => '#334155'), BUY_SIGNAL_COLOR, SELL_SIGNAL_COLOR] },
       background: { enabled: true, foreColor: '#fff', borderWidth: 0, opacity: 0.92 },
     },
-    xaxis: { type: 'datetime', labels: { format: xAxisDateFormat(interval, intraday), style: { fontSize: '10px', colors: '#94a3b8' }, hideOverlappingLabels: true, datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+    // 날짜 축은 아래 거래량 패널에만 표시해 가격·거래량이 겹쳐 보이지 않게 한다.
+    xaxis: { type: 'datetime', labels: { show: false, format: xAxisDateFormat(interval, intraday), datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
     yaxis: [
       { seriesName: market.name, labels: { formatter: (value) => value ? Math.round(value).toLocaleString() : '', style: { fontSize: '10px', colors: '#94a3b8' } } },
       ...maLines.map(() => ({ seriesName: market.name, show: false })),
-      { show: false },
       { seriesName: market.name, show: false },
       { seriesName: market.name, show: false },
     ],
     grid: { borderColor: '#eef2f7', strokeDashArray: 3, padding: { right: 10, left: 4 } },
     tooltip: { shared: false, x: { format: intraday ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd' }, y: { formatter: (value) => value == null ? '' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 }) } },
+    legend: { show: false },
+  };
+}
+
+// 거래량은 가격·이동평균과 축 단위가 달라 같은 캔들 영역에 겹치면 가격처럼 오해하기
+// 쉽다. 시간축을 공유하는 독립 패널로 렌더링한다.
+export function buildVolumeConfig(series, period, height, interval = '') {
+  const intraday = interval ? isIntradayInterval(interval) : isIntradayPeriod(period);
+  return {
+    chart: { type: 'bar', height, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: false }, background: '#fff', fontFamily: 'Pretendard, -apple-system, "Malgun Gothic", sans-serif' },
+    series: [{ name: '거래량', data: series.volume }],
+    plotOptions: { bar: { columnWidth: '65%', borderRadius: 1 } },
+    colors: ['#94a3b8'],
+    dataLabels: { enabled: false },
+    xaxis: { type: 'datetime', labels: { format: xAxisDateFormat(interval, intraday), style: { fontSize: '10px', colors: '#94a3b8' }, hideOverlappingLabels: true, datetimeUTC: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+    yaxis: { labels: { formatter: (value) => value == null ? '' : Intl.NumberFormat('ko-KR', { notation: 'compact', maximumFractionDigits: 1 }).format(value), style: { fontSize: '9px', colors: '#94a3b8' } } },
+    grid: { borderColor: '#eef2f7', strokeDashArray: 3, padding: { top: -6, bottom: 0, left: 4, right: 10 } },
+    tooltip: { x: { format: intraday ? 'yyyy-MM-dd HH:mm' : 'yyyy-MM-dd' }, y: { formatter: (value) => value == null ? '' : `${Number(value).toLocaleString()}주` } },
     legend: { show: false },
   };
 }

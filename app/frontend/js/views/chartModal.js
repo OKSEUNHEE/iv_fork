@@ -4,8 +4,48 @@
 // 사용법: const modal = mountChartModal(container); modal.open({ id, name, ticker }, triggerEl);
 import {
   isIntradayInterval, maCategoryForInterval, MA_CATEGORY_OPTIONS, MA_CATEGORY_DEFAULTS, MA_LINE_COLORS,
-  computeChartSeries, buildCandleConfig, buildMacdConfig, buildRsiConfig, barsFootLabel, trendAnalysis, renderVolumeProfile,
+  computeChartSeries, buildCandleConfig, buildVolumeConfig, buildMacdConfig, buildRsiConfig, barsFootLabel, trendAnalysis, renderVolumeProfile,
 } from './chartSeries.js';
+
+const CHART_CACHE_PREFIX = 'investment_analysis_chart_v1:';
+const CHART_CACHE_MAX_ENTRIES = 8;
+
+function chartCacheTtl(interval) {
+  if (isIntradayInterval(interval)) return 30_000;
+  if (interval === '1d') return 5 * 60_000;
+  if (['2y', '5y'].includes(interval)) return 30 * 60_000;
+  if (interval === '1wk') return 2 * 60 * 60_000;
+  if (interval === '1mo') return 6 * 60 * 60_000;
+  if (interval === '1y') return 24 * 60 * 60_000;
+  return 5 * 60_000;
+}
+
+function chartCacheKey(ticker, interval) {
+  return `${CHART_CACHE_PREFIX}${ticker}:${interval}`;
+}
+
+function readChartCache(key, maxAge) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!cached || Date.now() - cached.savedAt > maxAge || !Array.isArray(cached.data?.ohlcv) || !cached.data.ohlcv.length) return null;
+    return cached.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeChartCache(key, data) {
+  try {
+    const entries = Object.keys(localStorage)
+      .filter((storageKey) => storageKey.startsWith(CHART_CACHE_PREFIX) && storageKey !== key)
+      .map((storageKey) => ({ storageKey, savedAt: JSON.parse(localStorage.getItem(storageKey) || '{}').savedAt || 0 }))
+      .sort((a, b) => a.savedAt - b.savedAt);
+    entries.slice(0, Math.max(0, entries.length - CHART_CACHE_MAX_ENTRIES + 1)).forEach(({ storageKey }) => localStorage.removeItem(storageKey));
+    localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data }));
+  } catch {
+    // 개인정보 보호 모드·저장공간 부족 등으로 localStorage를 쓸 수 없으면 네트워크 조회를 그대로 사용한다.
+  }
+}
 
 function periodButtonsHtml() {
   return `
@@ -52,6 +92,10 @@ function chartModalMarkup() {
             <div class="home-market-chart" id="home-chart-modal-chart"></div>
             <div class="home-market-loading" id="home-chart-modal-loading"><i class="fa-solid fa-spinner fa-spin"></i> 데이터 불러오는 중…</div>
             <div class="home-chart-ma-toggles" id="home-chart-modal-ma-toggles" role="group" aria-label="이동평균선 선택"></div>
+          </div>
+          <div class="home-market-volume-wrap">
+            <div class="home-market-macd-label">거래량</div>
+            <div class="home-market-volume" id="home-chart-modal-volume"></div>
           </div>
           <section class="home-volume-profile" aria-labelledby="home-volume-profile-title">
             <header>
@@ -166,6 +210,7 @@ export function mountChartModal(container) {
   let modalMarket = null;
   let modalInterval = '1d';
   let modalChart = null;
+  let modalVolumeChart = null;
   let modalMacdChart = null;
   let modalRsiChart = null;
   let modalTrigger = null;
@@ -183,6 +228,7 @@ export function mountChartModal(container) {
 
   function destroyModalCharts() {
     if (modalChart) { try { modalChart.destroy(); } catch {} modalChart = null; }
+    if (modalVolumeChart) { try { modalVolumeChart.destroy(); } catch {} modalVolumeChart = null; }
     if (modalMacdChart) { try { modalMacdChart.destroy(); } catch {} modalMacdChart = null; }
     if (modalRsiChart) { try { modalRsiChart.destroy(); } catch {} modalRsiChart = null; }
   }
@@ -203,7 +249,7 @@ export function mountChartModal(container) {
 
   async function rerenderModalCandle() {
     if (!modalOhlcv.length || !modalMarket) return;
-    const series = computeChartSeries(modalOhlcv, modalDisplayFrom, currentMAPeriods());
+    const series = computeChartSeries(modalOhlcv, modalDisplayFrom, currentMAPeriods(), modalInterval);
     const chartEl = container.querySelector('#home-chart-modal-chart');
     if (modalChart) { try { modalChart.destroy(); } catch {} modalChart = null; }
     modalChart = new ApexCharts(chartEl, buildCandleConfig(modalMarket, series, modalPeriod, '100%', modalInterval));
@@ -214,6 +260,7 @@ export function mountChartModal(container) {
 
   async function loadModalChart(market, period, interval) {
     const chartEl = container.querySelector('#home-chart-modal-chart');
+    const volumeEl = container.querySelector('#home-chart-modal-volume');
     const macdEl = container.querySelector('#home-chart-modal-macd');
     const rsiEl = container.querySelector('#home-chart-modal-rsi');
     const loading = container.querySelector('#home-chart-modal-loading');
@@ -231,9 +278,14 @@ export function mountChartModal(container) {
     destroyModalCharts();
 
     try {
-      const response = await fetch(`/api/home/market-candle?market=${encodeURIComponent(market.id)}&period=${period}&interval=${interval}&ticker=${encodeURIComponent(market.ticker)}&timeframe=${interval}`, { signal });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const cacheKey = chartCacheKey(market.ticker, interval);
+      let data = readChartCache(cacheKey, chartCacheTtl(interval));
+      if (!data) {
+        const response = await fetch(`/api/home/market-candle?market=${encodeURIComponent(market.id)}&period=${period}&interval=${interval}&ticker=${encodeURIComponent(market.ticker)}&timeframe=${interval}`, { signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        data = await response.json();
+        writeChartCache(cacheKey, data);
+      }
       const ohlcv = data.ohlcv || [];
       if (!ohlcv.length) throw new Error('데이터 없음');
 
@@ -253,12 +305,15 @@ export function mountChartModal(container) {
       const maPeriods = currentMAPeriods();
       footLabel.innerHTML = `<i class="fa-solid fa-chart-line"></i> ${barsFootLabel(period, true, interval, maPeriods)}`;
 
-      const series = computeChartSeries(ohlcv, modalDisplayFrom, maPeriods);
+      const series = computeChartSeries(ohlcv, modalDisplayFrom, maPeriods, interval);
       trend.innerHTML = trendAnalysis(ohlcv, interval);
       volumeProfile.innerHTML = renderVolumeProfile(series.displayOhlcv);
 
       modalChart = new ApexCharts(chartEl, buildCandleConfig(market, series, period, '100%', interval));
       await modalChart.render();
+
+      modalVolumeChart = new ApexCharts(volumeEl, buildVolumeConfig(series, period, '100%', interval));
+      await modalVolumeChart.render();
 
       modalMacdChart = new ApexCharts(macdEl, buildMacdConfig(series, period, '100%', interval));
       await modalMacdChart.render();
