@@ -82,6 +82,15 @@ http://localhost:8000/api/health
 실행할 수 있습니다. 실행 이미지에는 전략 모듈이 포함되며, 컨테이너가 시작할 때
 공개 가격 데이터를 받은 뒤 한 번의 백테스트를 수행합니다.
 
+### QuantConnect LEAN 소개
+
+[QuantConnect LEAN](https://github.com/QuantConnect/Lean)은 QuantConnect가 공개한
+오픈소스 알고리즘 트레이딩 엔진입니다. 데이터 구독, 주문 처리, 포트폴리오 관리와
+성과 지표 계산을 하나의 엔진에서 제공하며, Python과 C# 전략을 실행할 수 있습니다.
+이 저장소에서는 LEAN 공식 Docker 이미지(`quantconnect/lean`)를 사용해 국내 주식
+일봉 데이터를 Custom Data로 불러오고, 전략의 매매 신호와 누적 수익률·낙폭·Sharpe
+Ratio 등의 백테스트 결과를 재현 가능한 컨테이너 환경에서 확인합니다.
+
 ```bash
 docker compose -f docker-compose.lean.yml run --rm samsung-backtest
 ```
