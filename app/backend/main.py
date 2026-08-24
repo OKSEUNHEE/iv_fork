@@ -1728,6 +1728,100 @@ def market_top_gainers(limit: int = 20) -> dict[str, object]:
         "is_simulated": is_simulated,
     }
 
+
+# ── 섹터별 대표 종목 (6개 섹터 × 5종목) ─────────────────────────────────────────
+SECTOR_GROUPS = [
+    {"id": "semiconductor-it", "label": "반도체·IT", "icon": "fa-microchip", "stocks": [
+        {"ticker": "005930.KS", "name": "삼성전자"},
+        {"ticker": "000660.KS", "name": "SK하이닉스"},
+        {"ticker": "035420.KS", "name": "NAVER"},
+        {"ticker": "035720.KS", "name": "카카오"},
+        {"ticker": "018260.KS", "name": "삼성SDS"},
+    ]},
+    {"id": "battery-energy", "label": "2차전지·에너지", "icon": "fa-battery-full", "stocks": [
+        {"ticker": "373220.KS", "name": "LG에너지솔루션"},
+        {"ticker": "006400.KS", "name": "삼성SDI"},
+        {"ticker": "096770.KS", "name": "SK이노베이션"},
+        {"ticker": "003670.KS", "name": "포스코퓨처엠"},
+        {"ticker": "034730.KS", "name": "SK"},
+    ]},
+    {"id": "auto", "label": "자동차·부품", "icon": "fa-car", "stocks": [
+        {"ticker": "005380.KS", "name": "현대차"},
+        {"ticker": "000270.KS", "name": "기아"},
+        {"ticker": "012330.KS", "name": "현대모비스"},
+        {"ticker": "161390.KS", "name": "한국타이어앤테크놀로지"},
+        {"ticker": "204320.KS", "name": "HL만도"},
+    ]},
+    {"id": "financial", "label": "금융", "icon": "fa-building-columns", "stocks": [
+        {"ticker": "105560.KS", "name": "KB금융"},
+        {"ticker": "055550.KS", "name": "신한지주"},
+        {"ticker": "086790.KS", "name": "하나금융지주"},
+        {"ticker": "316140.KS", "name": "우리금융지주"},
+        {"ticker": "032830.KS", "name": "삼성생명"},
+    ]},
+    {"id": "bio-healthcare", "label": "바이오·헬스케어", "icon": "fa-pills", "stocks": [
+        {"ticker": "207940.KS", "name": "삼성바이오로직스"},
+        {"ticker": "068270.KS", "name": "셀트리온"},
+        {"ticker": "000100.KS", "name": "유한양행"},
+        {"ticker": "326030.KS", "name": "SK바이오팜"},
+        {"ticker": "128940.KS", "name": "한미약품"},
+    ]},
+    {"id": "materials-telecom", "label": "소재·통신·유통", "icon": "fa-industry", "stocks": [
+        {"ticker": "051910.KS", "name": "LG화학"},
+        {"ticker": "005490.KS", "name": "POSCO홀딩스"},
+        {"ticker": "017670.KS", "name": "SK텔레콤"},
+        {"ticker": "030200.KS", "name": "KT"},
+        {"ticker": "000120.KS", "name": "CJ대한통운"},
+    ]},
+]
+
+
+@app.get("/api/market/sector-snapshot")
+def market_sector_snapshot() -> dict[str, object]:
+    """6개 섹터 × 5종목의 현재가·등락률 스냅샷을 반환한다."""
+    import pandas as pd
+    import yfinance as yf
+
+    fetched_at = pd.Timestamp.utcnow()
+    all_tickers = [stock["ticker"] for group in SECTOR_GROUPS for stock in group["stocks"]]
+    quotes: dict[str, dict[str, object]] = {}
+    ok_count = 0
+    for ticker in all_tickers:
+        try:
+            fi = yf.Ticker(ticker).fast_info
+            current = float(fi.last_price)
+            previous = float(fi.previous_close) if fi.previous_close else current
+            change_pct = ((current / previous) - 1) * 100 if previous else 0.0
+            quotes[ticker] = {"price": round(current, 2), "change_pct": round(change_pct, 2), "status": "ok"}
+            ok_count += 1
+        except Exception:
+            quotes[ticker] = {"price": None, "change_pct": None, "status": "error"}
+
+    is_simulated = ok_count < 5
+    if is_simulated:
+        # Yahoo Finance 요청 실패가 많으면 시뮬레이션 데이터로 대체한다.
+        rng_state = 991
+        def _rand():
+            nonlocal rng_state
+            rng_state = (rng_state * 1664525 + 1013904223) % 2 ** 32
+            return rng_state / 2 ** 32
+        for ticker in all_tickers:
+            quotes[ticker] = {
+                "price": round(20000 + _rand() * 480000, 0),
+                "change_pct": round((_rand() - 0.4) * 10, 2),
+                "status": "ok",
+            }
+
+    sectors = []
+    for group in SECTOR_GROUPS:
+        stocks = [{"ticker": s["ticker"], "name": s["name"],
+                   **quotes.get(s["ticker"], {"price": None, "change_pct": None, "status": "error"})}
+                  for s in group["stocks"]]
+        sectors.append({"id": group["id"], "label": group["label"], "icon": group["icon"], "stocks": stocks})
+
+    return {"sectors": sectors, "fetched_at": fetched_at.isoformat(), "is_simulated": is_simulated}
+
+
 KOSPI_SECTORS = sorted({c["sector"] for c in KOSPI_COMPONENTS})
 
 
