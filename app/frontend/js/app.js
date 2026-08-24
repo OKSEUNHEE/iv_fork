@@ -116,7 +116,7 @@ const routes = {
   'tax-accounting':              { label: '세무·회계 시뮬레이션',         render: () => taxAccountingView(app) },
   'dart-financial-analysis':    { label: 'DART 재무 AI 분석',             render: () => dartFinancialAnalysisView(app) },
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
-  'vocabulary-exam':     { label: '퀴즈 · 단어장 30문제 시험',   render: () => vocabularyExamView(app, navigate) },
+  'vocabulary-exam':     { label: '퀴즈 · 주식 투자 퀴즈',       render: () => vocabularyExamView(app, navigate) },
   'rag-chat':            { label: '문서 검색 채팅',              render: () => ragChatView(app) },
   ...quizDayRoutes,
   ...learnRoutes,

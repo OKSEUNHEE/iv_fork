@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'vocabulary_exam_submission_2026_08_v2';
 const PROFILE_KEY = 'vocabulary_exam_profile_2026_08_v1';
 const LETTERS = ['①', '②', '③', '④'];
+const VOCABULARY_EXAM_SUBMISSION_OPEN = false;
 
 function savedSubmissionId() {
   try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
@@ -23,6 +24,15 @@ function formatKst(iso) {
 }
 
 export function vocabularyExamView(app, navigate) {
+  if (!VOCABULARY_EXAM_SUBMISSION_OPEN) {
+    app.innerHTML = `<div class="card" style="text-align:center;padding:52px 24px;">
+      <div style="font-size:2.5rem;margin-bottom:16px;"><i class="fa-solid fa-lock" style="color:var(--primary)"></i></div>
+      <h2 style="margin:0 0 10px;">제출기간이 아닙니다</h2>
+      <p style="margin:0;color:var(--text-muted);">주식 투자 퀴즈는 현재 제출할 수 없습니다.</p>
+    </div>`;
+    return;
+  }
+
   app.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">시험 정보를 확인하고 있어요…</div></div>';
   fetch('/api/vocabulary-exam')
     .then(async (response) => {
@@ -34,7 +44,7 @@ export function vocabularyExamView(app, navigate) {
     .catch((error) => {
       const opensAt = error.data?.detail?.opens_at;
       if (error.data?.detail?.code === 'exam_not_open') {
-        app.innerHTML = `<div class="card" style="text-align:center;padding:52px 24px;"><div style="font-size:2.5rem;margin-bottom:16px;"><i class="fa-solid fa-lock" style="color:var(--primary)"></i></div><h2 style="margin:0 0 10px;">단어장 시험 준비 중</h2><p style="margin:0;color:var(--text-muted);">시험은 <strong>${formatKst(opensAt)}</strong>부터 응시할 수 있어요.</p></div>`;
+        app.innerHTML = `<div class="card" style="text-align:center;padding:52px 24px;"><div style="font-size:2.5rem;margin-bottom:16px;"><i class="fa-solid fa-lock" style="color:var(--primary)"></i></div><h2 style="margin:0 0 10px;">주식 투자 퀴즈 준비 중</h2><p style="margin:0;color:var(--text-muted);">퀴즈는 <strong>${formatKst(opensAt)}</strong>부터 응시할 수 있어요.</p></div>`;
         return;
       }
       app.innerHTML = `<div class="card"><p style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation"></i> 시험 정보를 불러오지 못했습니다.</p><p style="color:var(--text-muted);font-size:.85rem;">${error.message}</p></div>`;
@@ -58,9 +68,9 @@ export function vocabularyExamView(app, navigate) {
       const reviewAvailable = Boolean(result);
       const question = reviewAvailable ? result.questions[current] : questions[current];
       const answered = Object.keys(answers).length;
-      app.innerHTML = `<div class="quiz-header"><div><h2 style="margin:0 0 4px;font-size:1.25rem;font-weight:800"><i class="fa-solid fa-spell-check" style="color:var(--primary);margin-right:8px;"></i>주식 기초 단어장 모의시험</h2><p style="margin:0;color:var(--text-muted);font-size:.85rem;">학습 자료 기반 4지선다 30문항 · 정답·해설 공개 ${formatKst(releaseAt)}</p></div><div class="quiz-score-bar"><span>${reviewAvailable ? `결과 · ${result.score} / ${result.total}점` : submitted ? `제출 완료 · 공개 ${formatKst(releaseAt)}` : `${answered} / ${questions.length}문항 응답`}</span></div></div>
+      app.innerHTML = `<div class="quiz-header"><div><h2 style="margin:0 0 4px;font-size:1.25rem;font-weight:800"><i class="fa-solid fa-spell-check" style="color:var(--primary);margin-right:8px;"></i>주식 투자 퀴즈</h2><p style="margin:0;color:var(--text-muted);font-size:.85rem;">학습 자료 기반 4지선다 30문항 · 정답·해설 공개 ${formatKst(releaseAt)}</p></div><div class="quiz-score-bar"><span>${reviewAvailable ? `결과 · ${result.score} / ${result.total}점` : submitted ? `제출 완료 · 공개 ${formatKst(releaseAt)}` : `${answered} / ${questions.length}문항 응답`}</span></div></div>
       ${submitted ? '' : `<div class="card" style="margin:0 0 20px;"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;"><label style="font-size:.88rem;font-weight:700;">이름<input id="exam-name" type="text" maxlength="40" value="${profile.name.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')}" placeholder="이름을 입력하세요" style="display:block;width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font:inherit;"></label><label style="font-size:.88rem;font-weight:700;">사는 지역<select id="exam-region" style="display:block;width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font:inherit;"><option value="">시·도 선택</option>${exam.regions.map((region) => `<option value="${region}" ${profile.region === region ? 'selected' : ''}>${region}</option>`).join('')}</select></label></div><p style="font-size:.78rem;color:var(--text-muted);margin:10px 0 0;">지역은 17개 시·도 중에서만 선택할 수 있어요.</p></div>`}
-      ${reviewAvailable ? `<div class="card" style="margin:0 0 20px;border-left:4px solid var(--primary);"><strong>결과: ${result.score} / ${result.total}점</strong><span style="color:var(--text-muted);margin-left:8px;">해설을 읽고 단어장을 다시 확인해 보세요.</span></div>` : submitted ? `<div class="card" style="margin:0 0 20px;border-left:4px solid var(--primary);"><strong>답안이 제출되었습니다.</strong><span style="color:var(--text-muted);margin-left:8px;">정답과 해설은 ${formatKst(releaseAt)}부터 확인할 수 있어요.</span></div>` : ''}
+      ${reviewAvailable ? `<div class="card" style="margin:0 0 20px;border-left:4px solid var(--primary);"><strong>결과: ${result.score} / ${result.total}점</strong><span style="color:var(--text-muted);margin-left:8px;">해설을 읽고 학습 자료를 다시 확인해 보세요.</span></div>` : submitted ? `<div class="card" style="margin:0 0 20px;border-left:4px solid var(--primary);"><strong>답안이 제출되었습니다.</strong><span style="color:var(--text-muted);margin-left:8px;">정답과 해설은 ${formatKst(releaseAt)}부터 확인할 수 있어요.</span></div>` : ''}
       <div class="quiz-progress-wrap" style="margin-bottom:18px;"><div class="quiz-progress-label"><span>문제 ${current + 1} / ${questions.length}</span><span>${reviewAvailable ? '채점 결과' : `${Math.round(answered / questions.length * 100)}% 완료`}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${reviewAvailable ? 100 : answered / questions.length * 100}%"></div></div></div>
       <div class="question-card"><div class="q-num"><span class="badge badge-blue">Q${current + 1}</span><span style="color:var(--text-muted);font-size:.76rem;">주식 기초 용어</span></div><div class="q-text">${question.question}</div><div class="choices">${question.choices.map((choice, index) => { const selected = answers[current]; const style = reviewAvailable ? (index === question.answer ? ' correct' : (index === selected ? ' wrong' : '')) : (index === selected ? ' selected' : ''); return `<button class="choice-btn${style}" data-choice="${index}" ${submitted ? 'disabled' : ''}><span class="choice-idx">${LETTERS[index]}</span><span>${choice}</span></button>`; }).join('')}</div>${reviewAvailable ? `<div class="explanation show ${answers[current] !== question.answer ? 'wrong-exp' : ''}"><div class="exp-label">${answers[current] === question.answer ? '정답입니다!' : `정답: ${LETTERS[question.answer]} ${question.choices[question.answer]}`}</div>${question.explanation}</div>` : ''}</div>
       <div class="quiz-nav"><button class="btn btn-secondary" id="prev" ${current === 0 ? 'disabled' : ''}>이전</button>${current < questions.length - 1 ? '<button class="btn btn-primary" id="next">다음</button>' : submitted ? '<button class="btn btn-secondary" id="home">퀴즈 메뉴</button>' : `<button class="btn btn-success" id="submit" ${answered < questions.length ? 'disabled' : ''}>시험 제출</button>`}</div>`;
