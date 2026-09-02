@@ -8,6 +8,47 @@ function formatText(value) {
   return escapeHtml(value).replace(/\n/g, '<br>');
 }
 
+function formatInline(value) {
+  return escapeHtml(value)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[출처\s*(\d+)\]/g, '<span class="rag-citation">출처 $1</span>');
+}
+
+function formatAnswer(value) {
+  const blocks = [];
+  let listItems = [];
+  let ordered = false;
+  const flushList = () => {
+    if (!listItems.length) return;
+    blocks.push(`<${ordered ? 'ol' : 'ul'}>${listItems.map((item) => `<li>${formatInline(item)}</li>`).join('')}</${ordered ? 'ol' : 'ul'}>`);
+    listItems = [];
+  };
+
+  String(value).replace(/\r/g, '').split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    const heading = trimmed.match(/^#{1,3}\s+(.+)$/);
+    const bullet = trimmed.match(/^[-*•]\s+(.+)$/);
+    const number = trimmed.match(/^\d+[.)]\s+(.+)$/);
+    if (!trimmed) {
+      flushList();
+    } else if (heading) {
+      flushList();
+      blocks.push(`<h3>${formatInline(heading[1])}</h3>`);
+    } else if (bullet || number) {
+      const isOrdered = Boolean(number);
+      if (listItems.length && ordered !== isOrdered) flushList();
+      ordered = isOrdered;
+      listItems.push((bullet || number)[1]);
+    } else {
+      flushList();
+      blocks.push(`<p>${formatInline(trimmed)}</p>`);
+    }
+  });
+  flushList();
+  return blocks.length ? blocks.join('') : '<p>관련 문서를 찾지 못했습니다.</p>';
+}
+
 export function ragChatView(app) {
   const messages = [];
   let sources = [];
@@ -49,7 +90,7 @@ export function ragChatView(app) {
       <section class="rag-chat-layout rag-answer-layout">
         <section class="card rag-chat-panel">
           <div id="rag-messages" class="rag-messages" aria-live="polite">
-            ${messages.length ? messages.map((message) => `<div class="rag-message is-${message.role}">${formatText(message.text)}</div>`).join('') : '<div class="rag-welcome"><strong>무엇이 궁금한가요?</strong><br>예: “ETF 괴리율은 왜 생기나요?”</div>'}
+            ${messages.length ? messages.map((message) => `<div class="rag-message is-${message.role}">${message.role.startsWith('assistant') ? formatAnswer(message.text) : formatText(message.text)}</div>`).join('') : '<div class="rag-welcome"><strong>무엇이 궁금한가요?</strong><br>예: “ETF 괴리율은 왜 생기나요?”</div>'}
           </div>
           <div class="rag-chat-compose">
             <div class="rag-examples">${EXAMPLES.map((example) => `<button type="button" class="btn btn-secondary btn-sm rag-example" data-query="${escapeHtml(example)}">${escapeHtml(example)}</button>`).join('')}</div>

@@ -180,15 +180,42 @@ def _require_qdrant() -> None:
 
 
 def _rag_only_answer(chunks: list[dict[str, object]]) -> str:
-    """검색된 원문만 잘라 정리한다. 생성 모델이나 외부 지식은 사용하지 않는다."""
+    """생성 모델 없이도 읽기 쉬운 근거 중심 답변을 만든다."""
     if not chunks:
         return "관련 문서를 찾지 못했습니다. 다른 표현으로 질문해 보세요."
+
+    def excerpt(value: object, limit: int = 280) -> str:
+        """Markdown 원문의 서식 잡음을 줄이고, 문장 경계에서 짧게 자른다."""
+        lines = []
+        for line in str(value).splitlines():
+            line = line.strip()
+            if not line or line.startswith(("```", "#")) or re.fullmatch(r"[\s|:-]+", line):
+                continue
+            if "|" in line:
+                line = " · ".join(part.strip() for part in line.strip("|").split("|") if part.strip())
+            line = re.sub(r"^#{1,6}\s+", "", line)
+            line = re.sub(r"^[-*+]\s+", "", line)
+            line = re.sub(r"^\d+[.)]\s+", "", line)
+            line = re.sub(r"!?(?:\[([^\]]*)\]\([^)]*\))", r"\1", line)
+            lines.append(line)
+        text = " ".join(" ".join(lines).split())
+        if len(text) <= limit:
+            return text
+        # 한국어 문장 부호를 포함한 자연스러운 경계에서 우선 자른다.
+        boundary = max(text.rfind(mark, 0, limit) for mark in (". ", ".", "?", "!", "다. ", "요. "))
+        if boundary >= limit // 2:
+            return text[:boundary + 1].rstrip()
+        return text[:limit].rstrip() + "…"
+
     excerpts = []
-    for chunk in chunks[:3]:
-        text = " ".join(str(chunk.get("text", "")).split())
+    for index, chunk in enumerate(chunks[:3], start=1):
+        text = excerpt(chunk.get("text", ""))
         if text:
-            excerpts.append(f"• {text[:500]}{'…' if len(text) > 500 else ''}")
-    return "문서에서 찾은 관련 내용입니다. 오른쪽 원문과 함께 확인하세요.\n\n" + "\n\n".join(excerpts)
+            section = " ".join(str(chunk.get("section_path", "문서 본문")).split()) or "문서 본문"
+            excerpts.append(f"- **{section}**: {text} [출처 {index}]")
+    if not excerpts:
+        return "관련 문서를 찾았지만 표시할 본문이 없습니다. 검색 근거를 확인해 주세요."
+    return "### 문서에서 찾은 핵심\n\n" + "\n".join(excerpts) + "\n\n검색 근거에서 원문 전체를 확인할 수 있습니다."
 
 
 def _openai_compatible_answer(query: str, chunks: list[dict[str, object]]) -> str:
@@ -206,7 +233,8 @@ def _openai_compatible_answer(query: str, chunks: list[dict[str, object]]) -> st
     prompt = (
         "아래 '검색 원문'만 근거로 사용자의 질문에 한국어로 간결하게 답하세요. "
         "원문에 없는 사실·숫자·투자 조언을 추가하지 말고, 정보가 부족하면 부족하다고 밝히세요. "
-        "출처 번호를 [출처 1]처럼 표시하고 3개 이내의 짧은 문단 또는 목록으로 정리하세요.\n\n"
+        "답변은 반드시 Markdown으로 작성하세요: 먼저 `### 핵심 답변` 제목을 쓰고, 이어서 2~4개의 짧은 목록만 사용하세요. "
+        "각 목록에는 근거가 된 출처 번호를 [출처 1] 형식으로 하나 이상 붙이세요. 표, 코드 블록, 인사말, 원문 장문 인용은 쓰지 마세요.\n\n"
         f"사용자 질문: {query}\n\n검색 원문:\n{context}"
     )
     payload = {

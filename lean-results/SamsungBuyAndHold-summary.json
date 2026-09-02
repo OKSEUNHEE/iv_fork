@@ -49,16 +49,24 @@
     "Volume": "$79,600.00"
   },
   "state": {
-    "StartTime": "2026-08-05T23:59:32Z",
-    "EndTime": "2026-08-05T23:59:35Z",
+    "StartTime": "2026-09-02T09:16:03Z",
+    "EndTime": "2026-09-02T09:16:08Z",
     "RuntimeError": "",
     "StackTrace": "",
     "LogCount": "4",
     "OrderCount": "1",
     "InsightCount": "0",
     "Name": "local",
-    "Hostname": "e1e0b777fc18",
+    "Hostname": "ca0c9cb1f202",
     "Status": "Completed"
+  },
+  "serverStatistics": {
+    "CPU Usage": "0.0%",
+    "Used RAM (MB)": "43",
+    "Total RAM (MB)": "2147483647",
+    "Hostname": "ca0c9cb1f202",
+    "LEAN Version": "v2.5.0.0",
+    "Up Time": "0d 00:00:04"
   },
   "algorithmConfiguration": {
     "name": "local",
