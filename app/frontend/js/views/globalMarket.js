@@ -34,6 +34,39 @@ function formatDate(value) {
     : new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
+function renderAiSummaryCard(aiData, isUs = false) {
+  if (!aiData || !aiData.summary || !aiData.summary.length) return '';
+  const sentiment = aiData.sentiment || '중립';
+  const isPositive = sentiment.includes('호재') || sentiment.includes('긍정');
+  const isNegative = sentiment.includes('악재') || sentiment.includes('주의');
+  const badgeBg = isPositive ? '#ecfdf5' : isNegative ? '#fef2f2' : '#f8fafc';
+  const badgeColor = isPositive ? '#065f46' : isNegative ? '#991b1b' : '#334155';
+  const badgeBorder = isPositive ? '#a7f3d0' : isNegative ? '#fecaca' : '#cbd5e1';
+  const badgeIcon = isPositive ? 'fa-arrow-trend-up' : isNegative ? 'fa-triangle-exclamation' : 'fa-minus';
+
+  return `
+    <div style="margin-bottom:16px;padding:18px 20px;background:linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(139,92,246,0.06) 100%);border:1px solid rgba(139,92,246,0.3);border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.1rem;background:linear-gradient(135deg,#8b5cf6,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="-webkit-text-fill-color:#8b5cf6;"></i> AI 스마트 ${isUs ? '한국어 번역 & ' : ''}3줄 브리핑
+          </span>
+          <span style="font-size:0.75rem;padding:2px 7px;border-radius:999px;background:#ede9fe;color:#5b21b6;font-weight:600;">AI 실시간 생성</span>
+        </div>
+        <div style="font-size:0.8rem;padding:4px 10px;border-radius:8px;background:${badgeBg};color:${badgeColor};border:1px solid ${badgeBorder};font-weight:700;">
+          <i class="fa-solid ${badgeIcon}"></i> 투자 심리: ${escapeHtml(sentiment)}
+        </div>
+      </div>
+      <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--text-main);font-size:0.88rem;line-height:1.6;">
+        ${aiData.summary.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+      </ul>
+      <div style="margin-top:10px;font-size:0.72rem;color:var(--text-muted);text-align:right;">
+        * ${isUs ? '미국 현지 영문 뉴스를 AI가 한글로 번역 및 분석한 요약입니다.' : '국내 최신 증권 기사를 종합 분석한 AI 요약입니다.'}
+      </div>
+    </div>
+  `;
+}
+
 export function globalMarketView(container) {
   container.innerHTML = `
     <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
@@ -46,7 +79,7 @@ export function globalMarketView(container) {
               <i class="fa-solid fa-earth-americas" style="color:#2563eb;"></i> 통합 금융 마켓 대시보드
             </h1>
             <p style="margin:0;color:var(--text-muted);font-size:0.88rem;">
-              인베스팅닷컴 스타일의 <strong>국내(코스피·코스닥) 및 미국/글로벌 핵심 지수, 시총 대형주, 실시간 증권 뉴스</strong> 통합 플랫폼입니다.
+              인베스팅닷컴 스타일의 <strong>국내(코스피·코스닥) 및 미국/글로벌 핵심 지수, 대형주, AI 뉴스 번역·요약</strong> 통합 플랫폼입니다.
             </p>
           </div>
           <button id="global-refresh-btn" class="btn btn-secondary" style="font-size:0.85rem;">
@@ -86,7 +119,7 @@ export function globalMarketView(container) {
             <h2 style="font-size:1.1rem;margin:0;display:flex;align-items:center;gap:8px;">
               <i class="fa-solid fa-crown" style="color:#eab308;"></i> 국내 시가총액 TOP 10 대형주 시세
             </h2>
-            <span style="font-size:0.78rem;color:var(--text-muted);">종목 카드를 클릭하면 해당 기업의 증권 뉴스가 즉시 조회됩니다.</span>
+            <span style="font-size:0.78rem;color:var(--text-muted);">종목 카드를 클릭하면 해당 기업의 AI 요약과 증권 뉴스가 즉시 조회됩니다.</span>
           </div>
           <div id="kr-top-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;">
             <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-align:center;color:var(--text-muted);">
@@ -95,17 +128,22 @@ export function globalMarketView(container) {
           </div>
         </section>
 
-        <!-- 국내 종목 검색 & 증권 뉴스 피드 -->
+        <!-- 국내 종목 검색 & AI 요약 & 증권 뉴스 피드 -->
         <section class="card" style="padding:24px;border-radius:16px;">
           <h2 style="font-size:1.15rem;margin:0 0 14px;display:flex;align-items:center;gap:8px;">
-            <i class="fa-solid fa-magnifying-glass" style="color:#0f766e;"></i> 국내 상장 기업 검색 & 증권 뉴스
+            <i class="fa-solid fa-magnifying-glass" style="color:#0f766e;"></i> 국내 상장 기업 검색 & AI 증권 뉴스 분석
           </h2>
           <form id="kr-search-form" style="display:flex;gap:10px;margin-bottom:16px;">
             <input id="kr-search-input" class="param-input" value="삼성전자" maxlength="50" placeholder="국내 기업명 입력 (예: 삼성전자, SK하이닉스, 현대차, 에코프로, 카카오)" style="flex:1;" />
-            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search"></i> 증권 뉴스 검색</button>
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search"></i> 분석 및 뉴스 검색</button>
           </form>
           
           <div id="kr-news-status" style="margin-bottom:12px;font-size:0.84rem;color:var(--text-muted);"></div>
+          
+          <!-- AI 브리핑 영역 -->
+          <div id="kr-ai-summary-box"></div>
+
+          <!-- 뉴스 목록 -->
           <div id="kr-news-list" style="display:grid;gap:12px;"></div>
         </section>
 
@@ -132,7 +170,7 @@ export function globalMarketView(container) {
             <h2 style="font-size:1.1rem;margin:0;display:flex;align-items:center;gap:8px;">
               <i class="fa-solid fa-fire" style="color:#f59e0b;"></i> 미국 빅테크 (Magnificent 7) 실시간 시세
             </h2>
-            <span style="font-size:0.78rem;color:var(--text-muted);">종목 카드를 클릭하면 미국 현지 속보가 로드됩니다.</span>
+            <span style="font-size:0.78rem;color:var(--text-muted);">종목 카드를 클릭하면 미국 현지 속보가 한글로 자동 번역·요약됩니다.</span>
           </div>
           <div id="m7-stocks-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;">
             <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-align:center;color:var(--text-muted);">
@@ -141,17 +179,23 @@ export function globalMarketView(container) {
           </div>
         </section>
 
-        <!-- 미국 주식 검색 & 글로벌 속보 피드 -->
+        <!-- 미국 주식 검색 & AI 번역·요약 & 글로벌 속보 피드 -->
         <section class="card" style="padding:24px;border-radius:16px;">
           <h2 style="font-size:1.15rem;margin:0 0 14px;display:flex;align-items:center;gap:8px;">
-            <i class="fa-solid fa-magnifying-glass" style="color:#8b5cf6;"></i> 미국 종목 검색 & 현지 글로벌 속보
+            <i class="fa-solid fa-magnifying-glass" style="color:#8b5cf6;"></i> 미국 종목 검색 & AI 영문 속보 번역 브리핑
           </h2>
           <form id="global-search-form" style="display:flex;gap:10px;margin-bottom:16px;">
             <input id="global-ticker-input" class="param-input" value="NVDA" maxlength="15" placeholder="미국 티커 입력 (예: NVDA, TSLA, AAPL, MSFT, AMD, PLTR)" style="flex:1;text-transform:uppercase;font-weight:700;letter-spacing:1px;" />
-            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search"></i> 미국 뉴스 조회</button>
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search"></i> 미국 뉴스 분석</button>
           </form>
 
+          <!-- 선택된 종목 요약 카드 -->
           <div id="selected-stock-card" style="margin-bottom:16px;display:none;"></div>
+
+          <!-- AI 번역 브리핑 영역 -->
+          <div id="global-ai-summary-box"></div>
+
+          <!-- 글로벌 뉴스 목록 -->
           <div id="global-news-list" style="display:grid;gap:12px;"></div>
         </section>
 
@@ -173,6 +217,7 @@ export function globalMarketView(container) {
   const krSearchForm = container.querySelector('#kr-search-form');
   const krSearchInput = container.querySelector('#kr-search-input');
   const krNewsStatus = container.querySelector('#kr-news-status');
+  const krAiSummaryBox = container.querySelector('#kr-ai-summary-box');
   const krNewsList = container.querySelector('#kr-news-list');
 
   // 글로벌 패널 요소
@@ -181,6 +226,7 @@ export function globalMarketView(container) {
   const globalSearchForm = container.querySelector('#global-search-form');
   const globalTickerInput = container.querySelector('#global-ticker-input');
   const stockCard = container.querySelector('#selected-stock-card');
+  const globalAiSummaryBox = container.querySelector('#global-ai-summary-box');
   const globalNewsList = container.querySelector('#global-news-list');
 
   // 탭 전환 핸들러
@@ -257,10 +303,11 @@ export function globalMarketView(container) {
     }
   }
 
-  // 국내 뉴스 검색
+  // 국내 뉴스 검색 & AI 요약
   async function searchKrNews(companyName) {
     if (!companyName) return;
     krNewsStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 최신 증권 뉴스를 수집하는 중입니다...';
+    krAiSummaryBox.innerHTML = '';
     krNewsList.innerHTML = '';
     try {
       const data = await api.naverCompanyNews({ company_name: companyName, limit: 8 });
@@ -274,25 +321,46 @@ export function globalMarketView(container) {
         return;
       }
       krNewsStatus.textContent = `“${data.query}” 관련 핵심 증권 뉴스 ${data.count}건`;
-      krNewsList.innerHTML = data.items.length ? data.items.map((item) => `
-        <article style="padding:15px;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
-          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-            <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--text-main);font-weight:700;font-size:0.95rem;text-decoration:none;line-height:1.5;flex:1;">
-              ${escapeHtml(item.title)}
-            </a>
-            <span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:var(--surface-subtle);color:var(--text-muted);white-space:nowrap;border:1px solid var(--border);">
-              ${escapeHtml(item.publisher || '증권뉴스')}
-            </span>
+      
+      // 기사 목록 렌더링
+      if (data.items && data.items.length) {
+        krNewsList.innerHTML = data.items.map((item) => `
+          <article style="padding:15px;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" style="color:var(--text-main);font-weight:700;font-size:0.95rem;text-decoration:none;line-height:1.5;flex:1;">
+                ${escapeHtml(item.title)}
+              </a>
+              <span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:var(--surface-subtle);color:var(--text-muted);white-space:nowrap;border:1px solid var(--border);">
+                ${escapeHtml(item.publisher || '증권뉴스')}
+              </span>
+            </div>
+            ${item.description ? `<p style="margin:6px 0 0;color:var(--text-muted);font-size:0.84rem;line-height:1.55;">${escapeHtml(item.description)}</p>` : ''}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:0.75rem;color:var(--text-subtle);">
+              <span><i class="fa-regular fa-clock"></i> ${escapeHtml(formatDate(item.published_at))}</span>
+              <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" style="color:#0284c7;text-decoration:none;font-weight:600;">
+                원문 보기 <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+          </article>
+        `).join('');
+
+        // 비동기 AI 브리핑 로드
+        krAiSummaryBox.innerHTML = `
+          <div style="padding:14px;background:var(--surface-subtle);border:1px dashed var(--border);border-radius:12px;color:var(--text-muted);font-size:0.85rem;display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-wand-magic-sparkles fa-spin" style="color:#8b5cf6;"></i> AI가 최신 증권 뉴스를 분석하여 3줄 브리핑을 생성하고 있습니다...
           </div>
-          ${item.description ? `<p style="margin:6px 0 0;color:var(--text-muted);font-size:0.84rem;line-height:1.55;">${escapeHtml(item.description)}</p>` : ''}
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:0.75rem;color:var(--text-subtle);">
-            <span><i class="fa-regular fa-clock"></i> ${escapeHtml(formatDate(item.published_at))}</span>
-            <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" style="color:#0284c7;text-decoration:none;font-weight:600;">
-              원문 보기 <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-          </div>
-        </article>
-      `).join('') : '<p style="color:var(--text-muted);padding:12px;text-align:center;">표시할 증권 뉴스가 없습니다.</p>';
+        `;
+        api.aiNewsSummary({ company_name: companyName, is_us: false, articles: data.items })
+          .then((aiRes) => {
+            krAiSummaryBox.innerHTML = renderAiSummaryCard(aiRes, false);
+          })
+          .catch(() => {
+            krAiSummaryBox.innerHTML = '';
+          });
+
+      } else {
+        krNewsList.innerHTML = '<p style="color:var(--text-muted);padding:12px;text-align:center;">표시할 증권 뉴스가 없습니다.</p>';
+      }
     } catch (err) {
       krNewsStatus.textContent = '';
       krNewsList.innerHTML = `<div style="color:#ef4444;padding:12px;">뉴스 로드 실패: ${escapeHtml(err.message)}</div>`;
@@ -355,10 +423,11 @@ export function globalMarketView(container) {
     }
   }
 
-  // 미국 주식 & 뉴스 검색
+  // 미국 주식 & 뉴스 검색 & AI 한글 번역 브리핑
   async function searchGlobalStock(ticker) {
     if (!ticker) return;
-    globalNewsList.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> 미국 현지 속보 불러오는 중...</div>';
+    globalAiSummaryBox.innerHTML = '';
+    globalNewsList.innerHTML = '<div style="padding:14px;text-align:center;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> 미국 현지 속보 및 시세를 불러오는 중...</div>';
     try {
       const [quote, newsData] = await Promise.all([
         api.globalStockDetail(ticker),
@@ -401,6 +470,21 @@ export function globalMarketView(container) {
             </div>
           </article>
         `).join('');
+
+        // 비동기 AI 영문 뉴스 번역 & 브리핑 로드
+        globalAiSummaryBox.innerHTML = `
+          <div style="padding:14px;background:var(--surface-subtle);border:1px dashed var(--border);border-radius:12px;color:var(--text-muted);font-size:0.85rem;display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-wand-magic-sparkles fa-spin" style="color:#8b5cf6;"></i> AI가 미국 현지 영문 뉴스를 한국어로 번역하고 3줄 요약하고 있습니다...
+          </div>
+        `;
+        api.aiNewsSummary({ company_name: ticker, is_us: true, articles: newsData.items })
+          .then((aiRes) => {
+            globalAiSummaryBox.innerHTML = renderAiSummaryCard(aiRes, true);
+          })
+          .catch(() => {
+            globalAiSummaryBox.innerHTML = '';
+          });
+
       } else {
         globalNewsList.innerHTML = '<p style="color:var(--text-muted);padding:12px;text-align:center;">관련 글로벌 뉴스가 없습니다.</p>';
       }
@@ -427,7 +511,7 @@ export function globalMarketView(container) {
     searchGlobalStock(globalTickerInput.value.trim().toUpperCase());
   });
 
-  // 초기 실행 (국내 증시 우선 로드)
+  // 초기 실행
   loadKrData();
   searchKrNews('삼성전자');
 }

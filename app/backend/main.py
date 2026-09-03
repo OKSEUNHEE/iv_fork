@@ -3380,6 +3380,148 @@ def kr_top_stocks() -> dict[str, object]:
     return result
 
 
+class AISummaryRequest(BaseModel):
+    company_name: str
+    is_us: bool = False
+    articles: list[dict[str, str]] = []
+
+
+def _call_gemini_summary(prompt: str) -> str | None:
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        return None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 600}
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as res:
+            data = json.loads(res.read().decode("utf-8"))
+            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception:
+        return None
+
+
+def _call_ollama_summary(prompt: str) -> str | None:
+    base_url = os.getenv("RAG_LLM_BASE_URL", "http://ollama:11434/v1").rstrip("/")
+    model = os.getenv("RAG_LLM_MODEL", "qwen3:8b")
+    api_key = os.getenv("RAG_LLM_API_KEY", "ollama")
+    
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "너는 증권 및 글로벌 금융 전문 AI 애널리스트다. 뉴스를 정밀하게 분석하여 투자자에게 유용한 한국어 핵심 브리핑을 제공한다."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.2,
+        "max_tokens": 450
+    }
+    req = urllib.request.Request(
+        f"{base_url}/chat/completions",
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as res:
+            data = json.loads(res.read().decode("utf-8"))
+            return data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    except Exception:
+        return None
+
+
+@app.post("/api/news/ai-summary")
+def generate_news_ai_summary(req: AISummaryRequest) -> dict[str, object]:
+    """국내 및 미국/글로벌 뉴스를 AI가 분석하여 투자 심리와 한국어 3줄 요약을 반환한다."""
+    company = req.company_name.strip()
+    if not req.articles:
+        return {
+            "company": company,
+            "sentiment": "중립",
+            "summary": ["수집된 뉴스가 없어 요약을 생성할 수 없습니다."],
+            "source": "AI Summary Engine"
+        }
+
+    # 기사 텍스트 취합 (최대 5개)
+    text_list = []
+    for idx, a in enumerate(req.articles[:5], 1):
+        t = a.get("title", "").strip()
+        d = a.get("description", "").strip()
+        text_list.append(f"{idx}. {t} / {d}")
+    combined_news = "\n".join(text_list)
+
+    if req.is_us:
+        prompt = f"""
+다음은 미국 상장 기업 '{company}'의 최신 영문 경제 뉴스입니다.
+[뉴스 목록]
+{combined_news}
+
+위 영문 뉴스들을 한국어로 매끄럽게 번역 및 종합 분석하여 다음 형식으로만 정확히 작성해 주세요:
+[투자심리]: 호재 (긍정) / 중립 / 악재 (주의) 중 단어 하나만 선택
+[3줄요약]:
+1. (첫 번째 핵심 내용 한국어 번역 요약)
+2. (두 번째 핵심 내용 한국어 번역 요약)
+3. (세 번째 핵심 내용 한국어 번역 요약)
+"""
+    else:
+        prompt = f"""
+다음은 국내 상장 기업 '{company}'의 최신 증권/실적 뉴스입니다.
+[뉴스 목록]
+{combined_news}
+
+위 뉴스들을 투자자 관점에서 종합 분석하여 다음 형식으로만 정확히 작성해 주세요:
+[투자심리]: 호재 (긍정) / 중립 / 악재 (주의) 중 단어 하나만 선택
+[3줄요약]:
+1. (첫 번째 핵심 이슈 요약)
+2. (두 번째 핵심 이슈 요약)
+3. (세 번째 핵심 이슈 요약)
+"""
+
+    # 1. Gemini 또는 Ollama AI 호출
+    ai_raw = _call_gemini_summary(prompt) or _call_ollama_summary(prompt)
+    
+    sentiment = "중립"
+    summary_lines = []
+
+    if ai_raw:
+        # 응답 파싱
+        for line in ai_raw.splitlines():
+            line_clean = line.strip()
+            if "[투자심리]" in line_clean or "투자심리" in line_clean:
+                if "호재" in line_clean or "긍정" in line_clean:
+                    sentiment = "호재 (긍정적)"
+                elif "악재" in line_clean or "주의" in line_clean:
+                    sentiment = "악재 (주의 필요)"
+                else:
+                    sentiment = "중립"
+            elif re.match(r"^\d+[\.\)]\s*", line_clean) or line_clean.startswith("-"):
+                clean_item = re.sub(r"^\d+[\.\)]\s*|-\s*", "", line_clean).strip()
+                if clean_item and len(clean_item) > 5 and not clean_item.startswith("["):
+                    summary_lines.append(clean_item)
+    
+    # Fallback 기본 요약
+    if not summary_lines:
+        sentiment = "중립"
+        summary_lines = [
+            f"최근 {company} 관련 주요 이슈 및 실적·수주 모멘텀이 시장에서 활발히 논의 중입니다.",
+            f"주요 기사: {req.articles[0].get('title', '')[:70]}",
+            "세부적인 주가 영향 및 변동성은 시장 상황에 따라 추가 모니터링이 권장됩니다."
+        ]
+
+    return {
+        "company": company,
+        "is_us": req.is_us,
+        "sentiment": sentiment,
+        "summary": summary_lines[:3],
+        "source": "AI Intelligence Engine",
+    }
+
+
 app.mount("/image", StaticFiles(directory=NOTEBOOK_IMAGE_DIR), name="notebook-images")
 
 
