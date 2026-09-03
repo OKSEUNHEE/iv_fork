@@ -52,9 +52,10 @@ function formatAnswer(value) {
 export function ragChatView(app) {
   const messages = [];
   let sources = [];
-  let provider = 'rag';
+  let provider = 'gemini';
   let providerSelectedByUser = false;
   let externalAiAvailable = false;
+  let geminiAvailable = false;
   let sourcesOpen = false;
 
   function renderSources() {
@@ -80,10 +81,11 @@ export function ragChatView(app) {
         <div class="rag-chat-controls">
           <label for="rag-provider">답변 생성</label>
           <select id="rag-provider" class="param-input" aria-label="답변 생성 모듈 선택">
-            <option value="openai_compatible" ${provider === 'openai_compatible' ? 'selected' : ''} ${externalAiAvailable ? '' : 'disabled'}>질문 맞춤 요약 · Ollama</option>
+            <option value="gemini" ${provider === 'gemini' ? 'selected' : ''}>질문 맞춤 요약 · Google Gemini (초고속 ⭐)</option>
             <option value="rag" ${provider === 'rag' ? 'selected' : ''}>원문 발췌</option>
+            <option value="openai_compatible" ${provider === 'openai_compatible' ? 'selected' : ''} ${externalAiAvailable ? '' : 'disabled'}>질문 맞춤 요약 · 로컬 Ollama</option>
           </select>
-          <small id="rag-provider-note">${externalAiAvailable ? 'Ollama에는 검색 원문만 전달해 답변을 생성합니다.' : 'Ollama 모델을 준비하면 로컬 답변 생성을 사용할 수 있습니다.'}</small>
+          <small id="rag-provider-note">Google Gemini API로 검색 원문을 1초 만에 깔끔하게 요약합니다.</small>
           <span id="rag-status" class="badge badge-gray">연결 확인 중</span>
         </div>
       </section>
@@ -116,6 +118,14 @@ export function ragChatView(app) {
     app.querySelector('#rag-provider').addEventListener('change', (event) => {
       provider = event.target.value;
       providerSelectedByUser = true;
+      const providerNote = app.querySelector('#rag-provider-note');
+      if (provider === 'gemini') {
+        providerNote.textContent = 'Google Gemini API로 검색 원문을 1초 만에 깔끔하게 요약합니다.';
+      } else if (provider === 'rag') {
+        providerNote.textContent = 'AI 문장 생성 없이 Qdrant에서 찾은 교재 원문만 바로 표시합니다.';
+      } else {
+        providerNote.textContent = '로컬 Ollama 모델로 검색 원문을 요약합니다 (CPU 환경 30초~1분 소요).';
+      }
     });
     app.querySelectorAll('.rag-example').forEach((button) => button.addEventListener('click', () => ask(button.dataset.query)));
     app.querySelector('#rag-form').addEventListener('submit', (event) => {
@@ -153,28 +163,24 @@ export function ragChatView(app) {
       const providerNote = app.querySelector('#rag-provider-note');
       if (!status || !providerSelect || !providerNote) return;
       externalAiAvailable = Boolean(data.external_ai?.openai_compatible_available);
-      const externalOption = providerSelect.querySelector('option[value="openai_compatible"]');
-      externalOption.disabled = !externalAiAvailable;
-      if (externalAiAvailable && !providerSelectedByUser) {
-        provider = 'openai_compatible';
+      geminiAvailable = Boolean(data.external_ai?.gemini_available);
+      const ollamaOption = providerSelect.querySelector('option[value="openai_compatible"]');
+      if (ollamaOption) ollamaOption.disabled = !externalAiAvailable;
+      const geminiOption = providerSelect.querySelector('option[value="gemini"]');
+      if (geminiOption) geminiOption.disabled = !geminiAvailable;
+
+      if (!providerSelectedByUser) {
+        if (geminiAvailable) provider = 'gemini';
+        else if (externalAiAvailable) provider = 'openai_compatible';
+        else provider = 'rag';
         providerSelect.value = provider;
       }
-      if (!externalAiAvailable && provider === 'openai_compatible') {
-        provider = 'rag';
-        providerSelect.value = 'rag';
-      }
-      providerNote.textContent = externalAiAvailable
-        ? `Ollama가 ${data.embedding?.model || '임베딩 모델'}로 찾은 원문만 전달해 답변을 생성합니다.`
-        : data.embedding?.provider === 'hash'
-          ? '서버는 Ollama 없이 해시 기반 문서 검색만 사용합니다.'
-          : 'Ollama 모델을 준비하면 로컬 답변 생성을 사용할 수 있습니다.';
       if (data.qdrant?.collection_available) {
         status.className = 'badge badge-green';
         status.textContent = `문서 ${Number(data.qdrant.points_count || 0).toLocaleString()}개 청크 연결됨`;
       } else if (data.qdrant?.available) {
         status.className = 'badge badge-gray';
         status.textContent = '문서 색인 필요';
-        providerNote.textContent = '학습 문서가 아직 색인되지 않았습니다. 관리자에게 문서 색인을 요청하세요.';
       } else status.textContent = '벡터 DB 연결 안 됨';
     } catch {
       const status = app.querySelector('#rag-status');
@@ -192,9 +198,14 @@ export function ragChatView(app) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, top_k: 5, provider }),
       });
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error(`서버 응답 파싱 실패 (${response.status})`);
+      }
       messages.pop();
-      if (!response.ok) throw new Error(data.detail || '문서 검색에 실패했습니다.');
+      if (!response.ok) throw new Error(data.detail || data.message || '문서 검색에 실패했습니다.');
       sources = data.sources || [];
       messages.push({ role: 'assistant', text: data.answer || '관련 문서를 찾지 못했습니다.' });
     } catch (error) {

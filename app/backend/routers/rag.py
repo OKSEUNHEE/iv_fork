@@ -7,6 +7,7 @@ import os
 import re
 import urllib.error
 import urllib.request
+from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -22,6 +23,8 @@ _RAG_EMBEDDING_MODEL = os.getenv("RAG_EMBEDDING_MODEL", "")
 _RAG_EMBEDDING_TIMEOUT_SECONDS = max(30, int(os.getenv("RAG_EMBEDDING_TIMEOUT_SECONDS", "180")))
 _RAG_LLM_TIMEOUT_SECONDS = max(30, int(os.getenv("RAG_LLM_TIMEOUT_SECONDS", "180")))
 _RAG_DENSE_CANDIDATES = max(20, min(100, int(os.getenv("RAG_DENSE_CANDIDATES", "40"))))
+_GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
+_GEMINI_TIMEOUT_SECONDS = max(10, int(os.getenv("GEMINI_TIMEOUT_SECONDS", "45")))
 
 
 def _qdrant_request(method: str, path: str, payload: dict | None = None) -> dict:
@@ -86,7 +89,7 @@ def _embed_query(text: str) -> list[float]:
         raise HTTPException(503, "RAG_EMBEDDING_PROVIDER는 ollama 또는 hash여야 합니다.")
     if not _RAG_EMBEDDING_URL or not _RAG_EMBEDDING_MODEL:
         raise HTTPException(503, "Ollama 임베딩을 사용하려면 RAG_EMBEDDING_URL과 RAG_EMBEDDING_MODEL을 설정하세요.")
-    payload = {"model": _RAG_EMBEDDING_MODEL, "input": text, "truncate": True}
+    payload = {"model": _RAG_EMBEDDING_MODEL, "input": text, "truncate": True, "keep_alive": "60m"}
     try:
         request = urllib.request.Request(
             _RAG_EMBEDDING_URL,
@@ -115,7 +118,7 @@ class RagSearchRequest(BaseModel):
 
 
 class RagAskRequest(RagSearchRequest):
-    provider: str = Field(default="rag", pattern="^(rag|openai_compatible)$", description="답변 다듬기에 사용할 외부 AI 모듈")
+    provider: str = Field(default="gemini", pattern="^(rag|openai_compatible|gemini)$", description="답변 다듬기에 사용할 외부 AI 모듈")
 
 
 def _search_terms(text: str) -> set[str]:
@@ -124,11 +127,7 @@ def _search_terms(text: str) -> set[str]:
 
 
 def _lexical_score(query_terms: set[str], text: str, section_path: str = "") -> float:
-    """의미 유사도 후보 안에서 제목·핵심어 일치를 보강한다.
-
-    별도 형태소 분석기 없이도 약어, 영문 티커, 투자 용어가 많은 학습 문서에서
-    동점 후보를 더 읽기 좋은 순서로 정렬하기 위한 보수적인 점수다.
-    """
+    """의미 유사도 후보 안에서 제목·핵심어 일치를 보강한다."""
     if not query_terms:
         return 0.0
     body_terms = _search_terms(text)
@@ -139,8 +138,6 @@ def _lexical_score(query_terms: set[str], text: str, section_path: str = "") -> 
 
 
 def _search(query: str, top_k: int, score_threshold: float) -> list[dict[str, object]]:
-    # 넓게 의미 후보를 가져온 뒤, 제목·핵심어 일치로 재정렬한다. 검색 DB에는
-    # 벡터만 저장하므로 이 단계는 임베딩 모델이나 Qdrant 버전과 독립적으로 동작한다.
     candidate_limit = min(_RAG_DENSE_CANDIDATES, max(top_k * 6, top_k))
     payload: dict[str, object] = {"vector": _embed_query(query), "limit": candidate_limit, "with_payload": True, "with_vector": False}
     if score_threshold > 0:
@@ -154,7 +151,6 @@ def _search(query: str, top_k: int, score_threshold: float) -> list[dict[str, ob
         section_path = str(hit_payload.get("section_path", ""))
         semantic_score = float(hit.get("score", 0))
         lexical_score = _lexical_score(query_terms, text, section_path)
-        # Cosine 점수는 보통 0~1이지만, 다른 거리 설정도 안전하게 처리한다.
         normalized_semantic = max(0.0, min(1.0, (semantic_score + 1) / 2)) if semantic_score < 0 else min(1.0, semantic_score)
         chunks.append({
             "score": round(normalized_semantic * 0.8 + lexical_score * 0.2, 4),
@@ -179,13 +175,80 @@ def _require_qdrant() -> None:
         )
 
 
+def _gemini_answer(query: str, chunks: list[dict[str, object]]) -> str:
+    """RAG 원문만 근거로 Google Gemini API가 답변을 생성하도록 한다."""
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise HTTPException(503, "Google Gemini API 키가 설정되지 않았습니다. GEMINI_API_KEY를 설정한 뒤 다시 시도하세요.")
+    if not _GEMINI_MODEL:
+        raise HTTPException(503, "GEMINI_MODEL이 비어 있습니다.")
+
+    context = "\n\n".join(
+        f"[출처 {index + 1}: {chunk.get('source_doc', '')} / {chunk.get('section_path', '문서 본문')} / 조각 {int(chunk.get('chunk_index', 0)) + 1}]\n{chunk.get('text', '')}"
+        for index, chunk in enumerate(chunks[:3])
+    )[:6000]
+    prompt = (
+        "당신은 주식·투자 학습 교재 문서를 기반으로 질문에 답변하는 금융 튜터입니다.\n"
+        "아래 '검색 원문'을 참고하여 사용자의 질문에 한국어로 친절하고 완성도 높게 설명해 주세요.\n"
+        "원문에 없는 사실이나 투자 조언을 임의로 지어내지 마세요.\n\n"
+        "답변 형식 규정:\n"
+        "1. 맨 처음에 `### 핵심 답변` 제목을 작성하세요.\n"
+        "2. 이어서 2~4개의 목록(`* `)으로 핵심 개념을 읽기 쉽게 정리하세요.\n"
+        "3. 각 목록 항목마다 개념의 이유와 쉬운 설명을 2~3줄로 자세히 서술하세요.\n"
+        "4. 문장이 중간에 잘리지 않도록 마침표까지 완전한 문장으로 마무리하세요.\n"
+        "5. 각 항목 끝에는 참고한 출처 번호를 [출처 1] 형태로 붙이세요.\n\n"
+        f"사용자 질문: {query}\n\n검색 원문:\n{context}"
+    )
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{quote(_GEMINI_MODEL, safe='.-_')}:generateContent"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            # 짧은 문서 요약에는 내부 추론 토큰을 최소화해야 답변 본문이 중간에
+            # 끊기지 않는다. Gemini 3.5 Flash는 minimal thinking을 지원한다.
+            "thinkingConfig": {"thinkingLevel": "MINIMAL"},
+            "maxOutputTokens": 1024,
+        }
+    }
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        method="POST",
+        # URL query string에 키를 넣지 않아 프록시/접근 로그에 남지 않게 한다.
+        headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=_GEMINI_TIMEOUT_SECONDS) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        raise HTTPException(502, f"Google Gemini API 오류({exc.code}): {detail[:300]}") from exc
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        raise HTTPException(502, f"Google Gemini API 응답을 받지 못했습니다: {exc}") from exc
+
+    candidates = result.get("candidates", [])
+    if not candidates:
+        feedback = result.get("promptFeedback", {})
+        raise HTTPException(502, f"Google Gemini가 답변을 생성하지 않았습니다: {feedback or '빈 후보'}")
+    candidate = candidates[0]
+    if candidate.get("finishReason") == "MAX_TOKENS":
+        raise HTTPException(502, "Google Gemini 답변이 출력 한도에서 중단되었습니다. 잠시 후 다시 시도하세요.")
+    text = "".join(
+        str(part.get("text", ""))
+        for part in candidate.get("content", {}).get("parts", [])
+        if isinstance(part, dict)
+    ).strip()
+    if not text:
+        raise HTTPException(502, f"Google Gemini가 빈 답변을 반환했습니다 (종료 사유: {candidate.get('finishReason', '알 수 없음')}).")
+    return text
+
+
 def _rag_only_answer(chunks: list[dict[str, object]]) -> str:
     """생성 모델 없이도 읽기 쉬운 근거 중심 답변을 만든다."""
     if not chunks:
         return "관련 문서를 찾지 못했습니다. 다른 표현으로 질문해 보세요."
 
-    def excerpt(value: object, limit: int = 280) -> str:
-        """Markdown 원문의 서식 잡음을 줄이고, 문장 경계에서 짧게 자른다."""
+    def excerpt(value: object, limit: int = 600) -> str:
+        """Markdown 원문의 서식 잡음을 줄이고, 문장 경계에서 자연스럽게 정리한다."""
         lines = []
         for line in str(value).splitlines():
             line = line.strip()
@@ -201,9 +264,8 @@ def _rag_only_answer(chunks: list[dict[str, object]]) -> str:
         text = " ".join(" ".join(lines).split())
         if len(text) <= limit:
             return text
-        # 한국어 문장 부호를 포함한 자연스러운 경계에서 우선 자른다.
         boundary = max(text.rfind(mark, 0, limit) for mark in (". ", ".", "?", "!", "다. ", "요. "))
-        if boundary >= limit // 2:
+        if boundary >= limit // 3:
             return text[:boundary + 1].rstrip()
         return text[:limit].rstrip() + "…"
 
@@ -246,6 +308,7 @@ def _openai_compatible_answer(query: str, chunks: list[dict[str, object]]) -> st
         "temperature": 0.1,
         "max_tokens": 300,
         "reasoning_effort": "none",
+        "keep_alive": "60m",
     }
     request = urllib.request.Request(
         f"{base_url}/chat/completions",
@@ -280,7 +343,13 @@ def rag_ask(req: RagAskRequest) -> dict[str, object]:
     """RAG 검색 결과만으로 답변을 만들고, 선택 시 외부 AI로 문장만 다듬습니다."""
     _require_qdrant()
     chunks = _search(req.query, req.top_k, req.score_threshold)
-    answer = _rag_only_answer(chunks) if req.provider == "rag" else _openai_compatible_answer(req.query, chunks)
+    if req.provider == "gemini":
+        answer = _gemini_answer(req.query, chunks)
+    elif req.provider == "openai_compatible":
+        answer = _openai_compatible_answer(req.query, chunks)
+    else:
+        answer = _rag_only_answer(chunks)
+
     return {
         "query": req.query,
         "answer": answer,
@@ -307,9 +376,13 @@ def rag_status() -> dict[str, object]:
             }
         except Exception:
             info = {"error": "컬렉션이 없거나 조회 실패"}
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
     return {
         "qdrant": {"available": available, "collection_available": collection_available, "url": _QDRANT_URL, "collection": _QDRANT_COLLECTION, **info},
-        "external_ai": {"openai_compatible_available": bool(os.getenv("RAG_LLM_API_KEY") and os.getenv("RAG_LLM_MODEL"))},
+        "external_ai": {
+            "gemini_available": bool(gemini_key),
+            "openai_compatible_available": bool(os.getenv("RAG_LLM_API_KEY") and os.getenv("RAG_LLM_MODEL")),
+        },
         "embedding": {
             "provider": _RAG_EMBEDDING_PROVIDER,
             "ollama_available": _RAG_EMBEDDING_PROVIDER == "ollama" and bool(_RAG_EMBEDDING_URL and _RAG_EMBEDDING_MODEL),

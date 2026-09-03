@@ -24,6 +24,12 @@ services:
       RAG_LLM_API_KEY: ${RAG_LLM_API_KEY:-ollama}
       RAG_LLM_MODEL: ${RAG_LLM_MODEL:-qwen3:8b}
       RAG_LLM_TIMEOUT_SECONDS: ${RAG_LLM_TIMEOUT_SECONDS:-180}
+      # 실제 키는 저장소 루트의 .env에만 설정합니다. 기본값에 키를 넣지 마세요.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-45}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
       DART_API_KEY: ${DART_API_KEY:-}
       KOSIS_API_KEY: ${KOSIS_API_KEY:-}
       BOK_API_KEY: ${BOK_API_KEY:-}

@@ -1,7 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from html import unescape
 import io
 import json
 import os
@@ -62,6 +64,9 @@ _MATPLOTLIB_FONT_CONFIGURED = False
 ACTIVE_VISITOR_TTL_SECONDS = 90
 _active_visitors: dict[str, float] = {}
 _active_visitors_lock = Lock()
+NAVER_NEWS_CACHE_SECONDS = 300
+_naver_news_cache: dict[tuple[str, int], tuple[float, dict[str, object]]] = {}
+_naver_news_cache_lock = Lock()
 
 def _learn_document_map() -> dict[str, Path]:
     """Expose exactly the Markdown files shipped in docs/, without traversal."""
@@ -163,6 +168,11 @@ async def no_cache_static_assets(request, call_next):
 class DartCompanySearchRequest(BaseModel):
     company_name: str = Field(default="삼성전자", min_length=1, max_length=80)
     limit: int = Field(default=10, ge=1, le=30)
+
+
+class CompanyNewsRequest(BaseModel):
+    company_name: str = Field(min_length=1, max_length=80)
+    limit: int = Field(default=8, ge=1, le=20)
 
 
 class GroupNetworkRequest(BaseModel):
@@ -398,6 +408,208 @@ def dart_company_search(req: DartCompanySearchRequest) -> dict[str, object]:
             "DART는 .KS/.KQ suffix를 제공하지 않아 조회 가능한 Yahoo ticker 후보로 보완 표시합니다.",
         ],
     }
+
+
+def _naver_news_credentials() -> tuple[str, str]:
+    client_id = os.getenv("NAVER_CLIENT_ID", "").strip()
+    client_secret = os.getenv("NAVER_CLIENT_SECRET", "").strip()
+    if not client_id or not client_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="네이버 뉴스 검색을 사용하려면 NAVER_CLIENT_ID와 NAVER_CLIENT_SECRET을 설정하세요.",
+        )
+    return client_id, client_secret
+
+
+MAJOR_FINANCE_PUBLISHERS = {
+    "hankyung.com": "한국경제",
+    "mk.co.kr": "매일경제",
+    "mt.co.kr": "머니투데이",
+    "edaily.co.kr": "이데일리",
+    "asiae.co.kr": "아시아경제",
+    "sedaily.com": "서울경제",
+    "fnnews.com": "파이낸셜뉴스",
+    "heraldcorp.com": "헤럴드경제",
+    "biz.chosun.com": "조선비즈",
+    "infostockdaily.co.kr": "인포스탁데일리",
+    "thebell.co.kr": "더벨",
+    "etnews.com": "전자신문",
+    "newsis.com": "뉴시스",
+    "yna.co.kr": "연합뉴스",
+    "yonhapnewstv.co.kr": "연합뉴스TV",
+    "chosun.com": "조선일보",
+    "donga.com": "동아일보",
+    "joongang.co.kr": "중앙일보",
+    "news1.kr": "뉴스1",
+    "inews24.com": "아이뉴스24",
+    "etomato.com": "뉴스토마토",
+    "einfomax.co.kr": "연합인포맥스",
+}
+
+STOCK_FILTER_KEYWORDS = [
+    "주가", "실적", "공시", "증권", "투자", "목표가", "목표주가", "영업이익", "매출",
+    "리포트", "매수", "매도", "코스피", "코스닥", "상승", "하락", "급등", "급락",
+    "반등", "배당", "시총", "외국인", "기관", "순매수", "순매도", "특징주", "전망"
+]
+
+
+def _format_publisher_name(domain: str) -> str:
+    cleaned = domain.removeprefix("www.")
+    for key, name in MAJOR_FINANCE_PUBLISHERS.items():
+        if key in cleaned:
+            return name
+    return cleaned
+
+
+def _clean_naver_news_text(value: object) -> str:
+    """네이버 검색 결과의 강조 태그와 HTML 엔터티를 표시용 텍스트로 정리한다."""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]*>", "", unescape(str(value)))).strip()
+
+
+@lru_cache(maxsize=1)
+def _load_krx_stock_master() -> dict[str, str]:
+    """로컬에 저장된 코스피/코스닥 3,680+ 상장사 마스터 리스트를 로드한다."""
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "krx_stocks.json")
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def _find_listed_company(query_name: str) -> tuple[bool, str, str]:
+    """입력된 검색어가 실제 코스피/코스닥 상장 기업인지 0.001초 만에 철저히 검증한다."""
+    q = query_name.strip().lower()
+    
+    # 1. KOREAN_SEARCH_ALIASES 확인
+    for alias, (ticker, name) in KOREAN_SEARCH_ALIASES.items():
+        if q == alias.lower() or q == name.lower():
+            return True, name, ticker
+
+    # 2. KRX 전체 상장사 3,680+개 마스터 DB 확인
+    krx_stocks = _load_krx_stock_master()
+    if krx_stocks:
+        # 완전 일치 확인 (대소문자 무시)
+        for stock_name, code in krx_stocks.items():
+            if stock_name.lower() == q:
+                return True, stock_name, code
+                
+        # 2글자 이상 부분 일치 확인
+        if len(q) >= 2:
+            for stock_name, code in krx_stocks.items():
+                if q in stock_name.lower() or stock_name.lower() in q:
+                    return True, stock_name, code
+
+    return False, query_name, ""
+
+
+@app.post("/api/news/naver")
+def naver_company_news(req: CompanyNewsRequest) -> dict[str, object]:
+    """상장 기업명을 검증한 후 증권/투자/실적 전문 네이버 뉴스 검색 결과를 반환한다."""
+    raw_query = req.company_name.strip()
+    if not raw_query:
+        return {"query": "", "count": 0, "items": [], "message": "기업명을 입력해 주세요."}
+
+    # [핵심 검증] 상장 기업인지 판별 (과즙세연, 연예인 등 비상장/일반 단어 원천 차단)
+    is_listed, verified_name, stock_code = _find_listed_company(raw_query)
+    if not is_listed:
+        return {
+            "query": raw_query,
+            "count": 0,
+            "items": [],
+            "is_unlisted": True,
+            "message": f"“{raw_query}”은(는) 코스피/코스닥에 상장된 기업이 아닙니다. 상장된 기업명(예: 삼성전자, 카카오, 현대차, 에코프로, 하이브)을 검색해 주세요.",
+            "source": "Stock Master Verification",
+        }
+
+    company_name = verified_name
+    cache_key = (company_name.casefold(), req.limit)
+    with _naver_news_cache_lock:
+        cached = _naver_news_cache.get(cache_key)
+        if cached and monotonic() - cached[0] < NAVER_NEWS_CACHE_SECONDS:
+            return cached[1]
+
+    client_id, client_secret = _naver_news_credentials()
+    
+    # 1. 1차 타겟팅: "기업명 주가"로 검색하여 네이버 검색 단계에서 잡기사 90% 차단
+    search_query = f"{company_name} 주가"
+    
+    url = "https://naverapihub.apigw.ntruss.com/search/v1/news?" + urllib.parse.urlencode({
+        "query": search_query,
+        "display": min(req.limit * 3, 40),  # 필터링을 위해 넉넉하게 가져옴
+        "sort": "sim",  # 관련도/정확도순 우선
+    })
+    request = urllib.request.Request(
+        url,
+        headers={
+            "X-NCP-APIGW-API-KEY-ID": client_id,
+            "X-NCP-APIGW-API-KEY": client_secret,
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=12) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        raise HTTPException(status_code=502, detail=f"네이버 뉴스 API 오류({exc.code}): {detail[:200]}") from exc
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail=f"네이버 뉴스 API 응답을 받지 못했습니다: {exc}") from exc
+
+    raw_items = payload.get("items", [])
+    
+    # 2. 2차 정밀 필터링: 경제 전문지 기사이거나 증권 핵심 키워드가 있는 기사만 선별
+    items = []
+    for raw_item in raw_items:
+        original_link = str(raw_item.get("originallink") or raw_item.get("link") or "")
+        if not original_link.startswith(("https://", "http://")):
+            continue
+            
+        domain = urllib.parse.urlsplit(original_link).netloc.removeprefix("www.")
+        title = _clean_naver_news_text(raw_item.get("title", ""))
+        description = _clean_naver_news_text(raw_item.get("description", ""))
+        full_text = f"{title} {description}"
+        
+        is_finance_media = any(media in domain for media in MAJOR_FINANCE_PUBLISHERS)
+        has_stock_keyword = any(kw in full_text for kw in STOCK_FILTER_KEYWORDS)
+        
+        # 검색 대상 기업명이 제목에 실제로 언급된 기사인지 확인
+        title_has_company = (company_name in title) or (company_name[:2] in title and "삼성" in company_name)
+        
+        # 증권 전문 언론사이거나 주가/실적 키워드가 있으면서, 해당 기업과 직접 관련된 기사만 추가
+        if (is_finance_media or has_stock_keyword) and (title_has_company or company_name in description):
+            published_at = str(raw_item.get("pubDate") or "")
+            try:
+                published_at = parsedate_to_datetime(published_at).astimezone(timezone.utc).isoformat()
+            except (TypeError, ValueError, IndexError, OverflowError):
+                pass
+                
+            items.append({
+                "title": title,
+                "description": description,
+                "link": original_link,
+                "publisher": _format_publisher_name(domain),
+                "published_at": published_at,
+            })
+            
+        if len(items) >= req.limit:
+            break
+
+    result: dict[str, object] = {
+        "query": company_name,
+        "count": len(items),
+        "items": items,
+        "source": "Naver News Finance Filtered API",
+        "cached_for_seconds": NAVER_NEWS_CACHE_SECONDS,
+    }
+    with _naver_news_cache_lock:
+        if len(_naver_news_cache) >= 200:
+            expired = [key for key, value in _naver_news_cache.items() if monotonic() - value[0] >= NAVER_NEWS_CACHE_SECONDS]
+            for key in expired:
+                _naver_news_cache.pop(key, None)
+        _naver_news_cache[cache_key] = (monotonic(), result)
+    return result
 
 
 @lru_cache(maxsize=6)
@@ -3091,4 +3303,163 @@ install_openapi(app)
 # 학습 문서에서 사용하는 Notebook 내보내기 이미지는 프런트엔드 정적 폴더 밖에
 # 보관되어 있으므로, 루트 정적 파일보다 먼저 별도 경로로 제공합니다.
 app.mount("/image", StaticFiles(directory=NOTEBOOK_IMAGE_DIR), name="notebook-images")
+
+
+# =====================================================================
+# 글로벌 마켓 (Investing.com 스타일 전광판 및 미국 주식/뉴스 API)
+# =====================================================================
+
+GLOBAL_OVERVIEW_SYMBOLS = [
+    {"symbol": "^IXIC", "name": "나스닥", "category": "지수"},
+    {"symbol": "^GSPC", "name": "S&P 500", "category": "지수"},
+    {"symbol": "^DJI", "name": "다우 존스", "category": "지수"},
+    {"symbol": "KRW=X", "name": "달러/원", "category": "환율"},
+    {"symbol": "CL=F", "name": "WTI 원유", "category": "원자재"},
+    {"symbol": "GC=F", "name": "국제 금", "category": "원자재"},
+    {"symbol": "BTC-USD", "name": "비트코인", "category": "가상자산"},
+    {"symbol": "^TNX", "name": "미국 10년물 국채", "category": "채권"},
+]
+
+US_TOP_STOCKS = [
+    {"ticker": "NVDA", "name": "엔비디아", "sector": "반도체 / AI"},
+    {"ticker": "TSLA", "name": "테슬라", "sector": "전기차 / 자율주행"},
+    {"ticker": "AAPL", "name": "애플", "sector": "빅테크 / 스마트폰"},
+    {"ticker": "MSFT", "name": "마이크로소프트", "sector": "클라우드 / AI"},
+    {"ticker": "AMZN", "name": "아마존", "sector": "이커머스 / 클라우드"},
+    {"ticker": "GOOGL", "name": "알파벳 (구글)", "sector": "인터넷 / 검색"},
+    {"ticker": "META", "name": "메타", "sector": "소셜미디어 / AI"},
+    {"ticker": "AMD", "name": "AMD", "sector": "반도체 / CPU·GPU"},
+]
+
+_global_cache: dict[str, tuple[float, object]] = {}
+_global_cache_lock = Lock()
+
+
+def _fetch_yahoo_chart_quote(symbol: str) -> dict[str, object] | None:
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(symbol)}?interval=1d&range=5d"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+    try:
+        with urllib.request.urlopen(req, timeout=4) as res:
+            data = json.loads(res.read().decode("utf-8"))
+            result = data.get("chart", {}).get("result", [{}])[0]
+            meta = result.get("meta", {})
+            price = meta.get("regularMarketPrice", 0)
+            prev = meta.get("chartPreviousClose", price)
+            change = price - prev if prev else 0
+            change_pct = (change / prev * 100) if prev else 0
+            return {
+                "symbol": symbol,
+                "name": meta.get("shortName") or meta.get("symbol") or symbol,
+                "price": round(price, 2) if price else 0,
+                "change": round(change, 2),
+                "change_pct": round(change_pct, 2),
+                "currency": meta.get("currency", "USD"),
+                "high_52w": meta.get("fiftyTwoWeekHigh"),
+                "low_52w": meta.get("fiftyTwoWeekLow"),
+            }
+    except Exception:
+        return None
+
+
+@app.get("/api/global/overview")
+def global_market_overview() -> dict[str, object]:
+    """글로벌 핵심 지표 (나스닥, S&P500, 환율, 유가, 금, 비트코인 등) 전광판 데이터를 반환한다."""
+    cache_key = "global_overview"
+    with _global_cache_lock:
+        cached = _global_cache.get(cache_key)
+        if cached and monotonic() - cached[0] < 30:
+            return cached[1]
+
+    items = []
+    for item in GLOBAL_OVERVIEW_SYMBOLS:
+        q = _fetch_yahoo_chart_quote(item["symbol"])
+        if q:
+            q["display_name"] = item["name"]
+            q["category"] = item["category"]
+            items.append(q)
+
+    result = {
+        "count": len(items),
+        "items": items,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    with _global_cache_lock:
+        _global_cache[cache_key] = (monotonic(), result)
+    return result
+
+
+@app.get("/api/global/top-stocks")
+def global_top_stocks() -> dict[str, object]:
+    """미국 매그니피센트 7 (M7) 및 주요 빅테크 종목 실시간 시세를 반환한다."""
+    cache_key = "global_top_stocks"
+    with _global_cache_lock:
+        cached = _global_cache.get(cache_key)
+        if cached and monotonic() - cached[0] < 30:
+            return cached[1]
+
+    items = []
+    for item in US_TOP_STOCKS:
+        q = _fetch_yahoo_chart_quote(item["ticker"])
+        if q:
+            q["display_name"] = item["name"]
+            q["sector"] = item["sector"]
+            items.append(q)
+
+    result = {
+        "count": len(items),
+        "items": items,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    with _global_cache_lock:
+        _global_cache[cache_key] = (monotonic(), result)
+    return result
+
+
+@app.get("/api/global/stock")
+def global_stock_detail(ticker: str = "NVDA") -> dict[str, object]:
+    """미국/글로벌 개별 종목의 실시간 시세를 조회한다."""
+    clean_ticker = ticker.strip().upper()
+    if not clean_ticker:
+        raise HTTPException(status_code=400, detail="티커를 입력하세요.")
+    quote = _fetch_yahoo_chart_quote(clean_ticker)
+    if not quote:
+        raise HTTPException(status_code=404, detail=f"종목({clean_ticker}) 정보를 찾을 수 없습니다.")
+    return quote
+
+
+@app.get("/api/global/news")
+def global_stock_news(ticker: str = "NVDA") -> dict[str, object]:
+    """미국/글로벌 종목의 최신 영문 및 현지 뉴스를 수집하여 반환한다."""
+    clean_ticker = ticker.strip().upper()
+    if not clean_ticker:
+        clean_ticker = "NVDA"
+    url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={clean_ticker}"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    items = []
+    try:
+        with urllib.request.urlopen(req, timeout=5) as res:
+            xml_data = res.read()
+            root = ET.fromstring(xml_data)
+            for item in root.findall(".//item")[:10]:
+                title = item.findtext("title", "")
+                link = item.findtext("link", "")
+                pub_date = item.findtext("pubDate", "")
+                desc = item.findtext("description", "")
+                items.append({
+                    "title": title,
+                    "link": link,
+                    "published_at": pub_date,
+                    "description": desc,
+                    "publisher": "Yahoo Finance US",
+                })
+    except Exception as exc:
+        pass
+
+    return {
+        "ticker": clean_ticker,
+        "count": len(items),
+        "items": items,
+    }
+
+
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

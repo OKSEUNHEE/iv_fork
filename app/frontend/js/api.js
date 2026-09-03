@@ -1,4 +1,4 @@
-const BASE = '';
+﻿const BASE = '';
 
 // Backward-compat helpers used by legacy views
 export async function apiGet(path) { return apiFetch(path); }
@@ -63,6 +63,7 @@ export const api = {
   macroRealtime:    (body)  => apiFetch('/api/macro/realtime',              { method: 'POST', body: JSON.stringify(body) }),
   macroSimulation:  (body)  => apiFetch('/api/macro/simulation',            { method: 'POST', body: JSON.stringify(body) }),
   dartCompanySearch:(body)  => apiFetch('/api/dart/company-search',         { method: 'POST', body: JSON.stringify(body) }),
+  naverCompanyNews:(body)   => apiFetch('/api/news/naver',                  { method: 'POST', body: JSON.stringify(body) }),
   dartCompanyList:  (body)  => apiFetch('/api/dart/company-list',            { method: 'POST', body: JSON.stringify(body) }),
   groupNetwork:     (body)  => apiFetch('/api/dart/group-network',           { method: 'POST', body: JSON.stringify(body) }),
   industryPorter:   (body)  => apiFetch('/api/industry/porter',             { method: 'POST', body: JSON.stringify(body) }),
@@ -75,4 +76,8 @@ export const api = {
   dartFinancialAnalysis: (body) => apiFetch('/api/dart/financial-analysis', { method: 'POST', body: JSON.stringify(body) }),
   taxSample:        ()      => apiFetch('/api/tax/sample'),
   taxSimulate:      (body)  => apiFetch('/api/tax/simulate',               { method: 'POST', body: JSON.stringify(body) }),
+  globalMarketOverview: ()  => apiFetch('/api/global/overview'),
+  globalTopStocks:      ()  => apiFetch('/api/global/top-stocks'),
+  globalStockDetail: (ticker) => apiFetch(`/api/global/stock?ticker=${encodeURIComponent(ticker)}`),
+  globalStockNews:   (ticker) => apiFetch(`/api/global/news?ticker=${encodeURIComponent(ticker)}`),
 };

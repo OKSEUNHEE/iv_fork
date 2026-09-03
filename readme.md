@@ -241,6 +241,12 @@ RAG_LLM_API_KEY=ollama
 RAG_LLM_MODEL=qwen3:8b
 RAG_LLM_TIMEOUT_SECONDS=180
 
+# 선택 사항: 질문 맞춤 요약용 Google Gemini API
+# 키는 절대 소스 코드나 docker-compose.yml 기본값에 넣지 않습니다.
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3.5-flash
+GEMINI_TIMEOUT_SECONDS=45
+
 # 선택 사항: 우측 AI 투자 도우미를 Amazon Lex V2에 연결합니다.
 # 장기 자격 증명 대신 EC2/ECS 등의 IAM 역할 사용을 권장합니다.
 # AWS_REGION=ap-northeast-2

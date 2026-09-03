@@ -1,4 +1,4 @@
-import { homeView }            from './views/home.js';
+﻿import { homeView }            from './views/home.js';
 import { serverResourcesView } from './views/serverResources.js';
 import { volumeCloudView }    from './views/volumeCloud.js';
 import { worldMarketsView }   from './views/worldMarkets.js';
@@ -41,6 +41,8 @@ import { investmentTreeView }   from './views/investmentTree.js';
 import { quizHomeView, quizDayView } from './views/quiz.js';
 import { vocabularyExamView } from './views/vocabularyExam.js';
 import { ragChatView } from './views/ragChat.js';
+import { companyNewsView } from './views/companyNews.js';
+import { globalMarketView } from './views/globalMarket.js';
 import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
 import { taxAccountingView }         from './views/taxAccounting.js';
@@ -118,6 +120,8 @@ const routes = {
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
   'vocabulary-exam':     { label: '퀴즈 · 주식 투자 퀴즈',       render: () => vocabularyExamView(app, navigate) },
   'rag-chat':            { label: '문서 검색 채팅',              render: () => ragChatView(app) },
+  'company-news':         { label: '기업 최신 뉴스',              render: () => companyNewsView(app) },
+  'global-market':        { label: '글로벌 마켓 (Investing)',    render: () => globalMarketView(app) },
   ...quizDayRoutes,
   ...learnRoutes,
 };
