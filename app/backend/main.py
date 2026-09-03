@@ -3302,6 +3302,84 @@ install_openapi(app)
 
 # 학습 문서에서 사용하는 Notebook 내보내기 이미지는 프런트엔드 정적 폴더 밖에
 # 보관되어 있으므로, 루트 정적 파일보다 먼저 별도 경로로 제공합니다.
+
+
+KR_OVERVIEW_SYMBOLS = [
+    {"symbol": "^KS11", "name": "코스피 (KOSPI)", "category": "국내지수"},
+    {"symbol": "^KQ11", "name": "코스닥 (KOSDAQ)", "category": "국내지수"},
+    {"symbol": "^KS200", "name": "코스피 200", "category": "대표지수"},
+    {"symbol": "KRW=X", "name": "원/달러 환율", "category": "환율"},
+]
+
+KR_TOP_STOCKS = [
+    {"ticker": "005930.KS", "code": "005930", "name": "삼성전자", "sector": "반도체 / IT"},
+    {"ticker": "000660.KS", "code": "000660", "name": "SK하이닉스", "sector": "반도체 / HBM"},
+    {"ticker": "373220.KS", "code": "373220", "name": "LG에너지솔루션", "sector": "2차전지 / 배터리"},
+    {"ticker": "206640.KS", "code": "206640", "name": "삼성바이오로직스", "sector": "바이오 / 제약"},
+    {"ticker": "005380.KS", "code": "005380", "name": "현대차", "sector": "자동차 / 모빌리티"},
+    {"ticker": "000270.KS", "code": "000270", "name": "기아", "sector": "자동차 / PBV"},
+    {"ticker": "068270.KS", "code": "068270", "name": "셀트리온", "sector": "바이오시밀러"},
+    {"ticker": "196170.KQ", "code": "196170", "name": "알테오젠", "sector": "바이오 플랫폼"},
+    {"ticker": "247540.KQ", "code": "247540", "name": "에코프로비엠", "sector": "2차전지 양극재"},
+    {"ticker": "035420.KS", "code": "035420", "name": "NAVER", "sector": "인터넷 / 플랫폼"},
+]
+
+
+@app.get("/api/global/kr-overview")
+def kr_market_overview() -> dict[str, object]:
+    """국내 핵심 지표 (코스피, 코스닥, 코스피200, 환율) 전광판 데이터를 반환한다."""
+    cache_key = "kr_overview"
+    with _global_cache_lock:
+        cached = _global_cache.get(cache_key)
+        if cached and monotonic() - cached[0] < 30:
+            return cached[1]
+
+    items = []
+    for item in KR_OVERVIEW_SYMBOLS:
+        q = _fetch_yahoo_chart_quote(item["symbol"])
+        if q:
+            q["display_name"] = item["name"]
+            q["category"] = item["category"]
+            items.append(q)
+
+    result = {
+        "count": len(items),
+        "items": items,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    with _global_cache_lock:
+        _global_cache[cache_key] = (monotonic(), result)
+    return result
+
+
+@app.get("/api/global/kr-top-stocks")
+def kr_top_stocks() -> dict[str, object]:
+    """국내 시가총액 상위 대표 종목 실시간 시세를 반환한다."""
+    cache_key = "kr_top_stocks"
+    with _global_cache_lock:
+        cached = _global_cache.get(cache_key)
+        if cached and monotonic() - cached[0] < 30:
+            return cached[1]
+
+    items = []
+    for item in KR_TOP_STOCKS:
+        q = _fetch_yahoo_chart_quote(item["ticker"])
+        if q:
+            q["display_name"] = item["name"]
+            q["sector"] = item["sector"]
+            q["stock_code"] = item["code"]
+            items.append(q)
+
+    result = {
+        "count": len(items),
+        "items": items,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    with _global_cache_lock:
+        _global_cache[cache_key] = (monotonic(), result)
+    return result
+
+
 app.mount("/image", StaticFiles(directory=NOTEBOOK_IMAGE_DIR), name="notebook-images")
 
 

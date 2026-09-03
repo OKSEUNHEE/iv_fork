@@ -76,6 +76,8 @@ export const api = {
   dartFinancialAnalysis: (body) => apiFetch('/api/dart/financial-analysis', { method: 'POST', body: JSON.stringify(body) }),
   taxSample:        ()      => apiFetch('/api/tax/sample'),
   taxSimulate:      (body)  => apiFetch('/api/tax/simulate',               { method: 'POST', body: JSON.stringify(body) }),
+  globalKrOverview:     ()  => apiFetch('/api/global/kr-overview'),
+  globalKrTopStocks:    ()  => apiFetch('/api/global/kr-top-stocks'),
   globalMarketOverview: ()  => apiFetch('/api/global/overview'),
   globalTopStocks:      ()  => apiFetch('/api/global/top-stocks'),
   globalStockDetail: (ticker) => apiFetch(`/api/global/stock?ticker=${encodeURIComponent(ticker)}`),
