@@ -120,7 +120,7 @@ const routes = {
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
   'vocabulary-exam':     { label: '퀴즈 · 주식 투자 퀴즈',       render: () => vocabularyExamView(app, navigate) },
   'rag-chat':            { label: '문서 검색 채팅',              render: () => ragChatView(app) },
-  'company-news':         { label: '기업 최신 뉴스',              render: () => companyNewsView(app) },
+  'company-news':         { label: '통합 마켓 (국내·글로벌)',    render: () => globalMarketView(app) },
   'global-market':        { label: '통합 마켓 (국내·글로벌)',    render: () => globalMarketView(app) },
   ...quizDayRoutes,
   ...learnRoutes,
