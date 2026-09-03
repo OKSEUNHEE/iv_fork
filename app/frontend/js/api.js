@@ -80,6 +80,7 @@ export const api = {
   globalKrTopStocks:    ()  => apiFetch('/api/global/kr-top-stocks'),
   globalMarketOverview: ()  => apiFetch('/api/global/overview'),
   globalTopStocks:      ()  => apiFetch('/api/global/top-stocks'),
-  globalStockDetail: (ticker) => apiFetch(`/api/global/stock?ticker=${encodeURIComponent(ticker)}`),
-  globalStockNews:   (ticker) => apiFetch(`/api/global/news?ticker=${encodeURIComponent(ticker)}`),
+  globalStockDetail: (ticker) => apiFetch('/api/global/stock?ticker=' + encodeURIComponent(ticker)),
+  globalStockNews:   (ticker) => apiFetch('/api/global/news?ticker=' + encodeURIComponent(ticker)),
+  aiNewsSummary:     (body)   => apiFetch('/api/news/ai-summary', { method: 'POST', body: JSON.stringify(body) }),
 };
