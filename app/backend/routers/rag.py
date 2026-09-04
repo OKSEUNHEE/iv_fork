@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import hashlib
 import json
@@ -13,6 +13,73 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 router = APIRouter()
+
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[3]
+DOCS_DIR = ROOT_DIR / "docs"
+
+@lru_cache(maxsize=1)
+def _load_local_docs_chunks() -> list[dict[str, object]]:
+    """docs/ 폴더의 마크다운 파일들을 문단 단위로 파싱하여 인메모리 청크 목록을 생성한다."""
+    chunks = []
+    if not DOCS_DIR.exists():
+        return chunks
+
+    for doc_path in sorted(DOCS_DIR.glob("*.md")):
+        doc_name = doc_path.stem
+        try:
+            text = doc_path.read_text(encoding="utf-8", errors="ignore")
+            # 헤더 또는 문단 단위 분할
+            sections = re.split(r"\n(?=#{1,3}\s+)", text)
+            for idx, sec in enumerate(sections):
+                sec_clean = sec.strip()
+                if not sec_clean:
+                    continue
+                # 첫 줄을 섹션 제목으로
+                lines = sec_clean.splitlines()
+                first_line = lines[0].strip("# ").strip() if lines else "문서 본문"
+                chunks.append({
+                    "id": f"{doc_name}_{idx}",
+                    "source_doc": f"{doc_name}.md",
+                    "section_path": first_line,
+                    "chunk_index": idx,
+                    "text": sec_clean[:1500],
+                })
+        except Exception:
+            continue
+    return chunks
+
+
+def _search_local_docs(query: str, top_k: int = 5) -> list[dict[str, object]]:
+    """Qdrant가 없을 때 내장 키워드/자카드 유사도 매칭으로 문서를 검색한다."""
+    chunks = _load_local_docs_chunks()
+    if not chunks:
+        return []
+
+    q_words = set(re.findall(r"\w+", query.lower()))
+    scored = []
+    for c in chunks:
+        text = str(c.get("text", "")).lower()
+        sec = str(c.get("section_path", "")).lower()
+        score = 0
+        for w in q_words:
+            if len(w) < 2:
+                continue
+            if w in sec:
+                score += 3.0  # 제목에 포함 시 가중치
+            if w in text:
+                score += 1.0  # 본문에 포함 시 가중치
+        
+        # 기본 점수
+        if score > 0:
+            scored.append((score, c))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    if not scored:
+        # 매칭 단어가 없을 때 기본 상위 청크 제공
+        return chunks[:top_k]
+    return [item[1] for item in scored[:top_k]]
 
 _QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 _QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "investment_docs")
@@ -44,10 +111,13 @@ def _qdrant_request(method: str, path: str, payload: dict | None = None) -> dict
 
 def _qdrant_available() -> bool:
     try:
-        with urllib.request.urlopen(_QDRANT_URL.rstrip("/") + "/collections", timeout=3) as response:
-            return response.status == 200
+        with urllib.request.urlopen(_QDRANT_URL.rstrip("/") + "/collections", timeout=2) as response:
+            if response.status == 200:
+                return True
     except Exception:
-        return False
+        pass
+    # Qdrant가 없어도 내장 로컬 문서 엔진이 있으면 항상 가용(True) 상태로 제공
+    return len(_load_local_docs_chunks()) > 0
 
 
 def _qdrant_collection_available() -> bool:
@@ -334,7 +404,14 @@ def _openai_compatible_answer(query: str, chunks: list[dict[str, object]]) -> st
 def rag_search(req: RagSearchRequest) -> dict[str, object]:
     """Qdrant에서 관련 문서 청크를 검색합니다."""
     _require_qdrant()
-    chunks = _search(req.query, req.top_k, req.score_threshold)
+        # 1. Qdrant 시도, 실패 시 내장 로컬 문서 검색으로 Fallback
+    try:
+        if _qdrant_collection_available():
+            chunks = _search(req.query, req.top_k, req.score_threshold)
+        else:
+            chunks = _search_local_docs(req.query, req.top_k)
+    except Exception:
+        chunks = _search_local_docs(req.query, req.top_k)
     return {"query": req.query, "embed_method": _embedding_method(), "count": len(chunks), "results": chunks}
 
 
@@ -342,7 +419,14 @@ def rag_search(req: RagSearchRequest) -> dict[str, object]:
 def rag_ask(req: RagAskRequest) -> dict[str, object]:
     """RAG 검색 결과만으로 답변을 만들고, 선택 시 외부 AI로 문장만 다듬습니다."""
     _require_qdrant()
-    chunks = _search(req.query, req.top_k, req.score_threshold)
+        # 1. Qdrant 시도, 실패 시 내장 로컬 문서 검색으로 Fallback
+    try:
+        if _qdrant_collection_available():
+            chunks = _search(req.query, req.top_k, req.score_threshold)
+        else:
+            chunks = _search_local_docs(req.query, req.top_k)
+    except Exception:
+        chunks = _search_local_docs(req.query, req.top_k)
     if req.provider == "gemini":
         answer = _gemini_answer(req.query, chunks)
     elif req.provider == "openai_compatible":
