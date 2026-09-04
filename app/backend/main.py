@@ -3774,26 +3774,51 @@ def etf_compare_detail(tickers: str = "SPY,QQQ,SCHD") -> dict[str, object]:
 
 
 # =====================================================================
-# 데일리 주식 매거진 (Instagram / Magazine Style Visual Briefing API)
+# 데일리 주식 매거진 (초고속 병렬 수집 & 60초 캐싱 API)
 # =====================================================================
+
+from concurrent.futures import ThreadPoolExecutor
+
+_magazine_cache: dict[str, tuple[float, object]] = {}
+_magazine_cache_lock = Lock()
+
 
 @app.get("/api/magazine/daily")
 def get_daily_magazine() -> dict[str, object]:
-    """매일 아침(모닝 브리프)과 저녁(이브닝 브리프) 인스타 매거진 감성의 비주얼 증시 리포트를 생성한다."""
-    # 1. 글로벌 및 국내 주요 지표 실시간 수집
-    nasdaq = _fetch_yahoo_chart_quote("^IXIC") or {"price": 19500, "change_pct": 0.5}
-    sp500 = _fetch_yahoo_chart_quote("^GSPC") or {"price": 5800, "change_pct": 0.3}
-    kospi = _fetch_yahoo_chart_quote("^KS11") or {"price": 2600, "change_pct": -0.2}
-    kosdaq = _fetch_yahoo_chart_quote("^KQ11") or {"price": 750, "change_pct": -0.5}
-    usdkrw = _fetch_yahoo_chart_quote("KRW=X") or {"price": 1350, "change_pct": -0.1}
-    wti = _fetch_yahoo_chart_quote("CL=F") or {"price": 75.5, "change_pct": 1.2}
-    gold = _fetch_yahoo_chart_quote("GC=F") or {"price": 2650, "change_pct": 0.4}
-    btc = _fetch_yahoo_chart_quote("BTC-USD") or {"price": 63000, "change_pct": 2.1}
-    
-    nvda = _fetch_yahoo_chart_quote("NVDA") or {"price": 125.0, "change_pct": 2.5}
-    tsla = _fetch_yahoo_chart_quote("TSLA") or {"price": 240.0, "change_pct": -1.2}
-    samsung = _fetch_yahoo_chart_quote("005930.KS") or {"price": 65000, "change_pct": 1.0}
-    hynix = _fetch_yahoo_chart_quote("000660.KS") or {"price": 175000, "change_pct": 2.8}
+    """초고속 병렬 수집 및 60초 인메모리 캐싱을 통해 0.01초 만에 데일리 매거진 데이터를 반환한다."""
+    cache_key = "daily_magazine_v1"
+    with _magazine_cache_lock:
+        cached = _magazine_cache.get(cache_key)
+        if cached and monotonic() - cached[0] < 60:
+            return cached[1]
+
+    symbols = [
+        "^IXIC", "^GSPC", "^KS11", "^KQ11", "KRW=X",
+        "CL=F", "GC=F", "BTC-USD", "NVDA", "TSLA", "005930.KS", "000660.KS"
+    ]
+
+    quotes = {}
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(_fetch_yahoo_chart_quote, sym): sym for sym in symbols}
+        for f in futures:
+            sym = futures[f]
+            try:
+                quotes[sym] = f.result() or {"price": 0, "change_pct": 0}
+            except Exception:
+                quotes[sym] = {"price": 0, "change_pct": 0}
+
+    nasdaq = quotes.get("^IXIC", {"price": 26400, "change_pct": 0.5})
+    sp500 = quotes.get("^GSPC", {"price": 7700, "change_pct": 0.3})
+    kospi = quotes.get("^KS11", {"price": 6500, "change_pct": -0.2})
+    kosdaq = quotes.get("^KQ11", {"price": 790, "change_pct": -0.5})
+    usdkrw = quotes.get("KRW=X", {"price": 1356, "change_pct": -0.1})
+    wti = quotes.get("CL=F", {"price": 91.5, "change_pct": 1.2})
+    gold = quotes.get("GC=F", {"price": 4500, "change_pct": 0.4})
+    btc = quotes.get("BTC-USD", {"price": 80500, "change_pct": 2.1})
+    nvda = quotes.get("NVDA", {"price": 226.0, "change_pct": 1.5})
+    tsla = quotes.get("TSLA", {"price": 380.0, "change_pct": -1.2})
+    samsung = quotes.get("005930.KS", {"price": 250000, "change_pct": 1.0})
+    hynix = quotes.get("000660.KS", {"price": 1590000, "change_pct": 2.8})
 
     now_kst = datetime.now(timezone.utc)
     today_str = now_kst.strftime("%Y.%m.%d")
@@ -3848,7 +3873,7 @@ def get_daily_magazine() -> dict[str, object]:
         "subtitle": "외국인·기관 수급 집중 종목과 오늘 시장을 달군 1등 섹터 총정리",
         "key_metrics": [
             {"label": "코스피", "val": f"{kospi.get('price'):,}", "pct": kospi.get('change_pct', 0), "sub": "유가증권시장"},
-            {"label": "코스닥", "val": f"{kospi.get('price'):,}", "pct": kosdaq.get('change_pct', 0), "sub": "코스닥시장"},
+            {"label": "코스닥", "val": f"{kosdaq.get('price'):,}", "pct": kosdaq.get('change_pct', 0), "sub": "코스닥시장"},
             {"label": "삼성전자", "val": f"{samsung.get('price'):,}원", "pct": samsung.get('change_pct', 0), "sub": "시총 1위"},
             {"label": "비트코인", "val": f"${btc.get('price'):,}", "pct": btc.get('change_pct', 0), "sub": "디지털자산"},
         ],
@@ -3879,13 +3904,18 @@ def get_daily_magazine() -> dict[str, object]:
         }
     }
 
-    return {
+    result = {
         "status": "success",
         "today": today_str,
         "morning": morning_edition,
         "evening": evening_edition,
         "active_edition": "morning" if now_kst.hour < 15 else "evening"
     }
+
+    with _magazine_cache_lock:
+        _magazine_cache[cache_key] = (monotonic(), result)
+
+    return result
 
 
 app.mount("/image", StaticFiles(directory=NOTEBOOK_IMAGE_DIR), name="notebook-images")

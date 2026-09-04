@@ -384,8 +384,8 @@ export function homeView(container) {
               <span style="font-size:0.72rem;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,0.15);letter-spacing:1px;font-weight:700;">DAILY STOCK MAGAZINE</span>
               <span id="home-mag-date" style="font-size:0.8rem;color:#cbd5e1;">--</span>
             </div>
-            <h2 id="home-mag-title" style="margin:0 0 8px;font-size:1.5rem;font-weight:900;line-height:1.35;letter-spacing:-0.5px;">--</h2>
-            <p id="home-mag-subtitle" style="margin:0;font-size:0.88rem;color:#cbd5e1;line-height:1.5;">--</p>
+            <h2 id="home-mag-title" style="margin:0 0 8px;font-size:1.5rem;font-weight:900;line-height:1.35;letter-spacing:-0.5px;">뉴욕 증시 훈풍과 빅테크 실적 기대감 속 오늘 장 출발</h2>
+            <p id="home-mag-subtitle" style="margin:0;font-size:0.88rem;color:#cbd5e1;line-height:1.5;">AI 반도체 수요 견조 · 달러/원 환율 안정세 · 개장 전 필수 체크포인트</p>
           </div>
 
           <div id="home-mag-metrics" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);"></div>
