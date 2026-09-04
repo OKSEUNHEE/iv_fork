@@ -1,4 +1,5 @@
-import { computeChartSeries, buildCandleConfig, buildMacdConfig, barsFootLabel } from './chartSeries.js';
+﻿import { computeChartSeries, buildCandleConfig, buildMacdConfig, barsFootLabel } from './chartSeries.js';
+import { api } from '../api.js';
 import { mountChartModal } from './chartModal.js';
 
 const HOME_MARKETS = [
@@ -121,10 +122,32 @@ function saveQuoteCache(tickers, data) {
   } catch { /* 저장 공간을 사용할 수 없어도 실시간 조회는 계속한다. */ }
 }
 
+function formatPctBadge(pct) {
+  if (pct === null || pct === undefined) return '';
+  const num = Number(pct);
+  const isUp = num > 0;
+  const isDown = num < 0;
+  const sign = isUp ? '+' : '';
+  const color = isUp ? '#10b981' : isDown ? '#ef4444' : '#94a3b8';
+  const icon = isUp ? '▲' : isDown ? '▼' : '-';
+  return `<span style="color:${color};font-weight:800;font-size:0.85rem;">${icon} ${sign}${num.toFixed(2)}%</span>`;
+}
+
+function loadHtml2CanvasForHome(callback) {
+  if (window.html2canvas) {
+    callback();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
 export function homeView(container) {
   container.innerHTML = `
     <div class="home-dashboard" id="home-dashboard">
-      <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
+      <!-- 🌟 최상단 데일리 주식 매거진 (Instagram Style) -->`n      <div id="home-daily-magazine-root" style="margin-bottom:28px;"></div>`n`n      <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
       <section class="home-quote-dashboard" aria-labelledby="home-quote-title">
         <header class="home-quote-dashboard-head">
           <div>
@@ -333,4 +356,154 @@ export function homeView(container) {
     });
     chartModal.destroy();
   };
+
+
+  // ── 데일리 주식 매거진 로드 ──
+  const magRoot = container.querySelector('#home-daily-magazine-root');
+  if (magRoot) {
+    magRoot.innerHTML = `
+      <section style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;gap:8px;">
+            <button id="home-mag-morning" class="btn btn-primary" style="padding:6px 14px;border-radius:8px;font-size:0.84rem;font-weight:700;">
+              🌅 모닝 에디션 (Morning Cut)
+            </button>
+            <button id="home-mag-evening" class="btn btn-secondary" style="padding:6px 14px;border-radius:8px;font-size:0.84rem;font-weight:700;">
+              🌇 이브닝 에디션 (Evening Cut)
+            </button>
+          </div>
+          <button id="home-mag-capture" class="btn btn-secondary" style="padding:6px 12px;font-size:0.82rem;color:#e11d48;border-color:#fecdd3;background:#fff1f2;font-weight:700;">
+            <i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기
+          </button>
+        </div>
+
+        <div id="home-mag-sheet" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.06);">
+          <div id="home-mag-cover" style="padding:28px 30px 22px;background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);color:#fff;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:10px;">
+              <span id="home-mag-vol" style="font-family:monospace;font-size:0.82rem;letter-spacing:2px;color:#a5b4fc;font-weight:800;">VOL. ISSUE</span>
+              <span style="font-size:0.72rem;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,0.15);letter-spacing:1px;font-weight:700;">DAILY STOCK MAGAZINE</span>
+              <span id="home-mag-date" style="font-size:0.8rem;color:#cbd5e1;">--</span>
+            </div>
+            <h2 id="home-mag-title" style="margin:0 0 8px;font-size:1.5rem;font-weight:900;line-height:1.35;letter-spacing:-0.5px;">--</h2>
+            <p id="home-mag-subtitle" style="margin:0;font-size:0.88rem;color:#cbd5e1;line-height:1.5;">--</p>
+          </div>
+
+          <div id="home-mag-metrics" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);"></div>
+
+          <div style="padding:22px 28px;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:0.95rem;font-weight:800;color:var(--text-main);display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-bolt" style="color:#f59e0b;"></i> TODAY'S 3 KEY ISSUES
+              </span>
+              <span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;">CURATED BY AI ANALYST</span>
+            </div>
+            <div id="home-mag-stories" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;"></div>
+            
+            <div id="home-mag-hotpick" style="padding:14px 18px;border-radius:12px;background:linear-gradient(135deg, rgba(14,165,233,0.06) 0%, rgba(99,102,241,0.06) 100%);border:1px solid rgba(99,102,241,0.25);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                  <span style="font-size:0.7rem;padding:2px 6px;border-radius:4px;background:#6366f1;color:#fff;font-weight:800;">HOT PICK</span>
+                  <strong id="home-hotpick-name" style="font-size:0.95rem;color:#1e1b4b;">--</strong>
+                </div>
+                <p id="home-hotpick-reason" style="margin:0;font-size:0.8rem;color:var(--text-muted);">--</p>
+              </div>
+              <span id="home-hotpick-stat" style="font-size:0.76rem;font-weight:800;color:#4338ca;padding:3px 8px;border-radius:6px;background:#e0e7ff;">--</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+
+    let magData = null;
+    let currEd = 'morning';
+
+    function renderHomeMag(type) {
+      if (!magData) return;
+      currEd = type;
+      const ed = magData[type];
+      if (!ed) return;
+
+      const btnM = container.querySelector('#home-mag-morning');
+      const btnE = container.querySelector('#home-mag-evening');
+      const cover = container.querySelector('#home-mag-cover');
+
+      if (type === 'morning') {
+        btnM.className = 'btn btn-primary';
+        btnE.className = 'btn btn-secondary';
+        cover.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)';
+      } else {
+        btnE.className = 'btn btn-primary';
+        btnM.className = 'btn btn-secondary';
+        cover.style.background = 'linear-gradient(135deg, #1c1917 0%, #431407 60%, #7c2d12 100%)';
+      }
+
+      container.querySelector('#home-mag-vol').textContent = ed.vol;
+      container.querySelector('#home-mag-date').textContent = ed.date_label;
+      container.querySelector('#home-mag-title').textContent = ed.title;
+      container.querySelector('#home-mag-subtitle').textContent = ed.subtitle;
+
+      container.querySelector('#home-mag-metrics').innerHTML = ed.key_metrics.map(m => `
+        <div style="padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;justify-content:center;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+            <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">${m.label}</span>
+            <span style="font-size:0.66rem;color:var(--text-subtle);">${m.sub}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+            <strong style="font-size:0.98rem;color:var(--text-main);">${m.val}</strong>
+            ${formatPctBadge(m.pct)}
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelector('#home-mag-stories').innerHTML = ed.stories.map((s, idx) => `
+        <article style="padding:14px;background:var(--surface-subtle);border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:0.66rem;font-weight:800;letter-spacing:1px;color:#6366f1;">#${idx+1} ${s.tag}</span>
+              <span style="font-size:0.66rem;padding:2px 5px;border-radius:4px;background:rgba(99,102,241,0.1);color:#4f46e5;font-weight:700;">INSIGHT</span>
+            </div>
+            <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-main);margin:0 0 4px;line-height:1.4;">${s.headline}</h3>
+            <p style="margin:0;font-size:0.76rem;color:var(--text-muted);line-height:1.5;white-space:pre-line;">${s.body}</p>
+          </div>
+          <div style="padding-top:6px;border-top:1px dashed var(--border);font-size:0.7rem;font-weight:700;color:#0ea5e9;">
+            <i class="fa-solid fa-check"></i> ${s.highlight}
+          </div>
+        </article>
+      `).join('');
+
+      if (ed.hot_pick) {
+        container.querySelector('#home-hotpick-name').textContent = ed.hot_pick.name;
+        container.querySelector('#home-hotpick-reason').textContent = ed.hot_pick.reason;
+        container.querySelector('#home-hotpick-stat').textContent = ed.hot_pick.stat;
+      }
+    }
+
+    container.querySelector('#home-mag-morning').addEventListener('click', () => renderHomeMag('morning'));
+    container.querySelector('#home-mag-evening').addEventListener('click', () => renderHomeMag('evening'));
+
+    const captureBtn = container.querySelector('#home-mag-capture');
+    captureBtn.addEventListener('click', () => {
+      captureBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 이미지 생성 중...';
+      loadHtml2CanvasForHome(() => {
+        const sheet = container.querySelector('#home-mag-sheet');
+        window.html2canvas(sheet, { scale: 2, useCORS: true }).then((canvas) => {
+          const link = document.createElement('a');
+          link.download = `Daily_Magazine_${currEd}_${new Date().toISOString().slice(0,10)}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          captureBtn.innerHTML = '<i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기';
+        }).catch(() => {
+          alert('이미지 저장 중 오류가 발생했습니다.');
+          captureBtn.innerHTML = '<i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기';
+        });
+      });
+    });
+
+    api.dailyMagazine().then((res) => {
+      if (res && res.status === 'success') {
+        magData = res;
+        renderHomeMag(res.active_edition || 'morning');
+      }
+    }).catch(console.error);
+  }
 }
