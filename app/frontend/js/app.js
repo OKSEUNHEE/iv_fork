@@ -43,6 +43,7 @@ import { vocabularyExamView } from './views/vocabularyExam.js';
 import { ragChatView } from './views/ragChat.js';
 import { companyNewsView } from './views/companyNews.js';
 import { globalMarketView } from './views/globalMarket.js';
+import { etfAnalysisView } from './views/etfAnalysis.js';
 import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
 import { taxAccountingView }         from './views/taxAccounting.js';
@@ -122,6 +123,7 @@ const routes = {
   'rag-chat':            { label: '문서 검색 채팅',              render: () => ragChatView(app) },
   'company-news':         { label: '통합 마켓 (국내·글로벌)',    render: () => globalMarketView(app) },
   'global-market':        { label: '통합 마켓 (국내·글로벌)',    render: () => globalMarketView(app) },
+  'etf-analysis':         { label: 'ETF & 섹터 분석',            render: () => etfAnalysisView(app) },
   ...quizDayRoutes,
   ...learnRoutes,
 };

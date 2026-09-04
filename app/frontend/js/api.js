@@ -83,4 +83,7 @@ export const api = {
   globalStockDetail: (ticker) => apiFetch('/api/global/stock?ticker=' + encodeURIComponent(ticker)),
   globalStockNews:   (ticker) => apiFetch('/api/global/news?ticker=' + encodeURIComponent(ticker)),
   aiNewsSummary:     (body)   => apiFetch('/api/news/ai-summary', { method: 'POST', body: JSON.stringify(body) }),
+  etfHotSectors:     ()       => apiFetch('/api/etf/hot-sectors'),
+  etfBrands:         ()       => apiFetch('/api/etf/brands'),
+  etfCompare:        (tickers)=> apiFetch('/api/etf/compare?tickers=' + encodeURIComponent(tickers)),
 };
