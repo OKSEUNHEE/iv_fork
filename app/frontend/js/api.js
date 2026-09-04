@@ -86,4 +86,5 @@ export const api = {
   etfHotSectors:     ()       => apiFetch('/api/etf/hot-sectors'),
   etfBrands:         ()       => apiFetch('/api/etf/brands'),
   etfCompare:        (tickers)=> apiFetch('/api/etf/compare?tickers=' + encodeURIComponent(tickers)),
+  dailyMagazine:     ()       => apiFetch('/api/magazine/daily'),
 };

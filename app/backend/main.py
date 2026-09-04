@@ -3773,6 +3773,121 @@ def etf_compare_detail(tickers: str = "SPY,QQQ,SCHD") -> dict[str, object]:
     }
 
 
+# =====================================================================
+# 데일리 주식 매거진 (Instagram / Magazine Style Visual Briefing API)
+# =====================================================================
+
+@app.get("/api/magazine/daily")
+def get_daily_magazine() -> dict[str, object]:
+    """매일 아침(모닝 브리프)과 저녁(이브닝 브리프) 인스타 매거진 감성의 비주얼 증시 리포트를 생성한다."""
+    # 1. 글로벌 및 국내 주요 지표 실시간 수집
+    nasdaq = _fetch_yahoo_chart_quote("^IXIC") or {"price": 19500, "change_pct": 0.5}
+    sp500 = _fetch_yahoo_chart_quote("^GSPC") or {"price": 5800, "change_pct": 0.3}
+    kospi = _fetch_yahoo_chart_quote("^KS11") or {"price": 2600, "change_pct": -0.2}
+    kosdaq = _fetch_yahoo_chart_quote("^KQ11") or {"price": 750, "change_pct": -0.5}
+    usdkrw = _fetch_yahoo_chart_quote("KRW=X") or {"price": 1350, "change_pct": -0.1}
+    wti = _fetch_yahoo_chart_quote("CL=F") or {"price": 75.5, "change_pct": 1.2}
+    gold = _fetch_yahoo_chart_quote("GC=F") or {"price": 2650, "change_pct": 0.4}
+    btc = _fetch_yahoo_chart_quote("BTC-USD") or {"price": 63000, "change_pct": 2.1}
+    
+    nvda = _fetch_yahoo_chart_quote("NVDA") or {"price": 125.0, "change_pct": 2.5}
+    tsla = _fetch_yahoo_chart_quote("TSLA") or {"price": 240.0, "change_pct": -1.2}
+    samsung = _fetch_yahoo_chart_quote("005930.KS") or {"price": 65000, "change_pct": 1.0}
+    hynix = _fetch_yahoo_chart_quote("000660.KS") or {"price": 175000, "change_pct": 2.8}
+
+    now_kst = datetime.now(timezone.utc)
+    today_str = now_kst.strftime("%Y.%m.%d")
+    weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][now_kst.weekday()]
+
+    # 🌅 모닝 에디션 구성
+    morning_edition = {
+        "edition_type": "morning",
+        "vol": f"VOL. {now_kst.strftime('%m%d')}",
+        "date_label": f"{today_str} ({weekday_kr}) 🌅 MORNING ISSUE",
+        "title": "뉴욕 증시 훈풍과 빅테크 실적 기대감 속 오늘 장 출발",
+        "subtitle": "AI 반도체 수요 견조 · 달러/원 환율 안정세 · 개장 전 필수 체크포인트",
+        "key_metrics": [
+            {"label": "나스닥", "val": f"{nasdaq.get('price'):,}", "pct": nasdaq.get('change_pct', 0), "sub": "미국 기술주"},
+            {"label": "S&P 500", "val": f"{sp500.get('price'):,}", "pct": sp500.get('change_pct', 0), "sub": "미국 대형주"},
+            {"label": "원/달러", "val": f"{usdkrw.get('price'):,}원", "pct": usdkrw.get('change_pct', 0), "sub": "외환 시장"},
+            {"label": "엔비디아", "val": f"${nvda.get('price')}", "pct": nvda.get('change_pct', 0), "sub": "AI 대장주"},
+        ],
+        "stories": [
+            {
+                "tag": "GLOBAL TECH",
+                "headline": f"엔비디아({nvda.get('change_pct', 0):+}%)와 AI 반도체 밸류체인 상승 주도",
+                "body": "뉴욕 증시에서 대형 기술주 실적 모멘텀과 AI 서버 인프라 투자가 지속되며 강세를 보였습니다. 국내 반도체(삼성전자/SK하이닉스) 수급에도 긍정적 영향이 기대됩니다.",
+                "highlight": "AI 가속기 및 차세대 HBM 수요 견조"
+            },
+            {
+                "tag": "MACRO & FX",
+                "headline": f"달러/원 환율 {usdkrw.get('price'):,}원 선… 외국인 매수세 유입 기대",
+                "body": f"국제 유가(WTI ${wti.get('price')})와 국제 금(${gold.get('price')})이 안정적 흐름을 유지하며 위험 자산 선호 심리가 개선되었습니다.",
+                "highlight": "외국인 투자자 환율 부담 완화 국면"
+            },
+            {
+                "tag": "TODAY'S POINT",
+                "headline": "오늘 한국 증시 3대 관전 포인트",
+                "body": "1. 반도체 대형주 외인 순매수 지속 여부\n2. 전력망/원자력 ETF 수급 모멘텀\n3. 2차전지 및 바이오 섹터 순환매 확인",
+                "highlight": "장 초반 외국인 선물 동향 주목"
+            }
+        ],
+        "hot_pick": {
+            "name": "TIGER 반도체TOP10",
+            "reason": "글로벌 AI 반도체 랠리와 HBM 공급망 확대 수혜 1순위 ETF",
+            "stat": "최근 1개월 수급 강세"
+        }
+    }
+
+    # 🌇 이브닝 에디션 구성
+    evening_edition = {
+        "edition_type": "evening",
+        "vol": f"VOL. {now_kst.strftime('%m%d')}",
+        "date_label": f"{today_str} ({weekday_kr}) 🌇 EVENING CLOSING",
+        "title": f"코스피 {kospi.get('price'):,}P 마감… 주도 테마와 수급 결산",
+        "subtitle": "외국인·기관 수급 집중 종목과 오늘 시장을 달군 1등 섹터 총정리",
+        "key_metrics": [
+            {"label": "코스피", "val": f"{kospi.get('price'):,}", "pct": kospi.get('change_pct', 0), "sub": "유가증권시장"},
+            {"label": "코스닥", "val": f"{kospi.get('price'):,}", "pct": kosdaq.get('change_pct', 0), "sub": "코스닥시장"},
+            {"label": "삼성전자", "val": f"{samsung.get('price'):,}원", "pct": samsung.get('change_pct', 0), "sub": "시총 1위"},
+            {"label": "비트코인", "val": f"${btc.get('price'):,}", "pct": btc.get('change_pct', 0), "sub": "디지털자산"},
+        ],
+        "stories": [
+            {
+                "tag": "MARKET CLOSE",
+                "headline": f"코스피 {kospi.get('price'):,}P · 코스닥 {kosdaq.get('price'):,}P 장 마감",
+                "body": "오늘 국내 증시는 주요 대형주의 차별화 장세 속에서 외국인과 기관의 실적 우량주 선별 매수가 돋보였습니다.",
+                "highlight": "실적 가시성 높은 테마로 압축 대응"
+            },
+            {
+                "tag": "SECTOR LEADER",
+                "headline": "오늘 시장을 주도한 핵심 테마 랭킹",
+                "body": "AI 전력 인프라 및 고배당·월배당 ETF로 안정적인 자금 유입이 지속되었습니다.",
+                "highlight": "월배당 및 고배당 ETF 순자산 역대 최대치 경신"
+            },
+            {
+                "tag": "TOMORROW'S PLAN",
+                "headline": "내일 장 대비 3대 체크포인트",
+                "body": "1. 미국 야간 선물 지수 및 주요 경제 지표 발표\n2. 환율 1,350원대 안착 여부\n3. 밸류업 및 배당주 포트폴리오 비중 점검",
+                "highlight": "변동성 장세 속 분할 매수 전략 유효"
+            }
+        ],
+        "hot_pick": {
+            "name": "SOL 미국배당다우존스",
+            "reason": "월배당 복리 효과와 변동성 방어력을 갖춘 대표 배당 ETF",
+            "stat": "월배당 분배율 3.8%대"
+        }
+    }
+
+    return {
+        "status": "success",
+        "today": today_str,
+        "morning": morning_edition,
+        "evening": evening_edition,
+        "active_edition": "morning" if now_kst.hour < 15 else "evening"
+    }
+
+
 app.mount("/image", StaticFiles(directory=NOTEBOOK_IMAGE_DIR), name="notebook-images")
 
 

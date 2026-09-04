@@ -44,6 +44,7 @@ import { ragChatView } from './views/ragChat.js';
 import { companyNewsView } from './views/companyNews.js';
 import { globalMarketView } from './views/globalMarket.js';
 import { etfAnalysisView } from './views/etfAnalysis.js';
+import { dailyMagazineView } from './views/dailyMagazine.js';
 import { companyFinancialView } from './views/companyFinancial.js';
 import { learnView }            from './views/learn.js';
 import { taxAccountingView }         from './views/taxAccounting.js';
@@ -124,6 +125,7 @@ const routes = {
   'company-news':         { label: '통합 마켓 (국내·글로벌)',    render: () => globalMarketView(app) },
   'global-market':        { label: '통합 마켓 (국내·글로벌)',    render: () => globalMarketView(app) },
   'etf-analysis':         { label: 'ETF & 섹터 분석',            render: () => etfAnalysisView(app) },
+  'daily-magazine':       { label: '데일리 주식 매거진',         render: () => dailyMagazineView(app) },
   ...quizDayRoutes,
   ...learnRoutes,
 };
