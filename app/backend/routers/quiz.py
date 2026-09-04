@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import sqlite3
@@ -124,7 +124,10 @@ async def _seed_quiz_questions(*, force: bool = False) -> dict[str, int]:
 @router.on_event("startup")
 async def seed_current_quiz_questions() -> None:
     """Apply a changed quiz revision once when the backend starts."""
-    await _seed_quiz_questions()
+    try:
+        await _seed_quiz_questions()
+    except Exception as exc:
+        pass
 
 
 @router.get("/api/quiz/day/{day}")
