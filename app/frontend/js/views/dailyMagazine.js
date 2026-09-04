@@ -45,7 +45,7 @@ export function dailyMagazineView(container) {
         </div>
         <div style="display:flex;gap:8px;">
           <button id="btn-capture-insta" class="btn btn-secondary" style="padding:8px 14px;font-size:0.84rem;color:#e11d48;border-color:#fecdd3;background:#fff1f2;">
-            <i class="fa-brands fa-instagram"></i> 인스타 카드 이미지 저장
+            <i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기
           </button>
           <button id="btn-refresh-mag" class="btn btn-secondary" style="padding:8px 12px;font-size:0.84rem;">
             <i class="fa-solid fa-arrows-rotate"></i>
@@ -234,10 +234,10 @@ export function dailyMagazineView(container) {
         link.download = `Stock_Magazine_${currentEdition}_${new Date().toISOString().slice(0,10)}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-        btnCapture.innerHTML = '<i class="fa-brands fa-instagram"></i> 인스타 카드 이미지 저장';
+        btnCapture.innerHTML = '<i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기';
       }).catch((err) => {
         alert('이미지 저장 중 오류가 발생했습니다.');
-        btnCapture.innerHTML = '<i class="fa-brands fa-instagram"></i> 인스타 카드 이미지 저장';
+        btnCapture.innerHTML = '<i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기';
       });
     });
   });
