@@ -29,7 +29,8 @@ function loadHtml2Canvas(callback) {
   document.head.appendChild(script);
 }
 
-export function dailyMagazineView(container) {
+// 홈과 전용 페이지에서 같은 매거진 UI를 재사용한다.
+export function mountDailyMagazine(container) {
   container.innerHTML = `
     <div style="max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
       
@@ -243,4 +244,8 @@ export function dailyMagazineView(container) {
   });
 
   loadData();
+}
+
+export function dailyMagazineView(container) {
+  mountDailyMagazine(container);
 }

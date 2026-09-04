@@ -1,6 +1,7 @@
 ﻿import { computeChartSeries, buildCandleConfig, buildMacdConfig, barsFootLabel } from './chartSeries.js';
 import { api } from '../api.js';
 import { mountChartModal } from './chartModal.js';
+import { mountDailyMagazine } from './dailyMagazine.js';
 
 const HOME_MARKETS = [
   { id: 'kospi', name: 'KOSPI', ticker: '^KS11', color: '#0078d4' },
@@ -147,7 +148,10 @@ function loadHtml2CanvasForHome(callback) {
 export function homeView(container) {
   container.innerHTML = `
     <div class="home-dashboard" id="home-dashboard">
-      <!-- 🌟 최상단 데일리 주식 매거진 (Instagram Style) -->`n      <div id="home-daily-magazine-root" style="margin-bottom:28px;"></div>`n`n      <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
+      <!-- 🌟 최상단 데일리 주식 매거진 (Instagram Style) -->
+      <div id="home-daily-magazine-root" style="margin-bottom:28px;"></div>
+
+      <div class="home-market-grid">${HOME_MARKETS.map(chartCard).join('')}</div>
       <section class="home-quote-dashboard" aria-labelledby="home-quote-title">
         <header class="home-quote-dashboard-head">
           <div>
@@ -173,6 +177,8 @@ export function homeView(container) {
   let quoteAbortController = null;
   const quoteGrids = new Map();
   const chartModal = mountChartModal(container);
+  const magazineRoot = container.querySelector('#home-daily-magazine-root');
+  if (magazineRoot) mountDailyMagazine(magazineRoot);
 
   function destroyChart(id) {
     const chart = charts.get(id);
@@ -358,157 +364,4 @@ export function homeView(container) {
   };
 
 
-  // ── 데일리 주식 매거진 로드 ──
-  const magRoot = container.querySelector('#home-daily-magazine-root');
-  if (magRoot) {
-    magRoot.innerHTML = `
-      <section style="display:flex;flex-direction:column;gap:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-          <div style="display:flex;gap:8px;">
-            <button id="home-mag-morning" class="btn btn-primary" style="padding:6px 14px;border-radius:8px;font-size:0.84rem;font-weight:700;">
-              🌅 모닝 에디션 (Morning Cut)
-            </button>
-            <button id="home-mag-evening" class="btn btn-secondary" style="padding:6px 14px;border-radius:8px;font-size:0.84rem;font-weight:700;">
-              🌇 이브닝 에디션 (Evening Cut)
-            </button>
-          </div>
-          <button id="home-mag-capture" class="btn btn-secondary" style="padding:6px 12px;font-size:0.82rem;color:#e11d48;border-color:#fecdd3;background:#fff1f2;font-weight:700;">
-            <i class="fa-solid fa-download"></i> 한눈에 보는 이미지 저장하기
-          </button>
-        </div>
-
-                <!-- 매거진 시트 (0초 즉각 렌더링 완제품) -->
-        <div id="home-mag-sheet" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.06);">
-          <div id="home-mag-cover" style="padding:28px 30px 22px;background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);color:#fff;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:10px;">
-              <span id="home-mag-vol" style="font-family:monospace;font-size:0.82rem;letter-spacing:2px;color:#a5b4fc;font-weight:800;">VOL. TODAY</span>
-              <span style="font-size:0.72rem;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,0.15);letter-spacing:1px;font-weight:700;">DAILY STOCK MAGAZINE</span>
-              <span id="home-mag-date" style="font-size:0.8rem;color:#cbd5e1;">🌅 MORNING ISSUE</span>
-            </div>
-            <h2 id="home-mag-title" style="margin:0 0 8px;font-size:1.5rem;font-weight:900;line-height:1.35;letter-spacing:-0.5px;">뉴욕 증시 훈풍과 빅테크 실적 기대감 속 오늘 장 출발</h2>
-            <p id="home-mag-subtitle" style="margin:0;font-size:0.88rem;color:#cbd5e1;line-height:1.5;">AI 반도체 수요 견조 · 달러/원 환율 안정세 · 개장 전 필수 체크포인트</p>
-          </div>
-
-          <!-- 4대 핵심 지표 바 (즉시 렌더링) -->
-          <div id="home-mag-metrics" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-            <div style="padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;justify-content:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">나스닥</span>
-                <span style="font-size:0.66rem;color:var(--text-subtle);">미국 기술주</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                <strong style="font-size:0.98rem;color:var(--text-main);">26,489.88</strong>
-                <span style="color:#10b981;font-weight:800;font-size:0.85rem;">▲ +0.52%</span>
-              </div>
-            </div>
-            <div style="padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;justify-content:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">S&P 500</span>
-                <span style="font-size:0.66rem;color:var(--text-subtle);">미국 대형주</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                <strong style="font-size:0.98rem;color:var(--text-main);">7,723.82</strong>
-                <span style="color:#10b981;font-weight:800;font-size:0.85rem;">▲ +0.34%</span>
-              </div>
-            </div>
-            <div style="padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;justify-content:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">원/달러</span>
-                <span style="font-size:0.66rem;color:var(--text-subtle);">외환 시장</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                <strong style="font-size:0.98rem;color:var(--text-main);">1,356.58원</strong>
-                <span style="color:#ef4444;font-weight:800;font-size:0.85rem;">▼ -1.73%</span>
-              </div>
-            </div>
-            <div style="padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;justify-content:center;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                <span style="font-size:0.72rem;color:var(--text-muted);font-weight:600;">엔비디아</span>
-                <span style="font-size:0.66rem;color:var(--text-subtle);">AI 대장주</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-                <strong style="font-size:0.98rem;color:var(--text-main);">$226.04</strong>
-                <span style="color:#10b981;font-weight:800;font-size:0.85rem;">▲ +1.50%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 본문 스토리 3선 (즉시 렌더링) -->
-          <div style="padding:22px 28px;display:flex;flex-direction:column;gap:14px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:0.95rem;font-weight:800;color:var(--text-main);display:flex;align-items:center;gap:6px;">
-                <i class="fa-solid fa-bolt" style="color:#f59e0b;"></i> TODAY'S 3 KEY ISSUES
-              </span>
-              <span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;">CURATED BY AI ANALYST</span>
-            </div>
-            
-            <div id="home-mag-stories" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;">
-              <article style="padding:14px;background:var(--surface-subtle);border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
-                <div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                    <span style="font-size:0.66rem;font-weight:800;letter-spacing:1px;color:#6366f1;">#1 GLOBAL TECH</span>
-                    <span style="font-size:0.66rem;padding:2px 5px;border-radius:4px;background:rgba(99,102,241,0.1);color:#4f46e5;font-weight:700;">INSIGHT</span>
-                  </div>
-                  <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-main);margin:0 0 4px;line-height:1.4;">엔비디아와 AI 반도체 밸류체인 상승 주도</h3>
-                  <p style="margin:0;font-size:0.76rem;color:var(--text-muted);line-height:1.5;white-space:pre-line;">뉴욕 증시에서 대형 기술주 실적 모멘텀과 AI 서버 인프라 투자가 지속되며 강세를 보였습니다. 국내 반도체 수급에도 긍정적 영향이 기대됩니다.</p>
-                </div>
-                <div style="padding-top:6px;border-top:1px dashed var(--border);font-size:0.7rem;font-weight:700;color:#0ea5e9;">
-                  <i class="fa-solid fa-check"></i> AI 가속기 및 차세대 HBM 수요 견조
-                </div>
-              </article>
-
-              <article style="padding:14px;background:var(--surface-subtle);border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
-                <div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                    <span style="font-size:0.66rem;font-weight:800;letter-spacing:1px;color:#6366f1;">#2 MACRO & FX</span>
-                    <span style="font-size:0.66rem;padding:2px 5px;border-radius:4px;background:rgba(99,102,241,0.1);color:#4f46e5;font-weight:700;">INSIGHT</span>
-                  </div>
-                  <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-main);margin:0 0 4px;line-height:1.4;">달러/원 환율 1,350원대 안착… 외인 매수세 기대</h3>
-                  <p style="margin:0;font-size:0.76rem;color:var(--text-muted);line-height:1.5;white-space:pre-line;">국제 유가와 원자재 가격이 안정적 흐름을 유지하며 위험 자산 선호 심리가 점진적으로 개선되는 국면입니다.</p>
-                </div>
-                <div style="padding-top:6px;border-top:1px dashed var(--border);font-size:0.7rem;font-weight:700;color:#0ea5e9;">
-                  <i class="fa-solid fa-check"></i> 외국인 투자자 환율 부담 완화
-                </div>
-              </article>
-
-              <article style="padding:14px;background:var(--surface-subtle);border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
-                <div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                    <span style="font-size:0.66rem;font-weight:800;letter-spacing:1px;color:#6366f1;">#3 TODAY'S POINT</span>
-                    <span style="font-size:0.66rem;padding:2px 5px;border-radius:4px;background:rgba(99,102,241,0.1);color:#4f46e5;font-weight:700;">INSIGHT</span>
-                  </div>
-                  <h3 style="font-size:0.88rem;font-weight:800;color:var(--text-main);margin:0 0 4px;line-height:1.4;">오늘 한국 증시 3대 관전 포인트</h3>
-                  <p style="margin:0;font-size:0.76rem;color:var(--text-muted);line-height:1.5;white-space:pre-line;">1. 반도체 대형주 외인 순매수 지속 여부&#10;2. 전력망/원자력 ETF 수급 모멘텀&#10;3. 2차전지 및 바이오 섹터 순환매</p>
-                </div>
-                <div style="padding-top:6px;border-top:1px dashed var(--border);font-size:0.7rem;font-weight:700;color:#0ea5e9;">
-                  <i class="fa-solid fa-check"></i> 장 초반 외국인 선물 동향 주목
-                </div>
-              </article>
-            </div>
-            
-            <div id="home-mag-hotpick" style="padding:14px 18px;border-radius:12px;background:linear-gradient(135deg, rgba(14,165,233,0.06) 0%, rgba(99,102,241,0.06) 100%);border:1px solid rgba(99,102,241,0.25);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-              <div>
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
-                  <span style="font-size:0.7rem;padding:2px 6px;border-radius:4px;background:#6366f1;color:#fff;font-weight:800;">HOT PICK</span>
-                  <strong id="home-hotpick-name" style="font-size:0.95rem;color:#1e1b4b;">TIGER 반도체TOP10</strong>
-                </div>
-                <p id="home-hotpick-reason" style="margin:0;font-size:0.8rem;color:var(--text-muted);">글로벌 AI 반도체 랠리와 HBM 공급망 확대 수혜 1순위 ETF</p>
-              </div>
-              <span id="home-hotpick-stat" style="font-size:0.76rem;font-weight:800;color:#4338ca;padding:3px 8px;border-radius:6px;background:#e0e7ff;">최근 1개월 수급 강세</span>
-            </div>
-          </div>
-        </div>
-
-      </section>);
-
-    let magData = null;
-    let currEd = 'morning';
-
-api.dailyMagazine().then((res) => {
-      if (res && res.status === 'success') {
-        magData = res;
-        renderHomeMag(res.active_edition || 'morning');
-      }
-    }).catch(console.error);
-  }
 }
